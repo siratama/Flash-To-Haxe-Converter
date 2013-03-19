@@ -90,6 +90,7 @@ List.prototype = {
 }
 var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 	fl.openDocument(flaFileUri);
+	fl.outputPanel.clear();
 	var library = fl.getDocumentDOM().library;
 	tmpl.Field.initialize(library);
 	var items = library.getSelectedItems();
@@ -157,63 +158,7 @@ Main.prototype = {
 	}
 	,__class__: Main
 }
-var Publish = function() { }
-Publish.__name__ = true;
-Publish.main = function() {
-	var JSFL_MAIN_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/jsfl/FlashToHaxe.jsfl";
-	var FLA_FILE_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/fla/view.fla";
-	var PUBLISH_DIRECTORY = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/src/";
-	var FLASH_HAXE_DIRECTORY = "swf_as3/";
-	var CREATEJS_HAXE_DIRECTORY = "swf_haxe/";
-	var SYMBOL_NAMESPACE = "lib";
-	var PRE_URI = "file:///";
-	fl.runScript(PRE_URI + JSFL_MAIN_URI);
-	new Main(PRE_URI + FLA_FILE_URI,PRE_URI + PUBLISH_DIRECTORY + FLASH_HAXE_DIRECTORY,PRE_URI + PUBLISH_DIRECTORY + CREATEJS_HAXE_DIRECTORY,SYMBOL_NAMESPACE);
-}
-var Reflect = function() { }
-Reflect.__name__ = true;
-Reflect.hasField = function(o,field) {
-	return Object.prototype.hasOwnProperty.call(o,field);
-}
-Reflect.field = function(o,field) {
-	var v = null;
-	try {
-		v = o[field];
-	} catch( e ) {
-	}
-	return v;
-}
-var Std = function() { }
-Std.__name__ = true;
-Std.string = function(s) {
-	return js.Boot.__string_rec(s,"");
-}
-Std.parseInt = function(x) {
-	var v = parseInt(x,10);
-	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
-	if(isNaN(v)) return null;
-	return v;
-}
-Std.parseFloat = function(x) {
-	return parseFloat(x);
-}
-var StringBuf = function() {
-	this.b = "";
-};
-StringBuf.__name__ = true;
-StringBuf.prototype = {
-	__class__: StringBuf
-}
 var haxe = haxe || {}
-if(!haxe._Template) haxe._Template = {}
-haxe._Template.TemplateExpr = { __ename__ : true, __constructs__ : ["OpVar","OpExpr","OpIf","OpStr","OpBlock","OpForeach","OpMacro"] }
-haxe._Template.TemplateExpr.OpVar = function(v) { var $x = ["OpVar",0,v]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
-haxe._Template.TemplateExpr.OpExpr = function(expr) { var $x = ["OpExpr",1,expr]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
-haxe._Template.TemplateExpr.OpIf = function(expr,eif,eelse) { var $x = ["OpIf",2,expr,eif,eelse]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
-haxe._Template.TemplateExpr.OpStr = function(str) { var $x = ["OpStr",3,str]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
-haxe._Template.TemplateExpr.OpBlock = function(l) { var $x = ["OpBlock",4,l]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
-haxe._Template.TemplateExpr.OpForeach = function(expr,loop) { var $x = ["OpForeach",5,expr,loop]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
-haxe._Template.TemplateExpr.OpMacro = function(name,params) { var $x = ["OpMacro",6,name,params]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
 haxe.Template = function(str) {
 	var tokens = this.parseTokens(str);
 	this.expr = this.parseBlock(tokens);
@@ -585,6 +530,20 @@ haxe.Template.prototype = {
 	}
 	,__class__: haxe.Template
 }
+var Std = function() { }
+Std.__name__ = true;
+Std.string = function(s) {
+	return js.Boot.__string_rec(s,"");
+}
+Std.parseInt = function(x) {
+	var v = parseInt(x,10);
+	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
+	if(isNaN(v)) return null;
+	return v;
+}
+Std.parseFloat = function(x) {
+	return parseFloat(x);
+}
 var js = js || {}
 js.Boot = function() { }
 js.Boot.__name__ = true;
@@ -715,7 +674,7 @@ tmpl.Field.create = function(itemName,forAs3) {
 			var element = _g2[_g1];
 			++_g1;
 			if(element.name == "") continue;
-			var type = element.elementType == "instance" && forAs3?"flash.display.MovieClip":element.elementType == "text" && forAs3?"flash.text.TextField":element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.TextField";
+			var type = element.elementType == "instance" && forAs3?"flash.display.MovieClip":element.elementType == "text" && forAs3?"flash.text.TextField":element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.Text";
 			var line = tmpl.Field.fieldTemplate.execute({ name : element.name, type : type});
 			fieldLines.push(line);
 			if(!forAs3) {
@@ -726,6 +685,39 @@ tmpl.Field.create = function(itemName,forAs3) {
 	}
 	return fieldLines;
 }
+var Publish = function() { }
+Publish.__name__ = true;
+Publish.main = function() {
+}
+var Reflect = function() { }
+Reflect.__name__ = true;
+Reflect.hasField = function(o,field) {
+	return Object.prototype.hasOwnProperty.call(o,field);
+}
+Reflect.field = function(o,field) {
+	var v = null;
+	try {
+		v = o[field];
+	} catch( e ) {
+	}
+	return v;
+}
+var StringBuf = function() {
+	this.b = "";
+};
+StringBuf.__name__ = true;
+StringBuf.prototype = {
+	__class__: StringBuf
+}
+if(!haxe._Template) haxe._Template = {}
+haxe._Template.TemplateExpr = { __ename__ : true, __constructs__ : ["OpVar","OpExpr","OpIf","OpStr","OpBlock","OpForeach","OpMacro"] }
+haxe._Template.TemplateExpr.OpVar = function(v) { var $x = ["OpVar",0,v]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
+haxe._Template.TemplateExpr.OpExpr = function(expr) { var $x = ["OpExpr",1,expr]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
+haxe._Template.TemplateExpr.OpIf = function(expr,eif,eelse) { var $x = ["OpIf",2,expr,eif,eelse]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
+haxe._Template.TemplateExpr.OpStr = function(str) { var $x = ["OpStr",3,str]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
+haxe._Template.TemplateExpr.OpBlock = function(l) { var $x = ["OpBlock",4,l]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
+haxe._Template.TemplateExpr.OpForeach = function(expr,loop) { var $x = ["OpForeach",5,expr,loop]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
+haxe._Template.TemplateExpr.OpMacro = function(name,params) { var $x = ["OpMacro",6,name,params]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
 if(!tmpl.as3) tmpl.as3 = {}
 tmpl.as3.Bitmap = function() { }
 tmpl.as3.Bitmap.__name__ = true;
@@ -778,6 +770,16 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var test = "aaa";
+var JSFL_MAIN_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/jsfl/FlashToHaxe.jsfl";
+var FLA_FILE_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/fla/view.fla";
+var PUBLISH_DIRECTORY = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/src/";
+var FLASH_HAXE_DIRECTORY = "swf_as3/";
+var CREATEJS_HAXE_DIRECTORY = "swf_haxe/";
+var SYMBOL_NAMESPACE = "lib";
+var PRE_URI = "file:///";
+fl.runScript(PRE_URI + JSFL_MAIN_URI);
+new Main(PRE_URI + FLA_FILE_URI,PRE_URI + PUBLISH_DIRECTORY + FLASH_HAXE_DIRECTORY,PRE_URI + PUBLISH_DIRECTORY + CREATEJS_HAXE_DIRECTORY,SYMBOL_NAMESPACE);
 haxe.Template.splitter = new EReg("(::[A-Za-z0-9_ ()&|!+=/><*.\"-]+::|\\$\\$([A-Za-z0-9_-]+)\\()","");
 haxe.Template.expr_splitter = new EReg("(\\(|\\)|[ \r\n\t]*\"[^\"]*\"[ \r\n\t]*|[!+=/><*.&|-]+)","");
 haxe.Template.expr_trim = new EReg("^[ ]*([^ ]+)[ ]*$","");
@@ -785,7 +787,7 @@ haxe.Template.expr_int = new EReg("^[0-9]+$","");
 haxe.Template.expr_float = new EReg("^([+-]?)(?=\\d|,\\d)\\d*(,\\d*)?([Ee]([+-]?\\d+))?$","");
 haxe.Template.globals = { };
 tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
-tmpl.Field.originalPropertyName = new haxe.Template("\tpublic static inline var ::name::OriginalPropertyName = \"::name::\"");
+tmpl.Field.originalPropertyName = new haxe.Template("\tpublic static inline var ::name::OriginalPropertyName = \"::name::\";");
 tmpl.as3.Bitmap.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.display.BitmapData, implements Dynamic{","}"].join("\n"));
 tmpl.as3.MovieClip.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.display.MovieClip, implements Dynamic{","::field::","}"].join("\n"));
 tmpl.as3.Sound.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.media.Sound, implements Dynamic{","}"].join("\n"));

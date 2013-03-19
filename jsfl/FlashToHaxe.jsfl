@@ -90,6 +90,7 @@ List.prototype = {
 }
 var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 	fl.openDocument(flaFileUri);
+	fl.outputPanel.clear();
 	var library = fl.getDocumentDOM().library;
 	tmpl.Field.initialize(library);
 	var items = library.getSelectedItems();
@@ -704,7 +705,7 @@ tmpl.Field.create = function(itemName,forAs3) {
 			var element = _g2[_g1];
 			++_g1;
 			if(element.name == "") continue;
-			var type = element.elementType == "instance" && forAs3?"flash.display.MovieClip":element.elementType == "text" && forAs3?"flash.text.TextField":element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.TextField";
+			var type = element.elementType == "instance" && forAs3?"flash.display.MovieClip":element.elementType == "text" && forAs3?"flash.text.TextField":element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.Text";
 			var line = tmpl.Field.fieldTemplate.execute({ name : element.name, type : type});
 			fieldLines.push(line);
 			if(!forAs3) {
@@ -774,7 +775,7 @@ haxe.Template.expr_int = new EReg("^[0-9]+$","");
 haxe.Template.expr_float = new EReg("^([+-]?)(?=\\d|,\\d)\\d*(,\\d*)?([Ee]([+-]?\\d+))?$","");
 haxe.Template.globals = { };
 tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
-tmpl.Field.originalPropertyName = new haxe.Template("\tpublic static inline var ::name::OriginalPropertyName = \"::name::\"");
+tmpl.Field.originalPropertyName = new haxe.Template("\tpublic static inline var ::name::OriginalPropertyName = \"::name::\";");
 tmpl.as3.Bitmap.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.display.BitmapData, implements Dynamic{","}"].join("\n"));
 tmpl.as3.MovieClip.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.display.MovieClip, implements Dynamic{","::field::","}"].join("\n"));
 tmpl.as3.Sound.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.media.Sound, implements Dynamic{","}"].join("\n"));

@@ -13,6 +13,7 @@ class Main {
     public function new(flaFileUri:String, flashHaxeUri:String, createJsHaxeUri:String, symbolNameSpace:String) {
 
 		Flash.openDocument(flaFileUri);
+		Flash.outputPanel.clear();
 
 		var library = Flash.getDocumentDOM().library;
 		Field.initialize(library);

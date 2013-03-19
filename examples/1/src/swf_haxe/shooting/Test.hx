@@ -1,5 +1,5 @@
 package shooting;
-@:native("aaa.shootingTest")
+@:native("lib.shootingTest")
 extern class Test extends createjs.easeljs.MovieClip, implements Dynamic{
 
 }

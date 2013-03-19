@@ -10,7 +10,7 @@ class Field {
 	);
 
 	private static var originalPropertyName:Template = new Template(
-	'\tpublic static inline var ::name::OriginalPropertyName = "::name::"'
+	'\tpublic static inline var ::name::OriginalPropertyName = "::name::";'
 	);
 
 	private static var library:Library;
@@ -34,7 +34,7 @@ class Field {
 				var type =
 					(element.elementType == "instance" && forAs3) ? "flash.display.MovieClip" :
 					(element.elementType == "text" && forAs3) ?  "flash.text.TextField" :
-					(element.elementType == "instance") ? "createjs.easeljs.MovieClip" : "createjs.easeljs.TextField";
+					(element.elementType == "instance") ? "createjs.easeljs.MovieClip" : "createjs.easeljs.Text";
 
 				var line = fieldTemplate.execute({
 					name: element.name,
