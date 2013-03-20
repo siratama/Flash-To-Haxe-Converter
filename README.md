@@ -54,7 +54,7 @@ FlashToHaxePublisher.jsfl 内には例えば以下のような変数値設定を行います。
     var FLA_FILE_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/fla/view.fla";
     var PUBLISH_DIRECTORY = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/src/";
     var FLASH_HAXE_DIRECTORY = "swf_as3/";
-    var CREATEJS\_HAXE\_DIRECTORY = "swf_haxe/";
+    var CREATEJS_HAXE_DIRECTORY = "swf_haxe/";
     var SYMBOL_NAMESPACE = "lib";
 
 ディレクトリは当 JSFL 製作者のものとなっているため、任意に書き換えてください。
