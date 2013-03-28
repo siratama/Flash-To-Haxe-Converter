@@ -91,6 +91,7 @@ List.prototype = {
 var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 	fl.openDocument(flaFileUri);
 	fl.outputPanel.clear();
+	var outputtedFlashHaxe = flashHaxeUri != "";
 	var library = fl.getDocumentDOM().library;
 	tmpl.Field.initialize(library);
 	var items = library.getSelectedItems();
@@ -105,7 +106,7 @@ var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 		var item = items[i];
 		var itemType = item.itemType;
 		if(itemType == "folder") {
-			FLfile.createFolder(flashHaxeUri + item.name);
+			if(outputtedFlashHaxe) FLfile.createFolder(flashHaxeUri + item.name);
 			FLfile.createFolder(createJsHaxeUri + item.name);
 			continue;
 		}
@@ -113,8 +114,10 @@ var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 		var nativeClassName = pathNames.join("");
 		var className = pathNames.pop();
 		var packageStr = pathNames.join(".");
-		var outputLinesForAs3 = this.getOutputLinesForAs3(item.name,itemType,packageStr,className);
-		this.output(flashHaxeUri,item.name,outputLinesForAs3);
+		if(outputtedFlashHaxe) {
+			var outputLinesForAs3 = this.getOutputLinesForAs3(item.name,itemType,packageStr,className);
+			this.output(flashHaxeUri,item.name,outputLinesForAs3);
+		}
 		var outputLinesForHaxe = this.getOutputLinesForHaxe(item.name,itemType,packageStr,className,symbolNameSpace,nativeClassName);
 		this.output(createJsHaxeUri,item.name,outputLinesForHaxe);
 	}

@@ -81,6 +81,14 @@ FlashToHaxePublisher.jsfl 内には例えば以下のような変数値設定を行います。
 
 fl.～ と記述している行のコメントアウトを外すことで、FlashToHaxePublisher.jsfl ファイル実行と同時に swf と Toolkit for CreateJS のパブリッシュも同時に行われるようになります。Publish for CreateJS.jsfl のファイルパスは環境によって異なるため、任意の値に変更してください。上記は Windows 用のユーザ名が username だった場合のパスとなります。
 
+その他オプション機能としまして、Flash API 用 Haxe extern クラスファイル出力が不要な場合は、Main コンストラクタ呼び出し箇所の第二パラメータを空文字指定にします。
+
+    new Main(
+    	PRE_URI + FLA_FILE_URI,
+    	"",
+    	PRE_URI + PUBLISH_DIRECTORY + CREATEJS_HAXE_DIRECTORY,
+    	SYMBOL_NAMESPACE
+    );
 
 ###JSFL 実行
 

@@ -21,7 +21,6 @@ class Publish {
 	public static function main(){
 	}
 	public static function __init__(){
-		var test = "aaa";
 
 		var JSFL_MAIN_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/jsfl/FlashToHaxe.jsfl";
 		var FLA_FILE_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/fla/view.fla";

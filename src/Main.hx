@@ -15,6 +15,8 @@ class Main {
 		Flash.openDocument(flaFileUri);
 		Flash.outputPanel.clear();
 
+		var outputtedFlashHaxe = flashHaxeUri != "";
+
 		var library = Flash.getDocumentDOM().library;
 		Field.initialize(library);
 
@@ -32,7 +34,10 @@ class Main {
 			var itemType = item.itemType;
 
 			if(itemType == "folder"){
-				jsfl.FLfile.createFolder(flashHaxeUri + item.name);
+
+				if(outputtedFlashHaxe)
+					jsfl.FLfile.createFolder(flashHaxeUri + item.name);
+
 				jsfl.FLfile.createFolder(createJsHaxeUri + item.name);
 				continue;
 			}
@@ -42,8 +47,10 @@ class Main {
 			var className = pathNames.pop();
 			var packageStr = pathNames.join(".");
 
-			var outputLinesForAs3 = getOutputLinesForAs3(item.name, itemType, packageStr, className);
-			output(flashHaxeUri, item.name, outputLinesForAs3);
+			if(outputtedFlashHaxe){
+				var outputLinesForAs3 = getOutputLinesForAs3(item.name, itemType, packageStr, className);
+				output(flashHaxeUri, item.name, outputLinesForAs3);
+			}
 
 			var outputLinesForHaxe = getOutputLinesForHaxe(item.name, itemType, packageStr, className, symbolNameSpace, nativeClassName);
 			output(createJsHaxeUri, item.name, outputLinesForHaxe);
