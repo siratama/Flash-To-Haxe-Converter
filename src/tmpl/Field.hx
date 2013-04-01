@@ -27,6 +27,11 @@ class Field {
 		var layers:Array<Layer> = Flash.getDocumentDOM().getTimeline().layers;
 
 		for(layer in layers){
+
+			var layerType = layer.layerType;
+
+			if(layerType == "folder") continue;
+
 			for(element in layer.frames[0].elements){
 
 				if(element.name == "") continue;

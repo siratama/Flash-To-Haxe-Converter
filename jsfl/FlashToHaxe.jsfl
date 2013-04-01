@@ -703,6 +703,8 @@ tmpl.Field.create = function(itemName,forAs3) {
 	while(_g < layers.length) {
 		var layer = layers[_g];
 		++_g;
+		var layerType = layer.layerType;
+		if(layerType == "folder") continue;
 		var _g1 = 0, _g2 = layer.frames[0].elements;
 		while(_g1 < _g2.length) {
 			var element = _g2[_g1];
