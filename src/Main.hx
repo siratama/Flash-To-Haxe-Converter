@@ -10,7 +10,8 @@ class Main {
 
 	public static function main(){
 	}
-    public function new(flaFileUri:String, flashHaxeUri:String, createJsHaxeUri:String, symbolNameSpace:String) {
+    public function new(
+		flaFileUri:String, flashHaxeUri:String, createJsHaxeUri:String, symbolNameSpace:String, ?initializedOutputDirectory:Bool = false) {
 
 		Flash.openDocument(flaFileUri);
 		Flash.outputPanel.clear();
@@ -28,19 +29,14 @@ class Main {
 			return;
 		}
 
+		initializeOutputDirectory(flashHaxeUri, createJsHaxeUri, outputtedFlashHaxe, initializedOutputDirectory);
+
 		for(i in 0...itemsLength){
 
 			var item = items[i];
 			var itemType = item.itemType;
 
-			if(itemType == "folder"){
-
-				if(outputtedFlashHaxe)
-					jsfl.FLfile.createFolder(flashHaxeUri + item.name);
-
-				jsfl.FLfile.createFolder(createJsHaxeUri + item.name);
-				continue;
-			}
+			if(createFolder(flashHaxeUri, createJsHaxeUri, item, outputtedFlashHaxe)) continue;
 
 			var pathNames = item.name.split("/");
 			var nativeClassName = pathNames.join("");
@@ -55,7 +51,44 @@ class Main {
 			var outputLinesForHaxe = getOutputLinesForHaxe(item.name, itemType, packageStr, className, symbolNameSpace, nativeClassName);
 			output(createJsHaxeUri, item.name, outputLinesForHaxe);
 		}
+		Flash.trace("finish");
     }
+	private function initializeOutputDirectory(flashHaxeUri:String, createJsHaxeUri:String, outputtedFlashHaxe:Bool, initializedOutputDirectory:Bool){
+
+		if(!initializedOutputDirectory) return;
+
+		if(FLfile.exists(createJsHaxeUri)){
+
+			if(!FLfile.remove(createJsHaxeUri))
+				Flash.trace("initialize error:" + createJsHaxeUri);
+			else
+				FLfile.createFolder(createJsHaxeUri);
+		}
+		if(outputtedFlashHaxe && FLfile.exists(flashHaxeUri)){
+
+			if(!FLfile.remove(flashHaxeUri))
+				Flash.trace("initialize error:" + flashHaxeUri);
+			else
+				FLfile.createFolder(flashHaxeUri);
+		}
+	}
+	private function createFolder(flashHaxeUri:String, createJsHaxeUri:String, item:Item, outputtedFlashHaxe:Bool):Bool{
+
+		if(item.itemType != "folder") return false;
+
+		var flashHaxeFolderURI = flashHaxeUri + item.name;
+		var createJsHaxeFolderURI = createJsHaxeUri + item.name;
+
+		if(outputtedFlashHaxe && !FLfile.exists(flashHaxeFolderURI)){
+			if(!FLfile.createFolder(flashHaxeFolderURI))
+				Flash.trace("create error: " + flashHaxeFolderURI);
+		}
+
+		if(!FLfile.exists(createJsHaxeFolderURI) && !FLfile.createFolder(createJsHaxeFolderURI))
+			Flash.trace("create error: " + createJsHaxeFolderURI);
+
+		return true;
+	}
 	private function getOutputLinesForAs3(itemName:String, itemType:String, packageStr:String, className:String):String{
 
 		var outputLines = "";
@@ -69,7 +102,6 @@ class Main {
 		}
 		return outputLines;
 	}
-
 	private function getOutputLinesForHaxe(itemName:String, itemType:String, packageStr:String, className:String, namespace:String, nativeClassName:String):String{
 
 		var outputLines = "";
@@ -86,7 +118,7 @@ class Main {
 	private function output(baseUri:String, itemName:String, outputLines:String){
 
 		var filePath = baseUri + itemName + ".hx";
-		Flash.trace(filePath);
+		//Flash.trace(filePath);
 		FLfile.write(filePath, outputLines);
 	}
 }

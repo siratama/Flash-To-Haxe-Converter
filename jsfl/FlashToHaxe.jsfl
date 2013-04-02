@@ -88,7 +88,8 @@ List.prototype = {
 	}
 	,__class__: List
 }
-var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
+var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace,initializedOutputDirectory) {
+	if(initializedOutputDirectory == null) initializedOutputDirectory = false;
 	fl.openDocument(flaFileUri);
 	fl.outputPanel.clear();
 	var outputtedFlashHaxe = flashHaxeUri != "";
@@ -100,16 +101,13 @@ var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 		fl.trace("Select item in library.");
 		return;
 	}
+	this.initializeOutputDirectory(flashHaxeUri,createJsHaxeUri,outputtedFlashHaxe,initializedOutputDirectory);
 	var _g = 0;
 	while(_g < itemsLength) {
 		var i = _g++;
 		var item = items[i];
 		var itemType = item.itemType;
-		if(itemType == "folder") {
-			if(outputtedFlashHaxe) FLfile.createFolder(flashHaxeUri + item.name);
-			FLfile.createFolder(createJsHaxeUri + item.name);
-			continue;
-		}
+		if(this.createFolder(flashHaxeUri,createJsHaxeUri,item,outputtedFlashHaxe)) continue;
 		var pathNames = item.name.split("/");
 		var nativeClassName = pathNames.join("");
 		var className = pathNames.pop();
@@ -121,6 +119,7 @@ var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace) {
 		var outputLinesForHaxe = this.getOutputLinesForHaxe(item.name,itemType,packageStr,className,symbolNameSpace,nativeClassName);
 		this.output(createJsHaxeUri,item.name,outputLinesForHaxe);
 	}
+	fl.trace("finish");
 };
 Main.__name__ = true;
 Main.main = function() {
@@ -128,7 +127,6 @@ Main.main = function() {
 Main.prototype = {
 	output: function(baseUri,itemName,outputLines) {
 		var filePath = baseUri + itemName + ".hx";
-		fl.trace(filePath);
 		FLfile.write(filePath,outputLines);
 	}
 	,getOutputLinesForHaxe: function(itemName,itemType,packageStr,className,$namespace,nativeClassName) {
@@ -160,6 +158,25 @@ Main.prototype = {
 			break;
 		}
 		return outputLines;
+	}
+	,createFolder: function(flashHaxeUri,createJsHaxeUri,item,outputtedFlashHaxe) {
+		if(item.itemType != "folder") return false;
+		var flashHaxeFolderURI = flashHaxeUri + item.name;
+		var createJsHaxeFolderURI = createJsHaxeUri + item.name;
+		if(outputtedFlashHaxe && !FLfile.exists(flashHaxeFolderURI)) {
+			if(!FLfile.createFolder(flashHaxeFolderURI)) fl.trace("create error: " + flashHaxeFolderURI);
+		}
+		if(!FLfile.exists(createJsHaxeFolderURI) && !FLfile.createFolder(createJsHaxeFolderURI)) fl.trace("create error: " + createJsHaxeFolderURI);
+		return true;
+	}
+	,initializeOutputDirectory: function(flashHaxeUri,createJsHaxeUri,outputtedFlashHaxe,initializedOutputDirectory) {
+		if(!initializedOutputDirectory) return;
+		if(FLfile.exists(createJsHaxeUri)) {
+			if(!FLfile.remove(createJsHaxeUri)) fl.trace("initialize error:" + createJsHaxeUri); else FLfile.createFolder(createJsHaxeUri);
+		}
+		if(outputtedFlashHaxe && FLfile.exists(flashHaxeUri)) {
+			if(!FLfile.remove(flashHaxeUri)) fl.trace("initialize error:" + flashHaxeUri); else FLfile.createFolder(flashHaxeUri);
+		}
 	}
 	,__class__: Main
 }

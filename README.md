@@ -90,6 +90,18 @@ fl.～ と記述している行のコメントアウトを外すことで、FlashToHaxePublisher.jsfl フ
     	SYMBOL_NAMESPACE
     );
 
+Main クラスコンストラクタ 第5引数に true を指定すると、hx ファイル出力前に 出力対象ディレクトリの初期化(削除 & 作成)が行われます。これにより、不要になった hx ファイルが出力ディレクトリ内に残る事は無くなります。
+
+    new Main(
+    	PRE_URI + FLA_FILE_URI,
+    	PRE_URI + PUBLISH_DIRECTORY + FLASH_HAXE_DIRECTORY,
+    	PRE_URI + PUBLISH_DIRECTORY + CREATEJS_HAXE_DIRECTORY,
+    	SYMBOL_NAMESPACE,
+		true
+    );
+
+ディレクトリ初期化が正常に行われないと Flash CS 出力ウインドウに error が表示されます。hx 出力対象ディレクトリを開いていたりするとエラーが発生します。全てのフォルダを閉じる等して、再度 jsfl を実行してください。
+
 ###JSFL 実行
 
 FlashToHaxePublisher.jsfl をダブルクリック、あるいは Flash CS 上にドラッグ＆ドロップで JSFL を実行できます。
