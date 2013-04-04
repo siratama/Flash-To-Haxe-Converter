@@ -798,10 +798,10 @@ haxe.Template.expr_float = new EReg("^([+-]?)(?=\\d|,\\d)\\d*(,\\d*)?([Ee]([+-]?
 haxe.Template.globals = { };
 tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
 tmpl.Field.originalPropertyName = new haxe.Template("\tpublic static inline var ::name::OriginalPropertyName = \"::name::\";");
-tmpl.as3.Bitmap.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.display.BitmapData, implements Dynamic{","}"].join("\n"));
-tmpl.as3.MovieClip.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.display.MovieClip, implements Dynamic{","::field::","}"].join("\n"));
-tmpl.as3.Sound.template = new haxe.Template(["package ::packageStr::;","extern class ::className:: extends flash.media.Sound, implements Dynamic{","}"].join("\n"));
-tmpl.haxe.Bitmap.template = new haxe.Template(["package ::packageStr::;","@:native(\"::namespace::.::nativeClassName::\")","extern class ::className:: extends createjs.easeljs.Bitmap, implements Dynamic{","}"].join("\n"));
-tmpl.haxe.MovieClip.template = new haxe.Template(["package ::packageStr::;","@:native(\"::namespace::.::nativeClassName::\")","extern class ::className:: extends createjs.easeljs.MovieClip, implements Dynamic{","::field::","}"].join("\n"));
-tmpl.haxe.Sound.template = new haxe.Template(["package ::packageStr::;","extern class ::className::, implements Dynamic{","}"].join("\n"));
+tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.BitmapData, implements Dynamic{\r\n}");
+tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.MovieClip, implements Dynamic{\r\n::field::\r\n}");
+tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound, implements Dynamic{\r\n}");
+tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap, implements Dynamic{\r\n}");
+tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.MovieClip, implements Dynamic{\r\n::field::\r\n}");
+tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className::, implements Dynamic{\r\n}");
 Main.main();

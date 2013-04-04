@@ -1,11 +1,12 @@
 package tmpl.as3;
 import haxe.Template;
 class Sound {
-	static public var template:Template = new Template([
-	"package ::packageStr::;",
-	"extern class ::className:: extends flash.media.Sound, implements Dynamic{",
-	"}"
-	].join("\n"));
+
+	static public var template:Template = new Template(
+"package ::packageStr::;
+extern class ::className:: extends flash.media.Sound, implements Dynamic{
+}"
+	);
 
 	public static function create(packageStr:String, className:String):String{
 

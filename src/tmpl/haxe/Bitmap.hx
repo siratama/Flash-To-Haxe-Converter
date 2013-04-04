@@ -1,12 +1,13 @@
 package tmpl.haxe;
 import haxe.Template;
 class Bitmap {
-	static public var template:Template = new Template([
-	"package ::packageStr::;",
-	'@:native("::namespace::.::nativeClassName::")',
-	"extern class ::className:: extends createjs.easeljs.Bitmap, implements Dynamic{",
-	"}"
-	].join("\n"));
+
+	static public var template:Template = new Template(
+'package ::packageStr::;
+@:native("::namespace::.::nativeClassName::")
+extern class ::className:: extends createjs.easeljs.Bitmap, implements Dynamic{
+}'
+	);
 
 	public static function create(
 		packageStr:String, className:String,

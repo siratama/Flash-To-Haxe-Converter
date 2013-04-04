@@ -2,12 +2,12 @@ package tmpl.as3;
 import haxe.Template;
 class MovieClip {
 
-	static public var template:Template = new Template([
-	"package ::packageStr::;",
-	"extern class ::className:: extends flash.display.MovieClip, implements Dynamic{",
-		"::field::",
-	"}"
-	].join("\n"));
+	static public var template:Template = new Template(
+"package ::packageStr::;
+extern class ::className:: extends flash.display.MovieClip, implements Dynamic{
+::field::
+}"
+	);
 
     public static function create(packageStr:String, className:String, fieldSet:Array<String>):String{
 
