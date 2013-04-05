@@ -9,9 +9,11 @@ class Field {
 	"\tvar ::name:: : ::type::;"
 	);
 
+	/*
 	private static var originalPropertyName:Template = new Template(
 	'\tpublic static inline var ::name::OriginalPropertyName = "::name::";'
 	);
+	*/
 
 	private static var library:Library;
 	public static function initialize(library:Library){
@@ -47,10 +49,12 @@ class Field {
 				});
 				fieldLines.push(line);
 
+				/*
 				if(!forAs3){
 					line = originalPropertyName.execute({ name: element.name });
 					fieldLines.push(line);
 				}
+				*/
 			}
 		}
 		return fieldLines;

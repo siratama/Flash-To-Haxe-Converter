@@ -39,8 +39,7 @@ class Player {
 		hitareaBounds = view.hitarea.getBounds(view.parent);
 
 		#elseif js
-		var hitarea = ContainerUtil.getProperty(view, View.hitareaOriginalPropertyName);
-		hitareaBounds = ContainerUtil.getNominalBounds(hitarea);
+		hitareaBounds = ContainerUtil.getNominalBounds(view.hitarea);
 		#end
 
 		trace(hitareaBounds);

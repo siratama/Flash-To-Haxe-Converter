@@ -14,8 +14,7 @@ class PlayerForJS extends Player{
 		super();
 		layer.addChild(view);
 
-		var hitarea = ContainerUtil.getProperty(view, View.hitareaOriginalPropertyName);
-		hitareaBounds = ContainerUtil.getNominalBounds(hitarea);
+		hitareaBounds = ContainerUtil.getNominalBounds(view.hitarea);
 		trace(hitareaBounds);
 	}
 }

@@ -1058,9 +1058,8 @@ shooting.player.Player = $hxClasses["shooting.player.Player"] = function(layer) 
 	this.view.x = 100;
 	this.view.y = 150;
 	layer.addChild(this.view);
-	var hitarea = com.dango_itimi.toolkit_for_createjs.utils.ContainerUtil.getProperty(this.view,"hitarea");
-	this.hitareaBounds = com.dango_itimi.toolkit_for_createjs.utils.ContainerUtil.getNominalBounds(hitarea);
-	haxe.Log.trace(this.hitareaBounds,{ fileName : "Player.hx", lineNumber : 46, className : "shooting.player.Player", methodName : "new"});
+	this.hitareaBounds = com.dango_itimi.toolkit_for_createjs.utils.ContainerUtil.getNominalBounds(this.view.hitarea);
+	haxe.Log.trace(this.hitareaBounds,{ fileName : "Player.hx", lineNumber : 45, className : "shooting.player.Player", methodName : "new"});
 };
 shooting.player.Player.__name__ = ["shooting","player","Player"];
 shooting.player.Player.prototype = {

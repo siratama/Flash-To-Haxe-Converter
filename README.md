@@ -1,54 +1,54 @@
-Flash-To-Haxe-Converter
+﻿Flash-To-Haxe-Converter
 =======================
 licence: MIT
 
-![�A�v���P�[�V�����T�v](img/0.png)
+![アプリケーション概要](img/0.png)
 
-Flash-To-Haxe-Converter �́AFlash CS ���\���� Haxe extern �N���X�ɏo�͂��� JSFL �ł��B�o�͂����N���X�Q�́AHaxe �ł� Flash �R���e���c�� html5 �R���e���c�J���ɗL�p�ł��܂��B
+Flash-To-Haxe-Converter は、Flash CS 内構造を Haxe extern クラスに出力する JSFL です。出力されるクラス群は、Haxe での Flash コンテンツや html5 コンテンツ開発に有用できます。
 
-##����̗���� Flash-To-Haxe-Converter �̖����ӏ�
+##制作の流れと Flash-To-Haxe-Converter の役割箇所
 
-Flash CS �� Haxe �𗘗p���邱�ƂŁAFlash �R���e���c, html5 canvas �R���e���c, Desktop �A�v���P�[�V����, Android �A�v��, iOS �A�v�� �Ƃ������l�X�ȃv���b�g�t�H�[�������̃R���e���c���s���삪�\�ƂȂ�܂��B����̗���͈ȉ��̐}�̂悤�ɂȂ�܂��B
+Flash CS と Haxe を利用することで、Flash コンテンツ, html5 canvas コンテンツ, Desktop アプリケーション, Android アプリ, iOS アプリ といった様々なプラットフォーム向けのコンテンツ並行制作が可能となります。制作の流れは以下の図のようになります。
 
-![�S�̑�](img/1.png)
+![全体像](img/1.png)
 
-�܂��APhotoshop �� Illustrator ��p���ĉ摜�f�ނ��쐬���A�܂��A�T�E���h�ҏW�\�t�g�ŉ����t�@�C�����쐬��AFlash CS �Ɏ�荞�݂܂��B
+まず、Photoshop や Illustrator を用いて画像素材を作成し、また、サウンド編集ソフトで音声ファイルを作成後、Flash CS に取り込みます。
 
-Flash CS �ł́A�e�f�ނ𗘗p���ăA�j���[�V�������쐬������A�e�f�ރf�[�^���X�N���v�g���瑀��ł���悤 �f�ނɖ���(�����P�[�W�ݒ�)���s���܂��B�ҏW��Ɗ�����AFlash �R���e���c�𐧍삷��ꍇ�� swf ���p�u���b�V���Ahtml5 �R���e���c�𐧍삷��ꍇ�� Toolkit for CreateJS �ł̃p�u���b�V�����s���܂��B
+Flash CS では、各素材を利用してアニメーションを作成したり、各素材データをスクリプトから操作できるよう 素材に命名(リンケージ設定)を行います。編集作業完了後、Flash コンテンツを制作する場合は swf をパブリッシュ、html5 コンテンツを制作する場合は Toolkit for CreateJS でのパブリッシュを行います。
 
-�����ɓ� JSFL(�}�� Flash To Haxe Converter) �𗘗p���āAFlash CS �����C�u�����\���� Haxe extern �N���X�Q�ɕϊ����s���܂��B
+同時に当 JSFL(図内 Flash To Haxe Converter) を利用して、Flash CS 内ライブラリ構造を Haxe extern クラス群に変換を行います。
 
-�o�͂��ꂽ Flash & html5 �p�̃f�[�^�͋��ʂ̍\���������߁A�N���X�v���b�g�t�H�[���p���� Haxe �ɂď������邱�Ƃɂ��A��菭�Ȃ���Ԃ� Flash �R���e���c�� html5 canvas �R���e���c�̓������삪�\�ƂȂ�܂��B
+出力された Flash & html5 用のデータは共通の構造を持つため、クロスプラットフォーム用言語 Haxe にて処理することにより、より少ない手間で Flash コンテンツや html5 canvas コンテンツの同時制作が可能となります。
 
-�X�ɁAFlash �R���e���c�p swf �ɑ����̏�����t�������邱�ƂŁA���̂܂� Adobe AIR �ɕϊ����鎖���ł��܂��B(Adobe AIR ��p�̋@�\�𗘗p����ꍇ�͐}���uFlash(swf)�v�̑� Adobe AIR �p�� swf �o�͂��K�v�ƂȂ�܂��B)
+更に、Flash コンテンツ用 swf に多少の処理を付け加えることで、そのまま Adobe AIR に変換する事もできます。(Adobe AIR 専用の機能を利用する場合は図内「Flash(swf)」の他 Adobe AIR 用の swf 出力が必要となります。)
 
-TFCLib �� Toolkit for CreateJS �̃p�u���b�V���f�[�^���X�N���v�g(javascript or Haxe)���痘�p���₷�����邽�߂̂��̂ŁA�ʓr���삵�Ă��郉�C�u�����ł��B���A�v���P�[�V�����ŏo�͂���� �}�� CreateJS-Haxe �N���X�Q�͖����Ă����p�ł��܂����A���p����ƍX�Ɍ����悭�J����i�߂邱�Ƃ��\�ƂȂ�܂��B
+TFCLib は Toolkit for CreateJS のパブリッシュデータをスクリプト(javascript or Haxe)から利用しやすくするためのもので、別途制作しているライブラリです。当アプリケーションで出力される 図内 CreateJS-Haxe クラス群は無くても利用できますが、利用すると更に効率よく開発を進めることが可能となります。
 
-* �Q�l TFCLib ���̑���z�u���Ă��� haxe �p���C�u����
+* 参考 TFCLib その他を配置している haxe 用ライブラリ
 
 	[https://github.com/siratama/haxelib](https://github.com/siratama/haxelib)
 
-##JSFL �{��
+##JSFL 本体
 
-�ȉ��̃t�@�C�����A�{�̂ƂȂ� JSFL �t�@�C���ł��B
+以下のファイルが、本体となる JSFL ファイルです。
 
 	jsfl/FlashToHaxe.jsfl
 
-���� JSFL �� Haxe ��p���č쐬���Ă���A���e�͏��X������̂ƂȂ��Ă��܂��BJSFL ���쐬���� Haxe �̃\�[�X�R�[�h�� src/ �f�B���N�g�����ɔz�u���Ă��܂��B
+この JSFL は Haxe を用いて作成しており、内容は少々見難いものとなっています。JSFL を作成した Haxe のソースコードは src/ ディレクトリ内に配置しています。
 
-##���p�菇
+##利用手順
 
-JSFL ���p��� exapmples/ �f�B���N�g�����ɔz�u���Ă��܂��Bexamples/1/ �f�B���N�g�����t�@�C�����ɗ��p�菇���L�q���܂��B
+JSFL 利用例は exapmples/ ディレクトリ内に配置しています。examples/1/ ディレクトリ内ファイルを例に利用手順を記述します。
 
-###JSFL �{�̂̔z�u
+###JSFL 本体の配置
 
-jsfl/FlashToHaxe.jsfl ���R�s�[���ĔC�ӂ̃f�B���N�g���ɔz�u���܂��B�R�s�[�����T���v�����̂܂܂̈ʒu�ł���肠��܂���B
+jsfl/FlashToHaxe.jsfl をコピーして任意のディレクトリに配置します。コピーせずサンプルそのままの位置でも問題ありません。
 
-###FlashToHaxe.jsfl ���N������ jsfl �̍쐬
+###FlashToHaxe.jsfl を起動する jsfl の作成
 
-FlashToHaxe.jsfl ���N������C�ӂ̖��O�� jsfl ���쐬���܂��B�T���v���ł� examples/1/jsfl/FlashToHaxePublisher.jsfl ��p�ӂ��Ă��܂��B
+FlashToHaxe.jsfl を起動する任意の名前の jsfl を作成します。サンプルでは examples/1/jsfl/FlashToHaxePublisher.jsfl を用意しています。
 
-FlashToHaxePublisher.jsfl ���ɂ͗Ⴆ�Έȉ��̂悤�ȕϐ��l�ݒ���s���܂��B
+FlashToHaxePublisher.jsfl 内には例えば以下のような変数値設定を行います。
 
     var JSFL_MAIN_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/jsfl/FlashToHaxe.jsfl";
     var FLA_FILE_URI = "H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/fla/view.fla";
@@ -57,21 +57,21 @@ FlashToHaxePublisher.jsfl ���ɂ͗Ⴆ�Έȉ��̂悤�ȕϐ��l�ݒ���s���܂��B
     var CREATEJS_HAXE_DIRECTORY = "swf_haxe/";
     var SYMBOL_NAMESPACE = "lib";
 
-�f�B���N�g���͓� JSFL ����҂̂��̂ƂȂ��Ă��邽�߁A�C�ӂɏ��������Ă��������B
+ディレクトリは当 JSFL 製作者のものとなっているため、任意に書き換えてください。
 
-* JSFL\_MAIN\_URI: FlashToHaxe.jsfl �̐�΃p�X
-* FLA\_FILE\_URI: �p�u���b�V���Ώ� fla �t�@�C���̐�΃p�X
-* PUBLISH_DIRECTORY: Haxe �t�@�C�����o�͂����b�f�B���N�g����΃p�X
-* FLASH_HAXE_DIRECTORY: Flash-Haxe �p �N���X�t�@�C���Q���o�͂���f�B���N�g��
-* CREATEJS_HAXE_DIRECTORY: CreateJS-Haxe �p �N���X�t�@�C���Q���o�͂���f�B���N�g��
-* SYMBOL_NAMESPACE: Toolkit for CreateJS �ݒ�E�C���h�E�Őݒ肵�� JS���O���(�V���{��)
+* JSFL\_MAIN\_URI: FlashToHaxe.jsfl の絶対パス
+* FLA\_FILE\_URI: パブリッシュ対象 fla ファイルの絶対パス
+* PUBLISH_DIRECTORY: Haxe ファイルを出力する基礎ディレクトリ絶対パス
+* FLASH_HAXE_DIRECTORY: Flash-Haxe 用 クラスファイル群を出力するディレクトリ
+* CREATEJS_HAXE_DIRECTORY: CreateJS-Haxe 用 クラスファイル群を出力するディレクトリ
+* SYMBOL_NAMESPACE: Toolkit for CreateJS 設定ウインドウで設定した JS名前空間(シンボル)
 
-��L��̏ꍇ�A�o�͐� Haxe �t�@�C���E�f�B���N�g���͈ȉ��ƂȂ�܂��B
+上記例の場合、出力先 Haxe ファイル・ディレクトリは以下となります。
 
 * H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/src/swf_as3/
 * H:/eclipse/workspace/FlashToHaxeConverter/trunk/examples/1/src/swf_haxe/
 
-�܂� FlashToHaxePublisher.jsfl ���ŉ����Ɉȉ��̍s���R�����g�A�E�g���Ă��܂��B
+また FlashToHaxePublisher.jsfl 内最下部に以下の行をコメントアウトしています。
 
     //publish swf
     //fl.publishDocument(PRE_URI + FLA_FILE_URI);
@@ -79,9 +79,9 @@ FlashToHaxePublisher.jsfl ���ɂ͗Ⴆ�Έȉ��̂悤�ȕϐ��l�ݒ���s���܂��B
     //publish Toolkit for CreateJS
     //fl.runScript(PRE_URI + "C:/Users/username/AppData/Local/Adobe/Flash CS6/ja_JP/Configuration/CreateJS/jsfl/Publish for CreateJS.jsfl");
 
-fl.�` �ƋL�q���Ă���s�̃R�����g�A�E�g���O�����ƂŁAFlashToHaxePublisher.jsfl �t�@�C�����s�Ɠ����� swf �� Toolkit for CreateJS �̃p�u���b�V���������ɍs����悤�ɂȂ�܂��BPublish for CreateJS.jsfl �̃t�@�C���p�X�͊��ɂ���ĈقȂ邽�߁A�C�ӂ̒l�ɕύX���Ă��������B��L�� Windows �p�̃��[�U���� username �������ꍇ�̃p�X�ƂȂ�܂��B
+fl.～ と記述している行のコメントアウトを外すことで、FlashToHaxePublisher.jsfl ファイル実行と同時に swf と Toolkit for CreateJS のパブリッシュも同時に行われるようになります。Publish for CreateJS.jsfl のファイルパスは環境によって異なるため、任意の値に変更してください。上記は Windows 用のユーザ名が username だった場合のパスとなります。
 
-���̑��I�v�V�����@�\�Ƃ��܂��āAFlash API �p Haxe extern �N���X�t�@�C���o�͂��s�v�ȏꍇ�́AMain �R���X�g���N�^�Ăяo���ӏ��̑��p�����[�^���󕶎��w��ɂ��܂��B
+その他オプション機能としまして、Flash API 用 Haxe extern クラスファイル出力が不要な場合は、Main コンストラクタ呼び出し箇所の第二パラメータを空文字指定にします。
 
     new Main(
     	PRE_URI + FLA_FILE_URI,
@@ -90,7 +90,7 @@ fl.�` �ƋL�q���Ă���s�̃R�����g�A�E�g���O�����ƂŁAFlashToHaxePublisher.jsfl �t
     	SYMBOL_NAMESPACE
     );
 
-Main �N���X�R���X�g���N�^ ��5������ true ���w�肷��ƁAhx �t�@�C���o�͑O�� �o�͑Ώۃf�B���N�g���̏�����(�폜 & �쐬)���s���܂��B����ɂ��A�s�v�ɂȂ��� hx �t�@�C�����o�̓f�B���N�g�����Ɏc�鎖�͖����Ȃ�܂��B
+Main クラスコンストラクタ 第5引数に true を指定すると、hx ファイル出力前に 出力対象ディレクトリの初期化(削除 & 作成)が行われます。これにより、不要になった hx ファイルが出力ディレクトリ内に残る事は無くなります。
 
     new Main(
     	PRE_URI + FLA_FILE_URI,
@@ -100,74 +100,66 @@ Main �N���X�R���X�g���N�^ ��5������ true ���w�肷��ƁAhx �t�@�C���o�͑O�� �o�͑
 		true
     );
 
-�f�B���N�g��������������ɍs���Ȃ��� Flash CS �o�̓E�C���h�E�� error ���\������܂��Bhx �o�͑Ώۃf�B���N�g�����J���Ă����肷��ƃG���[���������܂��B�S�Ẵt�H���_����铙���āA�ēx jsfl �����s���Ă��������B
+ディレクトリ初期化が正常に行われないと Flash CS 出力ウインドウに error が表示されます。hx 出力対象ディレクトリを開いていたりするとエラーが発生します。全てのフォルダを閉じる等して、再度 jsfl を実行してください。
 
-###JSFL ���s
+###JSFL 実行
 
-FlashToHaxePublisher.jsfl ���_�u���N���b�N�A���邢�� Flash CS ��Ƀh���b�O���h���b�v�� JSFL �����s�ł��܂��B
+FlashToHaxePublisher.jsfl をダブルクリック、あるいは Flash CS 上にドラッグ＆ドロップで JSFL を実行できます。
 
-���s��AFlashToHaxePublisher.jsfl ���Őݒ肵�� fla �t�@�C�����܂��J���Ă��Ȃ��ꍇ�AFlash CS ���N������ fla �t�@�C�����J����܂��Bfla �t�@�C�����J���������̏�Ԃł� jsfl �R�}���h�͑S�Ď��s���ꂸ�A�uSelect item in library.�v�Ƃ������b�Z�[�W���\������܂��B
+実行後、FlashToHaxePublisher.jsfl 内で設定した fla ファイルをまだ開いていない場合、Flash CS が起動して fla ファイルが開かれます。fla ファイルが開いただけの状態では jsfl コマンドは全て実行されず、「Select item in library.」というメッセージが表示されます。
 
-���������s������ɂ́A���C�u�������̏o�͑ΏۂƂȂ�p�b�P�[�W�t�H���_���N���b�N���� �n�C���C�g��Ԃɂ��A���̌�ēx FlashToHaxePublisher.jsfl �����s���Ă��������B
+続きを実行させるには、ライブラリ内の出力対象となるパッケージフォルダをクリックして ハイライト状態にし、その後再度 FlashToHaxePublisher.jsfl を実行してください。
 
-![�Ώۃt�H���_���N���b�N](img/2.png)
+![対象フォルダをクリック](img/2.png)
 
-###�o�͂��ꂽ Haxe �N���X�̗��p
+###出力された Haxe クラスの利用
 
-���A�v���P�[�V�����ŏo�͂����N���X�̗��p��́A examples/1/src/main/ �f�B���N�g�����̊e Haxe �t�@�C�������m�F���������B
+当アプリケーションで出力したクラスの利用例は、 examples/1/src/main/ ディレクトリ内の各 Haxe ファイルをご確認ください。
 
-Haxe ��������R���p�C�����ꂽ�e�t�@�C���́A���炩���� examples/1/deploy/ �f�B���N�g�����ɏo�͂��Ă��܂��BFlash �p�R���e���c�Ƃ��Ă� preloader.swf �� main.swf�Ahtml5 �p�R���e���c�Ƃ��Ă� js/App.js ���o�͂��Ă��܂��B
+Haxe 処理からコンパイルされた各ファイルは、あらかじめ examples/1/deploy/ ディレクトリ内に出力しています。Flash 用コンテンツとしては preloader.swf と main.swf、html5 用コンテンツとしては js/App.js を出力しています。
 
-###dango-itimi haxelib �̃_�E�����[�h
+###dango-itimi haxelib のダウンロード
 
-examples/1/src/main/ �f�B�N���N�g���� �e Haxe �N���X�t�@�C������� Toolkit for CreateJS �p�u���b�V���f�[�^�������₷�����邽�߂� Haxe ���C�u�����uTFCLib�v��AFlash-Haxe �p�t�@�C���ǂݍ��ݏ������C�u�����𗘗p���Ă��܂��B�K�v������Έȉ��� URL �ɂ���t�@�C�����_�E�����[�h���ăN���X�p�X�ݒ���s�Ȃ��Ă��������B
+examples/1/src/main/ ディクレクトリ内 各 Haxe クラスファイルからは Toolkit for CreateJS パブリッシュデータを扱いやすくするための Haxe ライブラリ「TFCLib」や、Flash-Haxe 用ファイル読み込み処理ライブラリを利用しています。必要があれば以下の URL にあるファイルをダウンロードしてクラスパス設定を行なってください。
 
 * dango-itimi haxelib
 
 	[https://github.com/siratama/haxelib](https://github.com/siratama/haxelib)
 
-* dango-itimi haxelib �_�E�����[�h�y�[�W
+* dango-itimi haxelib ダウンロードページ
 
 	[https://github.com/siratama/haxelib/tags](https://github.com/siratama/haxelib/tags)
 
-�_�E�����[�h��Ahaxelib/src/ �f�B���N�g���� as3/, core/, createjs/, toolkit\_for\_createjs/ �f�B���N�g���ɃN���X�p�X��ʂ��܂��B
+ダウンロード後、haxelib/src/ ディレクトリ内 as3/, core/, createjs/, toolkit\_for\_createjs/ ディレクトリにクラスパスを通します。
 
 
-##�T���v�����
+##サンプル解説
 
 * examples/1/
 
-	Haxe �����t���R���p�C���w����s���A��̃\�[�X�R�[�h���� Flash �p�\�[�X�R�[�h�� javascript �p�\�[�X�R�[�h�������L�q������
+	Haxe 条件付きコンパイル指定を行い、一つのソースコード内に Flash 用ソースコードと javascript 用ソースコード両方を記述した例
 
 * examples/2/
 
-	�v���b�g�t�H�[�����ƂɁA��̃\�[�X�R�[�h���� Flash �p�\�[�X�R�[�h�� javascript �p�\�[�X�R�[�h�������L�q������
+	プラットフォームごとに、一つのソースコード内に Flash 用ソースコードと javascript 用ソースコード両方を記述した例
 
-examples/2/air/ �f�B���N�g�����ɂ� Adobe AIR (Android �A�v��)���o�͂���T���v�����쐬���Ă��܂��BHaxe ����R���p�C�����ꂽ Flash �R���e���c�p main.swf ��ǂݍ��ޏ����� Action Script 3.0 �� AirSample.as �ɋL�q���Aair\_sample.fla �t�@�C���̃h�L�������g�N���X�Ƃ��� AirSample.as ��ݒ��Aair\_sample.fla ���� AIR �̏o�͂��s�Ȃ��Ă��܂��B
+examples/2/air/ ディレクトリ内には Adobe AIR (Android アプリ)を出力するサンプルも作成しています。Haxe からコンパイルされた Flash コンテンツ用 main.swf を読み込む処理を Action Script 3.0 で AirSample.as に記述し、air\_sample.fla ファイルのドキュメントクラスとして AirSample.as を設定後、air\_sample.fla から AIR の出力を行なっています。
 
-##���ӓ_
-
-###�N���X�t�B�[���h�v���p�e�B�ւ̃A�N�Z�X�͒��ӂ��K�v
-
-CreateJS-Haxe �p�ɏo�͂��ꂽ Haxe �N���X�� �t�B�[���h�v���p�e�B�́AToolkit for CreateJS �̎d�l�ɂ�� undefined �ɂȂ��Ă��܂��ꍇ������܂��B�őP�̒��ӂ𕥂��̂ł���΁ATFCLib �� ContainerUtil.getProperty ���\�b�h�o�R�Ńv���p�e�B�擾���s���܂��B
-
-�ڍׂ͈ȉ��� URL ���u�l���������Ă����_�ƑΏ��v�̍������m�F���������B
-
-[http://www.dango-itimi.com/blog/archives/2013/001169.html](http://www.dango-itimi.com/blog/archives/2013/001169.html)
+##注意点
 
 ###haxelib jsfl
 
-jsfl ���쐬���� Haxe �\�[�X�R�[�h�ł́A�ȉ��� jsfl �p extern ���C�u�����𗘗p���Ă��܂��B
+jsfl を作成した Haxe ソースコードでは、以下の jsfl 用 extern ライブラリを利用しています。
 
 [http://lib.haxe.org/p/jsfl](http://lib.haxe.org/p/jsfl)
 
-�������A��L�̕��͑ΏۂƂȂ� jsfl �̃o�[�W�������Â��A���X���e��ύX����K�v������܂��BHaxe �\�[�X�R�[�h���C������ꍇ�͏��X��ԂƂȂ邽�߂����ӂ��������B
+しかし、上記の物は対象となる jsfl のバージョンが古く、少々内容を変更する必要があります。Haxe ソースコードを修正する場合は少々手間となるためご注意ください。
 
-###�Ή��o�[�W����
+###対応バージョン
 
-���A�v���P�[�V�����͈ȉ��̃o�[�W�������^�[�Q�b�g�ɂ��Ă��܂��B
+当アプリケーションは以下のバージョンをターゲットにしています。
 
-* Toolkit for CreateJS 1.1
+* Toolkit for CreateJS 1.2
 * Haxe 2.10
 
 

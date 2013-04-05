@@ -730,10 +730,6 @@ tmpl.Field.create = function(itemName,forAs3) {
 			var type = element.elementType == "instance" && forAs3?"flash.display.MovieClip":element.elementType == "text" && forAs3?"flash.text.TextField":element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.Text";
 			var line = tmpl.Field.fieldTemplate.execute({ name : element.name, type : type});
 			fieldLines.push(line);
-			if(!forAs3) {
-				line = tmpl.Field.originalPropertyName.execute({ name : element.name});
-				fieldLines.push(line);
-			}
 		}
 	}
 	return fieldLines;
@@ -797,7 +793,6 @@ haxe.Template.expr_int = new EReg("^[0-9]+$","");
 haxe.Template.expr_float = new EReg("^([+-]?)(?=\\d|,\\d)\\d*(,\\d*)?([Ee]([+-]?\\d+))?$","");
 haxe.Template.globals = { };
 tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
-tmpl.Field.originalPropertyName = new haxe.Template("\tpublic static inline var ::name::OriginalPropertyName = \"::name::\";");
 tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.BitmapData, implements Dynamic{\r\n}");
 tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.MovieClip, implements Dynamic{\r\n::field::\r\n}");
 tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound, implements Dynamic{\r\n}");
