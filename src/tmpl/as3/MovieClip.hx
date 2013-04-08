@@ -4,17 +4,18 @@ class MovieClip {
 
 	static public var template:Template = new Template(
 "package ::packageStr::;
-extern class ::className:: extends flash.display.MovieClip{
+extern class ::className:: extends flash.display.::superClassName::{
 ::field::
 }"
 	);
 
-    public static function create(packageStr:String, className:String, fieldSet:Array<String>):String{
+    public static function create(packageStr:String, className:String, field:Field):String{
 
 		var fileLines = template.execute({
 			packageStr: packageStr,
 			className: className,
-			field: fieldSet.join("\n")
+			field: field.getLines(),
+			superClassName: field.isMovieClipFrame() ? "MovieClip": "Sprite"
 		});
 		return fileLines;
     }

@@ -1,3 +1,4 @@
 package shooting.se;
-extern class PlayerExplosion, implements Dynamic{
+extern class PlayerExplosion{
+	public static inline var id:String = "shootingsePlayerExplosion";
 }

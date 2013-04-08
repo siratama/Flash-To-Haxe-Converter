@@ -1,3 +1,4 @@
 package shooting.se;
-extern class Hit, implements Dynamic{
+extern class Hit{
+	public var id:String = shootingseHit;
 }

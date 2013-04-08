@@ -1,5 +1,5 @@
 package shooting.player;
 @:native("lib.shootingplayerSavingPowerFrontView")
-extern class SavingPowerFrontView extends createjs.easeljs.MovieClip, implements Dynamic{
+extern class SavingPowerFrontView extends createjs.easeljs.MovieClip{
 
 }

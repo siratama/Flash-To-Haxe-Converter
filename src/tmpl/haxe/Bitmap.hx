@@ -5,7 +5,7 @@ class Bitmap {
 	static public var template:Template = new Template(
 'package ::packageStr::;
 @:native("::namespace::.::nativeClassName::")
-extern class ::className:: extends createjs.easeljs.Bitmap, implements Dynamic{
+extern class ::className:: extends createjs.easeljs.Bitmap{
 }'
 	);
 

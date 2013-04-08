@@ -1,3 +1,4 @@
 package shooting.se;
-extern class PowerMax, implements Dynamic{
+extern class PowerMax{
+	public var id:String = shootingsePowerMax;
 }

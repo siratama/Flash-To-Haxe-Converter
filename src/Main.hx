@@ -94,7 +94,7 @@ class Main {
 		var outputLines = "";
 		switch(itemType){
 			case "movie clip":
-				outputLines = tmpl.as3.MovieClip.create(packageStr, className, Field.create(itemName, true));
+				outputLines = tmpl.as3.MovieClip.create(packageStr, className, new Field(itemName, true));
 			case "sound":
 				outputLines = tmpl.as3.Sound.create(packageStr, className);
 			case "bitmap":
@@ -107,9 +107,9 @@ class Main {
 		var outputLines = "";
 		switch(itemType){
 			case "movie clip":
-				outputLines = tmpl.haxe.MovieClip.create(packageStr, className, Field.create(itemName, false), namespace, nativeClassName);
+				outputLines = tmpl.haxe.MovieClip.create(packageStr, className, new Field(itemName, false), namespace, nativeClassName);
 			case "sound":
-				outputLines = tmpl.haxe.Sound.create(packageStr, className);
+				outputLines = tmpl.haxe.Sound.create(packageStr, className, nativeClassName);
 			case "bitmap":
 				outputLines = tmpl.haxe.Bitmap.create(packageStr, className, namespace, nativeClassName);
 		}

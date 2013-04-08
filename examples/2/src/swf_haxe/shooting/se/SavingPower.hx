@@ -1,3 +1,4 @@
 package shooting.se;
-extern class SavingPower, implements Dynamic{
+extern class SavingPower{
+	public static inline var id:String = "shootingseSavingPower";
 }

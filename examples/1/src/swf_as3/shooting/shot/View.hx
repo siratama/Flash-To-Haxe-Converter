@@ -1,4 +1,4 @@
 package shooting.shot;
-extern class View extends flash.display.MovieClip{
+extern class View extends flash.display.Sprite{
 
 }

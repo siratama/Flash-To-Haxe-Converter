@@ -6,23 +6,21 @@ import haxe.Template;
 class Field {
 
 	private static var fieldTemplate:Template = new Template(
-	"\tvar ::name:: : ::type::;"
+		"\tvar ::name:: : ::type::;"
 	);
-
-	/*
-	private static var originalPropertyName:Template = new Template(
-	'\tpublic static inline var ::name::OriginalPropertyName = "::name::";'
-	);
-	*/
 
 	private static var library:Library;
 	public static function initialize(library:Library){
 		Field.library = library;
 	}
 
-	public static function create(itemName:String, forAs3:Bool){
+	private var isMovieClip:Bool;
+	private var fieldLines:Array<String>;
 
-		var fieldLines:Array<String> = [];
+	public function new(itemName:String, forAs3:Bool){
+
+		isMovieClip = false;
+		fieldLines = [];
 
 		//Flash.trace(itemName);
 		library.editItem(itemName);
@@ -33,6 +31,9 @@ class Field {
 			var layerType = layer.layerType;
 
 			if(layerType == "folder") continue;
+
+			if(!isMovieClip && layer.frames.length > 1)
+				isMovieClip = true;
 
 			for(element in layer.frames[0].elements){
 
@@ -48,15 +49,13 @@ class Field {
 					type: type
 				});
 				fieldLines.push(line);
-
-				/*
-				if(!forAs3){
-					line = originalPropertyName.execute({ name: element.name });
-					fieldLines.push(line);
-				}
-				*/
 			}
 		}
-		return fieldLines;
+	}
+	public function isMovieClipFrame():Bool{
+		return isMovieClip;
+	}
+	public function getLines():String{
+		return fieldLines.join("\n");
 	}
 }

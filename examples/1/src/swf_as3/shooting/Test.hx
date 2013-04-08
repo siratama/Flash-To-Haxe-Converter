@@ -1,4 +1,4 @@
 package shooting;
-extern class Test extends flash.display.MovieClip{
+extern class Test extends flash.display.Sprite{
 
 }

@@ -133,10 +133,10 @@ Main.prototype = {
 		var outputLines = "";
 		switch(itemType) {
 		case "movie clip":
-			outputLines = tmpl.haxe.MovieClip.create(packageStr,className,tmpl.Field.create(itemName,false),$namespace,nativeClassName);
+			outputLines = tmpl.haxe.MovieClip.create(packageStr,className,new tmpl.Field(itemName,false),$namespace,nativeClassName);
 			break;
 		case "sound":
-			outputLines = tmpl.haxe.Sound.create(packageStr,className);
+			outputLines = tmpl.haxe.Sound.create(packageStr,className,nativeClassName);
 			break;
 		case "bitmap":
 			outputLines = tmpl.haxe.Bitmap.create(packageStr,className,$namespace,nativeClassName);
@@ -148,7 +148,7 @@ Main.prototype = {
 		var outputLines = "";
 		switch(itemType) {
 		case "movie clip":
-			outputLines = tmpl.as3.MovieClip.create(packageStr,className,tmpl.Field.create(itemName,true));
+			outputLines = tmpl.as3.MovieClip.create(packageStr,className,new tmpl.Field(itemName,true));
 			break;
 		case "sound":
 			outputLines = tmpl.as3.Sound.create(packageStr,className);
@@ -707,13 +707,9 @@ js.Boot.__instanceof = function(o,cl) {
 	}
 }
 var tmpl = tmpl || {}
-tmpl.Field = function() { }
-tmpl.Field.__name__ = true;
-tmpl.Field.initialize = function(library) {
-	tmpl.Field.library = library;
-}
-tmpl.Field.create = function(itemName,forAs3) {
-	var fieldLines = [];
+tmpl.Field = function(itemName,forAs3) {
+	this.isMovieClip = false;
+	this.fieldLines = [];
 	tmpl.Field.library.editItem(itemName);
 	var layers = fl.getDocumentDOM().getTimeline().layers;
 	var _g = 0;
@@ -722,6 +718,7 @@ tmpl.Field.create = function(itemName,forAs3) {
 		++_g;
 		var layerType = layer.layerType;
 		if(layerType == "folder") continue;
+		if(!this.isMovieClip && layer.frames.length > 1) this.isMovieClip = true;
 		var _g1 = 0, _g2 = layer.frames[0].elements;
 		while(_g1 < _g2.length) {
 			var element = _g2[_g1];
@@ -729,10 +726,22 @@ tmpl.Field.create = function(itemName,forAs3) {
 			if(element.name == "") continue;
 			var type = element.elementType == "instance" && forAs3?"flash.display.MovieClip":element.elementType == "text" && forAs3?"flash.text.TextField":element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.Text";
 			var line = tmpl.Field.fieldTemplate.execute({ name : element.name, type : type});
-			fieldLines.push(line);
+			this.fieldLines.push(line);
 		}
 	}
-	return fieldLines;
+};
+tmpl.Field.__name__ = true;
+tmpl.Field.initialize = function(library) {
+	tmpl.Field.library = library;
+}
+tmpl.Field.prototype = {
+	getLines: function() {
+		return this.fieldLines.join("\n");
+	}
+	,isMovieClipFrame: function() {
+		return this.isMovieClip;
+	}
+	,__class__: tmpl.Field
 }
 if(!tmpl.as3) tmpl.as3 = {}
 tmpl.as3.Bitmap = function() { }
@@ -743,8 +752,8 @@ tmpl.as3.Bitmap.create = function(packageStr,className) {
 }
 tmpl.as3.MovieClip = function() { }
 tmpl.as3.MovieClip.__name__ = true;
-tmpl.as3.MovieClip.create = function(packageStr,className,fieldSet) {
-	var fileLines = tmpl.as3.MovieClip.template.execute({ packageStr : packageStr, className : className, field : fieldSet.join("\n")});
+tmpl.as3.MovieClip.create = function(packageStr,className,field) {
+	var fileLines = tmpl.as3.MovieClip.template.execute({ packageStr : packageStr, className : className, field : field.getLines(), superClassName : field.isMovieClipFrame()?"MovieClip":"Sprite"});
 	return fileLines;
 }
 tmpl.as3.Sound = function() { }
@@ -762,14 +771,14 @@ tmpl.haxe.Bitmap.create = function(packageStr,className,$namespace,nativeClassNa
 }
 tmpl.haxe.MovieClip = function() { }
 tmpl.haxe.MovieClip.__name__ = true;
-tmpl.haxe.MovieClip.create = function(packageStr,className,fieldSet,$namespace,nativeClassName) {
-	var fileLines = tmpl.haxe.MovieClip.template.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : className, field : fieldSet.join("\n")});
+tmpl.haxe.MovieClip.create = function(packageStr,className,field,$namespace,nativeClassName) {
+	var fileLines = tmpl.haxe.MovieClip.template.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : className, field : field.getLines(), superClassName : field.isMovieClipFrame()?"MovieClip":"Container"});
 	return fileLines;
 }
 tmpl.haxe.Sound = function() { }
 tmpl.haxe.Sound.__name__ = true;
-tmpl.haxe.Sound.create = function(packageStr,className) {
-	var fileLines = tmpl.haxe.Sound.template.execute({ packageStr : packageStr, className : className});
+tmpl.haxe.Sound.create = function(packageStr,className,nativeClassName) {
+	var fileLines = tmpl.haxe.Sound.template.execute({ packageStr : packageStr, className : className, nativeClassName : nativeClassName});
 	return fileLines;
 }
 var $_;
@@ -794,9 +803,9 @@ haxe.Template.expr_float = new EReg("^([+-]?)(?=\\d|,\\d)\\d*(,\\d*)?([Ee]([+-]?
 haxe.Template.globals = { };
 tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
 tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.BitmapData{\r\n}");
-tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.MovieClip{\r\n::field::\r\n}");
+tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.::superClassName::{\r\n::field::\r\n}");
 tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound{\r\n}");
-tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap, implements Dynamic{\r\n}");
-tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.MovieClip, implements Dynamic{\r\n::field::\r\n}");
-tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className::, implements Dynamic{\r\n}");
+tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap{\r\n}");
+tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.::superClassName::{\r\n::field::\r\n}");
+tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className::{\r\n\tpublic static inline var id:String = \"::nativeClassName::\";\r\n}");
 Main.main();

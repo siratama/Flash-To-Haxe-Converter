@@ -1,3 +1,4 @@
 package shooting.se;
-extern class Bgm, implements Dynamic{
+extern class Bgm{
+	public static inline var id:String = "shootingseBgm";
 }

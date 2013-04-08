@@ -5,13 +5,13 @@ class MovieClip {
 	static public var template:Template = new Template(
 'package ::packageStr::;
 @:native("::namespace::.::nativeClassName::")
-extern class ::className:: extends createjs.easeljs.MovieClip, implements Dynamic{
+extern class ::className:: extends createjs.easeljs.::superClassName::{
 ::field::
 }'
 	);
 
 	public static function create(
-		packageStr:String, className:String, fieldSet:Array<String>,
+		packageStr:String, className:String, field:Field,
 		namespace:String, nativeClassName:String
 	):String{
 
@@ -20,7 +20,8 @@ extern class ::className:: extends createjs.easeljs.MovieClip, implements Dynami
 			nativeClassName: nativeClassName,
 			packageStr: packageStr,
 			className: className,
-			field: fieldSet.join("\n")
+			field: field.getLines(),
+			superClassName: field.isMovieClipFrame() ? "MovieClip": "Container"
 		});
 		return fileLines;
 	}
