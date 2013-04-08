@@ -1,4 +1,4 @@
 package shooting.scene;
-extern class OpeningView extends flash.display.MovieClip, implements Dynamic{
+extern class OpeningView extends flash.display.MovieClip{
 	var clickStartBtn : flash.display.MovieClip;
 }

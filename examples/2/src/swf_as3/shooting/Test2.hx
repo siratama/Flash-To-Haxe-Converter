@@ -1,5 +1,5 @@
 package shooting;
-extern class Test2 extends flash.display.MovieClip, implements Dynamic{
+extern class Test2 extends flash.display.MovieClip{
 	var testA : flash.display.MovieClip;
 	var testB : flash.display.MovieClip;
 	var testC : flash.display.MovieClip;

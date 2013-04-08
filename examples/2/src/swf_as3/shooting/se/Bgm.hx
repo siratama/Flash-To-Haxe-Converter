@@ -1,3 +1,3 @@
 package shooting.se;
-extern class Bgm extends flash.media.Sound, implements Dynamic{
+extern class Bgm extends flash.media.Sound{
 }

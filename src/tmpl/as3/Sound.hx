@@ -4,7 +4,7 @@ class Sound {
 
 	static public var template:Template = new Template(
 "package ::packageStr::;
-extern class ::className:: extends flash.media.Sound, implements Dynamic{
+extern class ::className:: extends flash.media.Sound{
 }"
 	);
 

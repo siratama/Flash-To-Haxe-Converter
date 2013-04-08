@@ -4,7 +4,7 @@ class MovieClip {
 
 	static public var template:Template = new Template(
 "package ::packageStr::;
-extern class ::className:: extends flash.display.MovieClip, implements Dynamic{
+extern class ::className:: extends flash.display.MovieClip{
 ::field::
 }"
 	);
