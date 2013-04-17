@@ -805,7 +805,7 @@ tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
 tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.BitmapData{\r\n}");
 tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.::superClassName::{\r\n::field::\r\n}");
 tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound{\r\n}");
-tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap{\r\n\tpublic static inline var id:String = \"::nativeClassName::\";\r\n}");
+tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap{\r\n\tpublic static inline var id:String = \"::nativeClassName::\";\r\n\tpublic function new():Void;\r\n}");
 tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.::superClassName::{\r\n::field::\r\n}");
 tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className::{\r\n\tpublic static inline var id:String = \"::nativeClassName::\";\r\n}");
 Main.main();

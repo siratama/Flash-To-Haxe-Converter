@@ -1,4 +1,4 @@
 package shooting.se;
 extern class SavingPower{
-	public var id:String = shootingseSavingPower;
+	public static inline var id:String = "shootingseSavingPower";
 }

@@ -1,4 +1,4 @@
 package shooting.se;
 extern class Shot{
-	public var id:String = shootingseShot;
+	public static inline var id:String = "shootingseShot";
 }

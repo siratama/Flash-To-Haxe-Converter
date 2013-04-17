@@ -1,4 +1,4 @@
 package shooting.se;
 extern class PowerMax{
-	public var id:String = shootingsePowerMax;
+	public static inline var id:String = "shootingsePowerMax";
 }
