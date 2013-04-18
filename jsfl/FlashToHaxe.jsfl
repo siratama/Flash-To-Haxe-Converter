@@ -802,7 +802,7 @@ haxe.Template.expr_int = new EReg("^[0-9]+$","");
 haxe.Template.expr_float = new EReg("^([+-]?)(?=\\d|,\\d)\\d*(,\\d*)?([Ee]([+-]?\\d+))?$","");
 haxe.Template.globals = { };
 tmpl.Field.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
-tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.BitmapData{\r\n}");
+tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.BitmapData{\r\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void;\r\n}");
 tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.::superClassName::{\r\n::field::\r\n}");
 tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound{\r\n}");
 tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap{\r\n\tpublic static inline var id:String = \"::nativeClassName::\";\r\n\tpublic function new():Void;\r\n}");
