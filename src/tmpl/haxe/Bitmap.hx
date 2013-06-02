@@ -6,7 +6,7 @@ class Bitmap {
 'package ::packageStr::;
 @:native("::namespace::.::nativeClassName::")
 extern class ::className:: extends createjs.easeljs.Bitmap{
-	public static inline var id:String = "::nativeClassName::";
+	public static inline var manifestId:String = "::nativeClassName::";
 	public function new():Void;
 }'
 	);

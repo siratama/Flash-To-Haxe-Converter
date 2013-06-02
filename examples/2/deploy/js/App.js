@@ -475,6 +475,7 @@ if(!com.dango_itimi.createjs) com.dango_itimi.createjs = {}
 if(!com.dango_itimi.createjs.net) com.dango_itimi.createjs.net = {}
 com.dango_itimi.createjs.net.LoaderWithLoadQueue = $hxClasses["com.dango_itimi.createjs.net.LoaderWithLoadQueue"] = function(useXHR,plugin) {
 	if(useXHR == null) useXHR = false;
+	this.loadedEventSet = [];
 	this.initialize(useXHR,plugin);
 };
 com.dango_itimi.createjs.net.LoaderWithLoadQueue.__name__ = ["com","dango_itimi","createjs","net","LoaderWithLoadQueue"];
@@ -494,6 +495,7 @@ com.dango_itimi.createjs.net.LoaderWithLoadQueue.prototype = {
 		this.error = true;
 	}
 	,onFileLoad: function(event) {
+		this.loadedEventSet.push(event);
 	}
 	,loadManifest: function(manifest) {
 		this.loadQueue.loadManifest(manifest);
@@ -515,6 +517,7 @@ com.dango_itimi.createjs.net.LoaderWithLoadQueue.prototype = {
 		if(plugin != null) this.loadQueue.installPlugin(plugin);
 	}
 	,error: null
+	,loadedEventSet: null
 	,loadQueue: null
 	,__class__: com.dango_itimi.createjs.net.LoaderWithLoadQueue
 }
