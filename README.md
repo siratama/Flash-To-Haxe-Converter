@@ -160,7 +160,7 @@ jsfl を作成した Haxe ソースコードでは、以下の jsfl 用 extern �
 当アプリケーションは以下のバージョンをターゲットにしています。
 
 * Toolkit for CreateJS 1.2
-* Haxe 2.10
+* Haxe 3
 
 
 
