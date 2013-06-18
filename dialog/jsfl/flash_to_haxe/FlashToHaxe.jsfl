@@ -95,21 +95,21 @@ List.prototype = {
 	}
 	,__class__: List
 }
-var Main = function(flaFileDirectory,as3Directory,haxeDirectory,symbolNameSpace) {
+var Main = function(baseDirectory,as3Directory,haxeDirectory,symbolNameSpace) {
 	if(symbolNameSpace == null) symbolNameSpace = "lib";
 	fl.outputPanel.clear();
 	this.outputtedAs3 = as3Directory != "";
 	this.outputtedHaxe = haxeDirectory != "";
-	if(!this.outputtedAs3 && this.outputtedHaxe) {
+	if(!this.outputtedAs3 && !this.outputtedHaxe) {
 		fl.trace("Set output directory of as or hx.");
 		return;
 	}
-	this.flaFileDirectory = flaFileDirectory;
+	this.baseDirectory = baseDirectory;
 	this.symbolNameSpace = symbolNameSpace;
 	if(as3Directory.charAt(as3Directory.length - 1) != "/") as3Directory += "/";
 	if(haxeDirectory.charAt(haxeDirectory.length - 1) != "/") haxeDirectory += "/";
-	this.as3Directory = this.flaFileDirectory + as3Directory;
-	this.haxeDirectory = this.flaFileDirectory + haxeDirectory;
+	this.as3Directory = this.baseDirectory + as3Directory;
+	this.haxeDirectory = this.baseDirectory + haxeDirectory;
 	this.packageDirectoryMap = new haxe.ds.StringMap();
 	this.outputDataSet = [];
 	this.initializeOutputDirectory();

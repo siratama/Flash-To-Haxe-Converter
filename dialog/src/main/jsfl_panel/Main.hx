@@ -9,6 +9,10 @@ class Main {
 	private var view:View;
 	private var flashFileDirectory:String;
 
+	private static inline var AS3_TEXT_KEY = "AS3";
+	private static inline var HAXE_TEXT_KEY = "HAXE";
+	private static inline var JS_NAMESPACE_TEXT_KEY = "JS";
+
 	public static function main(){
 		new Main();
 	}
@@ -18,10 +22,11 @@ class Main {
 		view = new View();
 		stage.addChild(view);
 
+		flashFileDirectory = getFlashFileDirectory();
+		setDefaultText();
+
 		view.closeButton.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDownClose);
 		view.runButton.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDownRun);
-
-		flashFileDirectory = getFlashFileDirectory();
 	}
 	private function getFlashFileDirectory(){
 
@@ -29,6 +34,17 @@ class Main {
 		var arr = path.split("/");
 		arr.pop();
 		return arr.join("/") + "/";
+	}
+	private function setDefaultText(){
+
+		var recordedAs3Text = getDataFromDocument(AS3_TEXT_KEY);
+		if(recordedAs3Text != "0") view.asOutputPathText.text = recordedAs3Text;
+
+		var recordedHaxeText = getDataFromDocument(HAXE_TEXT_KEY);
+		if(recordedHaxeText != "0") view.hxOutputPathText.text = recordedHaxeText;
+
+		var recordedJsNamespaceText = getDataFromDocument(JS_NAMESPACE_TEXT_KEY);
+		if(recordedJsNamespaceText != "0") view.jsSymbolNamespaceText.text = recordedJsNamespaceText;
 	}
 	private function onMouseDownClose(event){
 		closeDialog();
@@ -43,6 +59,10 @@ class Main {
 		var jsSymbolNamespace = view.jsSymbolNamespaceText.text;
 		executeJsflCommand('new Main("$flashFileDirectory", "$as3Directory", "$haxeDirectory", "$jsSymbolNamespace");');
 		closeDialog();
+
+		addDataToDocument(AS3_TEXT_KEY, as3Directory);
+		addDataToDocument(HAXE_TEXT_KEY, haxeDirectory);
+		addDataToDocument(JS_NAMESPACE_TEXT_KEY, jsSymbolNamespace);
 	}
 	private function executeJsflCommand(command:String):Dynamic{
 
@@ -55,5 +75,11 @@ class Main {
 	private function closeDialog(){
 
 		executeJsflCommand("fl.xmlui.cancel();");
+	}
+	private function addDataToDocument(key:String, data:String){
+		executeJsflCommand('document.addDataToDocument("$key", "string", "$data");');
+	}
+	private function getDataFromDocument(key:String):String{
+		return executeJsflCommand('document.getDataFromDocument("$key");');
 	}
 }

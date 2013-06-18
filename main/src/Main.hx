@@ -8,7 +8,7 @@ import jsfl.Item;
 import jsfl.Flash;
 class Main {
 
-	private var flaFileDirectory:String;
+	private var baseDirectory:String;
 	private var as3Directory:String;
 	private var haxeDirectory:String;
 	private var symbolNameSpace:String;
@@ -20,25 +20,25 @@ class Main {
 	public static function main(){
 	}
     public function new(
-		flaFileDirectory:String, as3Directory:String, haxeDirectory:String, symbolNameSpace:String = "lib") {
+		baseDirectory:String, as3Directory:String, haxeDirectory:String, symbolNameSpace:String = "lib") {
 
 		Flash.outputPanel.clear();
 
 		this.outputtedAs3 = as3Directory != "";
 		this.outputtedHaxe = haxeDirectory != "";
 
-		if(!outputtedAs3 && outputtedHaxe){
+		if(!outputtedAs3 && !outputtedHaxe){
 			Flash.trace("Set output directory of as or hx.");
 			return;
 		}
 
-		this.flaFileDirectory = flaFileDirectory;
+		this.baseDirectory = baseDirectory;
 		this.symbolNameSpace = symbolNameSpace;
 
 		if(as3Directory.charAt(as3Directory.length -1) != "/") as3Directory += "/";
 		if(haxeDirectory.charAt(haxeDirectory.length -1) != "/") haxeDirectory+= "/";
-		this.as3Directory = this.flaFileDirectory + as3Directory;
-		this.haxeDirectory = this.flaFileDirectory + haxeDirectory;
+		this.as3Directory = this.baseDirectory + as3Directory;
+		this.haxeDirectory = this.baseDirectory + haxeDirectory;
 
 		packageDirectoryMap = new Map();
 		outputDataSet = [];
