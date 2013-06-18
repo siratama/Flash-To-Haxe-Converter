@@ -11,7 +11,7 @@ class PreloaderForJS extends Preloader{
 	}
 	public function new(){
 
-		js.Lib.window.onload = initialize;
+		js.Browser.window.onload = initialize;
 		super();
 	}
 	override private function setLoader(){

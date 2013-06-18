@@ -1,4 +1,4 @@
-package ;
+package
 //import jsfl.Flash;
 class Publish {
 

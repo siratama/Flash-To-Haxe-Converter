@@ -45,6 +45,13 @@ HxOverrides.substr = function(s,pos,len) {
 	} else if(len < 0) len = s.length + len - pos;
 	return s.substr(pos,len);
 }
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+}
 var List = function() {
 	this.length = 0;
 };
@@ -88,37 +95,27 @@ List.prototype = {
 	}
 	,__class__: List
 }
-var Main = function(flaFileUri,flashHaxeUri,createJsHaxeUri,symbolNameSpace,initializedOutputDirectory) {
-	if(initializedOutputDirectory == null) initializedOutputDirectory = false;
-	fl.openDocument(flaFileUri);
+var Main = function(flaFileDirectory,as3Directory,haxeDirectory,symbolNameSpace) {
+	if(symbolNameSpace == null) symbolNameSpace = "lib";
 	fl.outputPanel.clear();
-	var outputtedFlashHaxe = flashHaxeUri != "";
-	var library = fl.getDocumentDOM().library;
-	tmpl.Field.initialize(library);
-	var items = library.getSelectedItems();
-	var itemsLength = items.length;
-	if(itemsLength == 0) {
-		fl.trace("Select item in library.");
+	this.outputtedAs3 = as3Directory != "";
+	this.outputtedHaxe = haxeDirectory != "";
+	if(!this.outputtedAs3 && this.outputtedHaxe) {
+		fl.trace("Set output directory of as or hx.");
 		return;
 	}
-	this.initializeOutputDirectory(flashHaxeUri,createJsHaxeUri,outputtedFlashHaxe,initializedOutputDirectory);
-	var _g = 0;
-	while(_g < itemsLength) {
-		var i = _g++;
-		var item = items[i];
-		var itemType = item.itemType;
-		if(this.createFolder(flashHaxeUri,createJsHaxeUri,item,outputtedFlashHaxe)) continue;
-		var pathNames = item.name.split("/");
-		var nativeClassName = pathNames.join("");
-		var className = pathNames.pop();
-		var packageStr = pathNames.join(".");
-		if(outputtedFlashHaxe) {
-			var outputLinesForAs3 = this.getOutputLinesForAs3(item.name,itemType,packageStr,className);
-			this.output(flashHaxeUri,item.name,outputLinesForAs3);
-		}
-		var outputLinesForHaxe = this.getOutputLinesForHaxe(item.name,itemType,packageStr,className,symbolNameSpace,nativeClassName);
-		this.output(createJsHaxeUri,item.name,outputLinesForHaxe);
-	}
+	this.flaFileDirectory = flaFileDirectory;
+	this.symbolNameSpace = symbolNameSpace;
+	if(as3Directory.charAt(as3Directory.length - 1) != "/") as3Directory += "/";
+	if(haxeDirectory.charAt(haxeDirectory.length - 1) != "/") haxeDirectory += "/";
+	this.as3Directory = this.flaFileDirectory + as3Directory;
+	this.haxeDirectory = this.flaFileDirectory + haxeDirectory;
+	this.packageDirectoryMap = new haxe.ds.StringMap();
+	this.outputDataSet = [];
+	this.initializeOutputDirectory();
+	this.parseLibraryItem();
+	this.createFolder();
+	this.outputData();
 	fl.trace("finish");
 };
 Main.__name__ = true;
@@ -128,57 +125,108 @@ Main.prototype = {
 	output: function(baseUri,itemName,outputLines) {
 		var filePath = baseUri + itemName + ".hx";
 		FLfile.write(filePath,outputLines);
+		fl.trace(filePath);
 	}
-	,getOutputLinesForHaxe: function(itemName,itemType,packageStr,className,$namespace,nativeClassName) {
+	,getOutputLinesForHaxe: function(outputData) {
 		var outputLines = "";
-		switch(itemType) {
+		switch(outputData.itemType) {
 		case "movie clip":
-			outputLines = tmpl.haxe.MovieClip.create(packageStr,className,new tmpl.Field(itemName,false),$namespace,nativeClassName);
+			outputLines = tmpl.haxe.MovieClip.create(outputData.packageStr,outputData.className,new tmpl.Field(outputData.itemName,false),this.symbolNameSpace,outputData.nativeClassName);
 			break;
 		case "sound":
-			outputLines = tmpl.haxe.Sound.create(packageStr,className,nativeClassName);
+			outputLines = tmpl.haxe.Sound.create(outputData.packageStr,outputData.className,outputData.nativeClassName);
 			break;
 		case "bitmap":
-			outputLines = tmpl.haxe.Bitmap.create(packageStr,className,$namespace,nativeClassName);
+			outputLines = tmpl.haxe.Bitmap.create(outputData.packageStr,outputData.className,this.symbolNameSpace,outputData.nativeClassName);
 			break;
 		}
 		return outputLines;
 	}
-	,getOutputLinesForAs3: function(itemName,itemType,packageStr,className) {
+	,getOutputLinesForAs3: function(outputData) {
 		var outputLines = "";
-		switch(itemType) {
+		switch(outputData.itemType) {
 		case "movie clip":
-			outputLines = tmpl.as3.MovieClip.create(packageStr,className,new tmpl.Field(itemName,true));
+			outputLines = tmpl.as3.MovieClip.create(outputData.packageStr,outputData.className,new tmpl.Field(outputData.itemName,true));
 			break;
 		case "sound":
-			outputLines = tmpl.as3.Sound.create(packageStr,className);
+			outputLines = tmpl.as3.Sound.create(outputData.packageStr,outputData.className);
 			break;
 		case "bitmap":
-			outputLines = tmpl.as3.Bitmap.create(packageStr,className);
+			outputLines = tmpl.as3.Bitmap.create(outputData.packageStr,outputData.className);
 			break;
 		}
 		return outputLines;
 	}
-	,createFolder: function(flashHaxeUri,createJsHaxeUri,item,outputtedFlashHaxe) {
-		if(item.itemType != "folder") return false;
-		var flashHaxeFolderURI = flashHaxeUri + item.name;
-		var createJsHaxeFolderURI = createJsHaxeUri + item.name;
-		if(outputtedFlashHaxe && !FLfile.exists(flashHaxeFolderURI)) {
-			if(!FLfile.createFolder(flashHaxeFolderURI)) fl.trace("create error: " + flashHaxeFolderURI);
+	,outputData: function() {
+		var _g = 0, _g1 = this.outputDataSet;
+		while(_g < _g1.length) {
+			var outputData = _g1[_g];
+			++_g;
+			if(this.outputtedAs3) {
+				var outputLinesForAs3 = this.getOutputLinesForAs3(outputData);
+				this.output(this.as3Directory,outputData.itemName,outputLinesForAs3);
+			}
+			if(this.outputtedHaxe) {
+				var outputLinesForHaxe = this.getOutputLinesForHaxe(outputData);
+				this.output(this.haxeDirectory,outputData.itemName,outputLinesForHaxe);
+			}
 		}
-		if(!FLfile.exists(createJsHaxeFolderURI) && !FLfile.createFolder(createJsHaxeFolderURI)) fl.trace("create error: " + createJsHaxeFolderURI);
-		return true;
 	}
-	,initializeOutputDirectory: function(flashHaxeUri,createJsHaxeUri,outputtedFlashHaxe,initializedOutputDirectory) {
-		if(!initializedOutputDirectory) return;
-		if(FLfile.exists(createJsHaxeUri)) {
-			if(!FLfile.remove(createJsHaxeUri)) fl.trace("initialize error:" + createJsHaxeUri); else FLfile.createFolder(createJsHaxeUri);
+	,createFolder: function() {
+		var $it0 = this.packageDirectoryMap.keys();
+		while( $it0.hasNext() ) {
+			var key = $it0.next();
+			var as3DirectoryURI = this.as3Directory + key;
+			var haxeDirectoryURI = this.haxeDirectory + key;
+			if(this.outputtedAs3 && !FLfile.exists(as3DirectoryURI)) {
+				if(!FLfile.createFolder(as3DirectoryURI)) fl.trace("create error: " + as3DirectoryURI); else fl.trace(as3DirectoryURI);
+			}
+			if(this.outputtedHaxe && !FLfile.exists(haxeDirectoryURI)) {
+				if(!FLfile.createFolder(haxeDirectoryURI)) fl.trace("create error: " + haxeDirectoryURI); else fl.trace(haxeDirectoryURI);
+			}
 		}
-		if(outputtedFlashHaxe && FLfile.exists(flashHaxeUri)) {
-			if(!FLfile.remove(flashHaxeUri)) fl.trace("initialize error:" + flashHaxeUri); else FLfile.createFolder(flashHaxeUri);
+	}
+	,parseLibraryItem: function() {
+		var library = fl.getDocumentDOM().library;
+		tmpl.Field.initialize(library);
+		var items = library.items;
+		var itemsLength = items.length;
+		var _g = 0;
+		while(_g < itemsLength) {
+			var i = _g++;
+			var item = items[i];
+			var itemName = item.name;
+			var itemType = item.itemType;
+			if(itemType == "folder") continue;
+			if(item.linkageClassName == null) continue;
+			var pathNames = itemName.split("/");
+			var nativeClassName = pathNames.join("");
+			var className = pathNames.pop();
+			var packageStr = pathNames.join(".");
+			var directory = pathNames.join("/") + "/";
+			this.packageDirectoryMap.set(directory,true);
+			true;
+			this.outputDataSet.push(new OutputData(itemName,itemType,packageStr,className,nativeClassName));
 		}
+	}
+	,initializeOutputDirectory: function() {
+		if(this.outputtedAs3 && !FLfile.exists(this.as3Directory)) FLfile.createFolder(this.as3Directory);
+		if(this.outputtedHaxe && !FLfile.exists(this.haxeDirectory)) FLfile.createFolder(this.haxeDirectory);
 	}
 	,__class__: Main
+}
+var IMap = function() { }
+IMap.__name__ = true;
+var OutputData = function(itemName,itemType,packageStr,className,nativeClassName) {
+	this.itemName = itemName;
+	this.itemType = itemType;
+	this.packageStr = packageStr;
+	this.className = className;
+	this.nativeClassName = nativeClassName;
+};
+OutputData.__name__ = true;
+OutputData.prototype = {
+	__class__: OutputData
 }
 var Reflect = function() { }
 Reflect.__name__ = true;
@@ -265,7 +313,7 @@ haxe.Template.prototype = {
 			var loop = $e[3], e1 = $e[2];
 			var v = e1();
 			try {
-				var x = v.iterator();
+				var x = $iterator(v)();
 				if(x.hasNext == null) throw null;
 				v = x;
 			} catch( e2 ) {
@@ -416,9 +464,9 @@ haxe.Template.prototype = {
 				return v == null || v == false;
 			};
 		case "-":
-			var e = this.makeExpr(l);
+			var e3 = this.makeExpr(l);
 			return function() {
-				return -e();
+				return -e3();
 			};
 		}
 		throw p.p;
@@ -595,6 +643,25 @@ haxe.Template.prototype = {
 	}
 	,__class__: haxe.Template
 }
+if(!haxe.ds) haxe.ds = {}
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+haxe.ds.StringMap.__name__ = true;
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,__class__: haxe.ds.StringMap
+}
 var js = js || {}
 js.Boot = function() { }
 js.Boot.__name__ = true;
@@ -679,30 +746,30 @@ js.Boot.__interfLoop = function(cc,cl) {
 	return js.Boot.__interfLoop(cc.__super__,cl);
 }
 js.Boot.__instanceof = function(o,cl) {
-	try {
-		if(o instanceof cl) {
-			if(cl == Array) return o.__enum__ == null;
-			return true;
-		}
-		if(js.Boot.__interfLoop(o.__class__,cl)) return true;
-	} catch( e ) {
-		if(cl == null) return false;
-	}
+	if(cl == null) return false;
 	switch(cl) {
 	case Int:
-		return Math.ceil(o%2147483648.0) === o;
+		return (o|0) === o;
 	case Float:
 		return typeof(o) == "number";
 	case Bool:
-		return o === true || o === false;
+		return typeof(o) == "boolean";
 	case String:
 		return typeof(o) == "string";
 	case Dynamic:
 		return true;
 	default:
-		if(o == null) return false;
-		if(cl == Class && o.__name__ != null) return true; else null;
-		if(cl == Enum && o.__ename__ != null) return true; else null;
+		if(o != null) {
+			if(typeof(cl) == "function") {
+				if(o instanceof cl) {
+					if(cl == Array) return o.__enum__ == null;
+					return true;
+				}
+				if(js.Boot.__interfLoop(o.__class__,cl)) return true;
+			}
+		} else return false;
+		if(cl == Class && o.__name__ != null) return true;
+		if(cl == Enum && o.__ename__ != null) return true;
 		return o.__enum__ == cl;
 	}
 }
@@ -781,8 +848,9 @@ tmpl.haxe.Sound.create = function(packageStr,className,nativeClassName) {
 	var fileLines = tmpl.haxe.Sound.template.execute({ packageStr : packageStr, className : className, nativeClassName : nativeClassName});
 	return fileLines;
 }
-var $_;
-function $bind(o,m) { var f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; return f; };
+function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
+var $_, $fid = 0;
+function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; };
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.prototype.__class__ = Array;
@@ -806,6 +874,6 @@ tmpl.as3.Bitmap.template = new haxe.Template("package ::packageStr::;\r\nextern 
 tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.display.::superClassName::{\r\n::field::\r\n}");
 tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound{\r\n}");
 tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap{\r\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\r\n\tpublic function new():Void;\r\n}");
-tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.::superClassName::{\r\n::field::\r\n}");
+tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.::superClassName::{\r\n::field::\r\n\tpublic static var nominalBounds:createjs.easeljs.Rectangle;\r\n\tpublic static var frameBounds:Array<createjs.easeljs.Rectangle>;\r\n}");
 tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className::{\r\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\r\n}");
 Main.main();

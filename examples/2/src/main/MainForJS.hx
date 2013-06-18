@@ -5,7 +5,7 @@ import shooting.enemy.EnemyForJS;
 import createjs.easeljs.Stage;
 import createjs.easeljs.Ticker;
 import createjs.easeljs.Touch;
-import js.Lib;
+import js.Browser;
 
 class MainForJS extends Main{
 
@@ -13,7 +13,7 @@ class MainForJS extends Main{
 
 	public function new(){
 
-		stage = new Stage(Lib.document.getElementById("canvas"));
+		stage = new Stage(Browser.document.getElementById("canvas"));
 		stage.snapToPixelEnabled = true;
 		if(Touch.isSupported()) Touch.enable(stage);
 

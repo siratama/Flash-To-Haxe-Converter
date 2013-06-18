@@ -7,6 +7,7 @@ var SYMBOL_NAMESPACE = "lib";
 
 var PRE_URI = "file:///";
 fl.runScript(PRE_URI + JSFL_MAIN_URI);
+
 new Main(
 	PRE_URI + FLA_FILE_URI,
 	//"",

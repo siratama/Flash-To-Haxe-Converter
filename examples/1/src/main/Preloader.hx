@@ -33,7 +33,7 @@ class Preloader {
 		initialize({});
 
 		#elseif js
-		js.Lib.window.onload = initialize;
+		js.Browser.window.onload = initialize;
 		#end
     }
 	private function initialize(event){

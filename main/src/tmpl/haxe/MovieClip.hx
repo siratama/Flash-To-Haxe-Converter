@@ -7,6 +7,8 @@ class MovieClip {
 @:native("::namespace::.::nativeClassName::")
 extern class ::className:: extends createjs.easeljs.::superClassName::{
 ::field::
+	public static var nominalBounds:createjs.easeljs.Rectangle;
+	public static var frameBounds:Array<createjs.easeljs.Rectangle>;
 }'
 	);
 
