@@ -11,7 +11,7 @@ FlashToHaxeConverter は、Flash CC 内構造を Haxe extern クラスに出力�
 ## Download
 
 * [FlashToHaxeConverter.zip](https://raw.github.com/siratama/Flash-To-Haxe-Converter/master/download/FlashToHaxeConverter.zip)
-* [JSFLSetDirectoryChecker.jsfl (option)](https://raw.github.com/siratama/Flash-To-Haxe-Converter/master/download/JSFLSetDirectoryChecker.jsfl)
+* [JSFLSetsDirectoryChecker.jsfl (option)](https://raw.github.com/siratama/Flash-To-Haxe-Converter/master/download/JSFLSetsDirectoryChecker.jsfl)
 
 Windows の場合、右クリックから「リンク先のコンテンツを保存」を選択で保存できます。
 
