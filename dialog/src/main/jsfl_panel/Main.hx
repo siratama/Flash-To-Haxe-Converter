@@ -22,18 +22,18 @@ class Main {
 		view = new View();
 		stage.addChild(view);
 
-		flashFileDirectory = getFlashFileDirectory();
+		setFlashFileDirectory();
 		setDefaultText();
 
 		view.closeButton.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDownClose);
 		view.runButton.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDownRun);
 	}
-	private function getFlashFileDirectory(){
+	private function setFlashFileDirectory(){
 
 		var path:String = executeJsflCommand("fl.getDocumentDOM().pathURI;");
 		var arr = path.split("/");
 		arr.pop();
-		return arr.join("/") + "/";
+		flashFileDirectory =  arr.join("/") + "/";
 	}
 	private function setDefaultText(){
 
@@ -51,7 +51,7 @@ class Main {
 	}
 	private function onMouseDownRun(event){
 
-		var jsflUri = executeJsflCommand("fl.configURI;") + "Commands/flash_to_haxe/FlashToHaxe.jsfl";
+		var jsflUri = executeJsflCommand("fl.configURI;") + "FlashToHaxeConverter/main.jsfl";
 		executeJsflCommand('fl.runScript("$jsflUri");');
 
 		var as3Directory = view.asOutputPathText.text;
