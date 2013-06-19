@@ -15,15 +15,15 @@ FlashToHaxeConverter は、Flash CC 内構造を Haxe extern クラスに出力�
 
 Windows の場合、右クリックから「リンク先のコンテンツを保存」を選択で保存できます。
 
-When you do not know the placement directory of JSFL, please download JSFLSetDirectoryChecker.jsfl.
+When you do not know the placement directory of JSFL, please download JSFLSetsDirectoryChecker.jsfl.
 
-JSFL ファイルの配置場所がわからない方は JSFLSetDirectoryChecker.jsfl のファイルもダウンロードしてください。
+JSFL ファイルの配置場所がわからない方は JSFLSetsDirectoryChecker.jsfl のファイルもダウンロードしてください。
 
 ## Installation
 
-The placement directory of JSFL is displayed by an output window when you drag and drop JSFLSetDirectoryChecker.jsfl in Flash CC.
+The placement directory of JSFL is displayed by an output window when you drag and drop JSFLSetsDirectoryChecker.jsfl in Flash CC.
 
-JSFL ファイル配置場所(Configuration ディレクトリ)は、Flash CC 上に JSFLSetDirectoryChecker.jsfl をドラッグ＆ドロップして実行する事で、出力ウインドウに表示されます。
+JSFL ファイル配置場所(Configuration ディレクトリ)は、Flash CC 上に JSFLSetsDirectoryChecker.jsfl をドラッグ＆ドロップして実行する事で、出力ウインドウに表示されます。
 
 ![Configuration Directory](img/config_directory.png)
 
