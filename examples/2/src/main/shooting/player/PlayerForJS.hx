@@ -16,5 +16,7 @@ class PlayerForJS extends Player{
 
 		hitareaBounds = ContainerUtil.getNominalBounds(view.hitarea);
 		trace(hitareaBounds);
+		trace(view.nominalBounds);
+		trace(view.frameBounds[0]);
 	}
 }

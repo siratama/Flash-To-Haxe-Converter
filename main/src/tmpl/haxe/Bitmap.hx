@@ -8,7 +8,7 @@ class Bitmap {
 extern class ::className:: extends createjs.easeljs.Bitmap{
 	public static inline var manifestId:String = "::nativeClassName::";
 	public function new():Void;
-	public static var nominalBounds:createjs.easeljs.Rectangle;
+	public var nominalBounds:createjs.easeljs.Rectangle;
 }'
 	);
 

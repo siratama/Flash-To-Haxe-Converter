@@ -619,6 +619,8 @@ shooting.player.PlayerForJS = function(layer) {
 	layer.addChild(this.view);
 	this.hitareaBounds = com.dango_itimi.toolkit_for_createjs.utils.ContainerUtil.getNominalBounds(this.view.hitarea);
 	console.log(this.hitareaBounds);
+	console.log(this.view.nominalBounds);
+	console.log(this.view.frameBounds[0]);
 };
 shooting.player.PlayerForJS.__name__ = ["shooting","player","PlayerForJS"];
 shooting.player.PlayerForJS.__super__ = shooting.player.Player;
