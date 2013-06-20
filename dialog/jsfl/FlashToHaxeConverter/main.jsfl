@@ -875,5 +875,5 @@ tmpl.as3.MovieClip.template = new haxe.Template("package ::packageStr::;\r\nexte
 tmpl.as3.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className:: extends flash.media.Sound{\r\n}");
 tmpl.haxe.Bitmap.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.Bitmap{\r\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\r\n\tpublic function new():Void;\r\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\r\n}");
 tmpl.haxe.MovieClip.template = new haxe.Template("package ::packageStr::;\r\n@:native(\"::namespace::.::nativeClassName::\")\r\nextern class ::className:: extends createjs.easeljs.::superClassName::{\r\n::field::\r\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\r\n\tpublic var frameBounds:Array<createjs.easeljs.Rectangle>;\r\n}");
-tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nextern class ::className::{\r\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\r\n}");
+tmpl.haxe.Sound.template = new haxe.Template("package ::packageStr::;\r\nclass ::className::{\r\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\r\n}");
 Main.main();

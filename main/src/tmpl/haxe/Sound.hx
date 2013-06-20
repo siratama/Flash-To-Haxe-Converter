@@ -4,7 +4,7 @@ class Sound {
 
 	static public var template:Template = new Template(
 'package ::packageStr::;
-extern class ::className::{
+class ::className::{
 	public static inline var manifestId:String = "::nativeClassName::";
 }'
 	);
