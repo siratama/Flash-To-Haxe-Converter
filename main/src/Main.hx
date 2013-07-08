@@ -1,4 +1,8 @@
 package;
+import tmpl.FieldForOpenFL;
+import tmpl.FieldForCreateJS;
+import tmpl.FieldForFlash;
+import haxe.xml.Fast;
 import tmpl.Field;
 import haxe.Template;
 import jsfl.Layer;
@@ -9,55 +13,77 @@ import jsfl.Flash;
 class Main {
 
 	private var baseDirectory:String;
-	private var as3Directory:String;
-	private var haxeDirectory:String;
+
+	private var flashExternDirectory:String;
+    private var flashDirectory:String;
+	private var createJsDirectory:String;
+    private var openflDirectory:String;
+
 	private var symbolNameSpace:String;
-	private var outputtedAs3:Bool;
-	private var outputtedHaxe:Bool;
+
+	private var outputtedFlashExtern:Bool;
+    private var outputtedFlash:Bool;
+	private var outputtedCreateJs:Bool;
+    private var outputtedOpenfl:Bool;
+
+    private var swfName:String;
 	private var packageDirectoryMap:Map<String, Bool>;
 	private var outputDataSet:Array<OutputData>;
 
 	public static function main(){
 	}
     public function new(
-		baseDirectory:String, as3Directory:String, haxeDirectory:String, symbolNameSpace:String = "lib") {
+		baseDirectory:String, flashExternDirectory:String, flashDirectory:String, createJsDirectory:String, openflDirectory:String,
+        symbolNameSpace:String = "lib"
+    ) {
 
 		Flash.outputPanel.clear();
 
-		this.outputtedAs3 = as3Directory != "";
-		this.outputtedHaxe = haxeDirectory != "";
+		this.outputtedFlashExtern = flashExternDirectory != "";
+        this.outputtedFlash = flashDirectory != "";
+		this.outputtedCreateJs = createJsDirectory != "";
+        this.outputtedOpenfl = openflDirectory != "";
 
-		if(!outputtedAs3 && !outputtedHaxe){
-			Flash.trace("Set output directory of as or hx.");
+		if(!outputtedFlashExtern && !outputtedFlash && !outputtedCreateJs && !outputtedOpenfl){
+			Flash.trace("Set output directory");
 			return;
 		}
 
 		this.baseDirectory = baseDirectory;
 		this.symbolNameSpace = symbolNameSpace;
 
-		if(as3Directory.charAt(as3Directory.length -1) != "/") as3Directory += "/";
-		if(haxeDirectory.charAt(haxeDirectory.length -1) != "/") haxeDirectory+= "/";
-		this.as3Directory = this.baseDirectory + as3Directory;
-		this.haxeDirectory = this.baseDirectory + haxeDirectory;
+		this.flashExternDirectory = getOutputDirectory(flashExternDirectory);
+        this.flashDirectory = getOutputDirectory(flashDirectory);
+		this.createJsDirectory = getOutputDirectory(createJsDirectory);
+        this.openflDirectory = getOutputDirectory(openflDirectory);
 
 		packageDirectoryMap = new Map();
 		outputDataSet = [];
 
-		initializeOutputDirectory();
+		createOutputDirectory();
 		parseLibraryItem();
+        setSwfName();
 		createFolder();
 		outputData();
 
 		Flash.trace("finish");
     }
-	private function initializeOutputDirectory(){
+    private function getOutputDirectory(outputDirectory:String){
 
-		if(outputtedAs3 && !FLfile.exists(as3Directory))
-			FLfile.createFolder(as3Directory);
+        if(outputDirectory.charAt(outputDirectory.length -1) != "/") outputDirectory += "/";
+        return baseDirectory + outputDirectory;
+    }
+	private function createOutputDirectory(){
 
-		if(outputtedHaxe && !FLfile.exists(haxeDirectory))
-			FLfile.createFolder(haxeDirectory);
+        createOutputDirectoryCommon(outputtedFlashExtern, flashExternDirectory);
+        createOutputDirectoryCommon(outputtedFlash, flashDirectory);
+        createOutputDirectoryCommon(outputtedCreateJs, createJsDirectory);
+        createOutputDirectoryCommon(outputtedOpenfl, openflDirectory);
 	}
+    private function createOutputDirectoryCommon(outputted:Bool, outputDirectory:String){
+
+        if(outputted && !FLfile.exists(outputDirectory)) FLfile.createFolder(outputDirectory);
+    }
 	private function parseLibraryItem(){
 
 		var library = Flash.getDocumentDOM().library;
@@ -85,69 +111,96 @@ class Main {
 			outputDataSet.push(new OutputData(itemName, itemType, packageStr, className, nativeClassName));
 		}
 	}
+    private function setSwfName(){
+
+        var profileXML = Xml.parse(Flash.getDocumentDOM().exportPublishProfileString());
+        var fastXML = new Fast(profileXML.firstElement());
+        swfName = fastXML.node.PublishFormatProperties.node.flashFileName.innerData.split(".")[0];
+    }
+
+    //
 	private function createFolder(){
 
 	    for(key in packageDirectoryMap.keys()){
-
-			var as3DirectoryURI = as3Directory + key;
-			var haxeDirectoryURI = haxeDirectory + key;
-
-			if(outputtedAs3 && !FLfile.exists(as3DirectoryURI)){
-
-				if(!FLfile.createFolder(as3DirectoryURI))
-					Flash.trace("create error: " + as3DirectoryURI);
-				else
-					Flash.trace(as3DirectoryURI);
-			}
-			if(outputtedHaxe && !FLfile.exists(haxeDirectoryURI)){
-				if(!FLfile.createFolder(haxeDirectoryURI))
-					Flash.trace("create error: " + haxeDirectoryURI);
-				else
-					Flash.trace(haxeDirectoryURI);
-			}
+            createFolderCommon(outputtedFlashExtern, flashExternDirectory + key);
+            createFolderCommon(outputtedFlash, flashDirectory + key);
+            createFolderCommon(outputtedCreateJs, createJsDirectory + key);
+            createFolderCommon(outputtedOpenfl, openflDirectory + key);
 		}
 	}
+    private function createFolderCommon(outputted:Bool, directoryUri:String){
 
+        if(outputted && !FLfile.exists(directoryUri)){
+
+            if(!FLfile.createFolder(directoryUri))
+                Flash.trace("create error: " + directoryUri);
+            else
+                Flash.trace(directoryUri);
+        }
+    }
+
+    //
 	private function outputData(){
 
 		for(outputData in outputDataSet){
 
-			if(outputtedAs3){
-				var outputLinesForAs3 = getOutputLinesForAs3(outputData);
-				output(as3Directory, outputData.itemName, outputLinesForAs3);
+			if(outputtedFlashExtern){
+				var outputLines = getOutputLinesForFlash(outputData, true);
+				output(flashExternDirectory, outputData.itemName, outputLines);
 			}
-			if(outputtedHaxe){
-				var outputLinesForHaxe = getOutputLinesForHaxe(outputData);
-				output(haxeDirectory, outputData.itemName, outputLinesForHaxe);
+            if(outputtedFlash){
+                var outputLines = getOutputLinesForFlash(outputData, false);
+                output(flashDirectory, outputData.itemName, outputLines);
+            }
+			if(outputtedCreateJs){
+				var outputLines = getOutputLinesForCreateJs(outputData);
+				output(createJsDirectory, outputData.itemName, outputLines);
 			}
+            if(outputtedOpenfl){
+                var outputLines = getOutputLinesForOpenfl(outputData);
+                output(openflDirectory, outputData.itemName, outputLines);
+            }
 		}
 	}
-	private function getOutputLinesForAs3(outputData:OutputData):String{
+	private function getOutputLinesForFlash(outputData:OutputData, external:Bool):String{
 
 		var outputLines = "";
 		switch(outputData.itemType){
 			case "movie clip":
-				outputLines = tmpl.as3.MovieClip.create(outputData.packageStr, outputData.className, new Field(outputData.itemName, true));
+				outputLines = tmpl.flash.MovieClip.create(outputData.packageStr, outputData.className, external, new FieldForFlash(outputData.itemName));
 			case "sound":
-				outputLines = tmpl.as3.Sound.create(outputData.packageStr, outputData.className);
+				outputLines = tmpl.flash.Sound.create(outputData.packageStr, outputData.className, external);
 			case "bitmap":
-				outputLines = tmpl.as3.Bitmap.create(outputData.packageStr, outputData.className);
+				outputLines = tmpl.flash.Bitmap.create(outputData.packageStr, outputData.className, external);
 		}
 		return outputLines;
 	}
-	private function getOutputLinesForHaxe(outputData:OutputData):String{
+	private function getOutputLinesForCreateJs(outputData:OutputData):String{
 
 		var outputLines = "";
 		switch(outputData.itemType){
 			case "movie clip":
-				outputLines = tmpl.haxe.MovieClip.create(outputData.packageStr, outputData.className, new Field(outputData.itemName, false), symbolNameSpace, outputData.nativeClassName);
+				outputLines = tmpl.createjs.MovieClip.create(outputData.packageStr, outputData.className, new FieldForCreateJS(outputData.itemName), symbolNameSpace, outputData.nativeClassName);
 			case "sound":
-				outputLines = tmpl.haxe.Sound.create(outputData.packageStr, outputData.className, outputData.nativeClassName);
+				outputLines = tmpl.createjs.Sound.create(outputData.packageStr, outputData.className, outputData.nativeClassName);
 			case "bitmap":
-				outputLines = tmpl.haxe.Bitmap.create(outputData.packageStr, outputData.className, symbolNameSpace, outputData.nativeClassName);
+				outputLines = tmpl.createjs.Bitmap.create(outputData.packageStr, outputData.className, symbolNameSpace, outputData.nativeClassName);
 		}
 		return outputLines;
 	}
+    private function getOutputLinesForOpenfl(outputData:OutputData):String{
+
+        var outputLines = "";
+        switch(outputData.itemType){
+            case "movie clip":
+                outputLines = tmpl.openfl.MovieClip.create(outputData.packageStr, outputData.className, swfName, new FieldForOpenFL(outputData.itemName));
+            case "sound":
+                outputLines = tmpl.openfl.Sound.create(outputData.packageStr, outputData.className);
+            case "bitmap":
+                outputLines = tmpl.openfl.Bitmap.create(outputData.packageStr, outputData.className, swfName);
+        }
+        return outputLines;
+    }
 	private function output(baseUri:String, itemName:String, outputLines:String){
 
 		var filePath = baseUri + itemName + ".hx";

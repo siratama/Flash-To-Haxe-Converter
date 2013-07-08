@@ -449,12 +449,9 @@ com.dango_itimi.utils.ClassUtil.getPackageNamesWithClass = function(cls) {
 	return packageNames;
 }
 com.dango_itimi.utils.RectangleUtil = function(x,y,width,height) {
-	this.x = x;
-	this.y = y;
 	this.width = width;
 	this.height = height;
-	this.right = x + width;
-	this.bottom = y + height;
+	this.setPosition(x,y);
 };
 com.dango_itimi.utils.RectangleUtil.__name__ = ["com","dango_itimi","utils","RectangleUtil"];
 com.dango_itimi.utils.RectangleUtil.convert = function(rect) {
@@ -478,6 +475,18 @@ com.dango_itimi.utils.RectangleUtil.prototype = {
 	,addX: function(addedX) {
 		this.x += addedX;
 		this.right += addedX;
+	}
+	,setY: function(y) {
+		this.y = y;
+		this.bottom = y + this.height;
+	}
+	,setX: function(x) {
+		this.x = x;
+		this.right = x + this.width;
+	}
+	,setPosition: function(x,y) {
+		this.setX(x);
+		this.setY(y);
 	}
 	,toString: function() {
 		return "w:" + this.width + ", h:" + this.height + ", x:" + this.x + ", y:" + this.y;

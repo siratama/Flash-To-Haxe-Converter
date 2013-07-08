@@ -1,4 +1,5 @@
 package jsfl_panel;
+import flash.text.TextField;
 import flash.events.MouseEvent;
 import flash.events.Event;
 import flash.display.MovieClip;
@@ -9,9 +10,11 @@ class Main {
 	private var view:View;
 	private var flashFileDirectory:String;
 
-	private static inline var AS3_TEXT_KEY = "AS3";
-	private static inline var HAXE_TEXT_KEY = "HAXE";
-	private static inline var JS_NAMESPACE_TEXT_KEY = "JS";
+	private static inline var TEXT_KEY_FLASH_EXTERN = "FLASH_EXTERN";
+    private static inline var TEXT_KEY_FLASH = "FLASH";
+	private static inline var TEXT_KEY_CREATEJS = "CREATEJS";
+    private static inline var TEXT_KEY_OPENFL = "OPENFL";
+	private static inline var TEXT_KEY_JS_NAMESPACE = "JS";
 
 	public static function main(){
 		new Main();
@@ -37,15 +40,17 @@ class Main {
 	}
 	private function setDefaultText(){
 
-		var recordedAs3Text = getDataFromDocument(AS3_TEXT_KEY);
-		if(recordedAs3Text != "0") view.asOutputPathText.text = recordedAs3Text;
-
-		var recordedHaxeText = getDataFromDocument(HAXE_TEXT_KEY);
-		if(recordedHaxeText != "0") view.hxOutputPathText.text = recordedHaxeText;
-
-		var recordedJsNamespaceText = getDataFromDocument(JS_NAMESPACE_TEXT_KEY);
-		if(recordedJsNamespaceText != "0") view.jsSymbolNamespaceText.text = recordedJsNamespaceText;
+        setDefaultTextCommon(TEXT_KEY_FLASH_EXTERN, view.flashExternOutputPathText);
+        setDefaultTextCommon(TEXT_KEY_FLASH, view.flashOutputPathText);
+        setDefaultTextCommon(TEXT_KEY_CREATEJS, view.createJsOutputPathText);
+        setDefaultTextCommon(TEXT_KEY_OPENFL, view.openflOutputPathText);
+        setDefaultTextCommon(TEXT_KEY_JS_NAMESPACE, view.jsSymbolNamespaceText);
 	}
+    private function setDefaultTextCommon(textKey:String, textField:TextField){
+
+        var text = getDataFromDocument(textKey);
+        if(text != "0") textField.text = text;
+    }
 	private function onMouseDownClose(event){
 		closeDialog();
 	}
@@ -54,15 +59,20 @@ class Main {
 		var jsflUri = executeJsflCommand("fl.configURI;") + "FlashToHaxeConverter/main.jsfl";
 		executeJsflCommand('fl.runScript("$jsflUri");');
 
-		var as3Directory = view.asOutputPathText.text;
-		var haxeDirectory = view.hxOutputPathText.text;
+		var flashExternDirectory = view.flashExternOutputPathText.text;
+        var flashDirectory = view.flashOutputPathText.text;
+		var createJsDirectory = view.createJsOutputPathText.text;
+        var openflDirectory = view.openflOutputPathText.text;
+
 		var jsSymbolNamespace = view.jsSymbolNamespaceText.text;
-		executeJsflCommand('new Main("$flashFileDirectory", "$as3Directory", "$haxeDirectory", "$jsSymbolNamespace");');
+		executeJsflCommand('new Main("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
 		closeDialog();
 
-		addDataToDocument(AS3_TEXT_KEY, as3Directory);
-		addDataToDocument(HAXE_TEXT_KEY, haxeDirectory);
-		addDataToDocument(JS_NAMESPACE_TEXT_KEY, jsSymbolNamespace);
+		addDataToDocument(TEXT_KEY_FLASH_EXTERN, flashExternDirectory);
+        addDataToDocument(TEXT_KEY_FLASH, flashDirectory);
+		addDataToDocument(TEXT_KEY_CREATEJS, createJsDirectory);
+        addDataToDocument(TEXT_KEY_OPENFL, openflDirectory);
+		addDataToDocument(TEXT_KEY_JS_NAMESPACE, jsSymbolNamespace);
 	}
 	private function executeJsflCommand(command:String):Dynamic{
 

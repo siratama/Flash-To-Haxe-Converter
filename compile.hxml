@@ -1,0 +1,18 @@
+-js download/main/FlashToHaxeConverter/main.jsfl
+-main Main
+-cp main/src
+-lib jsfl
+-D js-classic
+
+--next
+
+-swf download/main/FlashToHaxeConverter/main.swf
+-main jsfl_panel.Main
+-swf-version 11
+-swf-header 300:300:24:ffffff
+-swf-lib dialog/fla/view.swf
+-cp dialog/src/main
+-cp dialog/src/flash_extern
+-lib jsfl
+
+

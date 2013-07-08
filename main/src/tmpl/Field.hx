@@ -1,23 +1,20 @@
 package tmpl;
+import jsfl.Element;
 import jsfl.Library;
 import jsfl.Layer;
 import jsfl.Flash;
 import haxe.Template;
 class Field {
 
-	private static var fieldTemplate:Template = new Template(
-		"\tvar ::name:: : ::type::;"
-	);
-
 	private static var library:Library;
 	public static function initialize(library:Library){
 		Field.library = library;
 	}
 
-	private var isMovieClip:Bool;
+	public var isMovieClip(default, null):Bool;
 	private var fieldLines:Array<String>;
 
-	public function new(itemName:String, forAs3:Bool){
+	public function new(itemName:String){
 
 		isMovieClip = false;
 		fieldLines = [];
@@ -39,22 +36,14 @@ class Field {
 
 				if(element.name == "") continue;
 
-				var type =
-					(element.elementType == "instance" && forAs3) ? "flash.display.MovieClip" :
-					(element.elementType == "text" && forAs3) ?  "flash.text.TextField" :
-					(element.elementType == "instance") ? "createjs.easeljs.MovieClip" : "createjs.easeljs.Text";
-
-				var line = fieldTemplate.execute({
-					name: element.name,
-					type: type
-				});
+                var line = getLine(element);
 				fieldLines.push(line);
 			}
 		}
 	}
-	public function isMovieClipFrame():Bool{
-		return isMovieClip;
-	}
+    private function getLine(element:Element):String{
+        return "";
+    }
 	public function getLines():String{
 		return fieldLines.join("\n");
 	}

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dialog id="flash_to_haxe" title="FlashToHaxeConverter">
-    <flash id="flash_to_haxe" width="300" height="180" src="main.swf" />
+    <flash id="flash_to_haxe" width="300" height="300" src="main.swf" />
 </dialog>

@@ -1,4 +1,4 @@
-package tmpl.haxe;
+package tmpl.createjs;
 import haxe.Template;
 class Sound {
 

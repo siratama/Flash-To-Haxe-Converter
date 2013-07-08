@@ -1,4 +1,4 @@
-package tmpl.haxe;
+package tmpl.createjs;
 import haxe.Template;
 class MovieClip {
 
@@ -23,7 +23,7 @@ extern class ::className:: extends createjs.easeljs.::superClassName::{
 			packageStr: packageStr,
 			className: className,
 			field: field.getLines(),
-			superClassName: field.isMovieClipFrame() ? "MovieClip": "Container"
+			superClassName: field.isMovieClip ? "MovieClip": "Container"
 		});
 		return fileLines;
 	}
