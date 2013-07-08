@@ -1,16 +1,16 @@
-﻿FlashToHaxeConverter
+FlashToHaxeConverter
 =======================
 licence: MIT
 
 ![アプリケーション概要](img/0.png)
 
-FlashToHaxeConverter is JSFL outputting structure in Flash CC to the Haxe extern class.  FlashToHaxeConverter outputs for Flash contents and Toolkit for CreateJS contents.
+FlashToHaxeConverter is JSFL outputting structure in Flash CC to the Haxe class.  FlashToHaxeConverter outputs for Flash contents and Toolkit for CreateJS contents and OpenFL.
 
-FlashToHaxeConverter は、Flash CC 内構造を Haxe extern クラスに出力する JSFL です。swf(Flash コンテンツ)用と Toolkit for CreateJS (html5 canvas コンテンツ)用の二種類の出力が可能です。
+FlashToHaxeConverter は、Flash CC 内構造を Haxe クラスに出力する JSFL です。Flash コンテンツ用(二種類)、Toolkit for CreateJS (html5 canvas コンテンツ)用、OpenFL 用の合計四種類の出力が可能です。
 
 ## Download
 
-* [FlashToHaxeConverter.zip](https://raw.github.com/siratama/Flash-To-Haxe-Converter/master/download/FlashToHaxeConverter.zip)
+* [main.zip](https://raw.github.com/siratama/Flash-To-Haxe-Converter/master/download/main.zip)
 * [JSFLSetsDirectoryChecker.jsfl (option)](https://raw.github.com/siratama/Flash-To-Haxe-Converter/master/download/JSFLSetsDirectoryChecker.jsfl)
 
 Windows の場合、右クリックから「リンク先のコンテンツを保存」を選択で保存できます。
@@ -27,9 +27,9 @@ JSFL ファイル配置場所(Configuration ディレクトリ)は、Flash CC �
 
 ![Configuration Directory](img/config_directory.png)
 
-Please place Commands/FlashToHaxeConverter.jsfl and FlashToHaxeConverter directory in FlashToHaxeConverter.zip to the Comfiguration directory.
+Please place Commands/FlashToHaxeConverter.jsfl and FlashToHaxeConverter directory in main.zip to the Comfiguration directory.
 
-FlashToHaxeConverter.zip 解凍後できあがる Commands/FlashToHaxeConverter.jsfl ファイルと FlashToHaxeConverter ディレクトリを、Comfiguration ディレクトリへ以下のように配置してください。
+main.zip 解凍後できあがる Commands/FlashToHaxeConverter.jsfl ファイルと FlashToHaxeConverter ディレクトリを、Comfiguration ディレクトリへ以下のように配置してください。
 
 	Configuration/
 	　├ Commands/
