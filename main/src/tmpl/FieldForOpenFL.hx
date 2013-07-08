@@ -1,4 +1,4 @@
-﻿package tmpl;
+package tmpl;
 import jsfl.Element;
 import haxe.Template;
 class FieldForOpenFL extends Field{

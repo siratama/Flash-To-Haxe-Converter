@@ -1,4 +1,4 @@
-﻿package tmpl;
+package tmpl;
 import haxe.Template;
 import jsfl.Element;
 class FieldForFlashOrCreateJS extends Field{

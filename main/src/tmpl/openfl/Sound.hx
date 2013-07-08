@@ -8,7 +8,7 @@ import flash.media.Sound;
 import openfl.Assets;
 abstract ::className::(Sound){
     public function new()
-        this = Assets.getMovieClip('::packageStr::.::className::');
+        this = Assets.getSound('::packageStr::.::className::');
     @:to public function getInstance():Sound
         return this;
 }"

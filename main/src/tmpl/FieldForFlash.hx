@@ -1,4 +1,4 @@
-﻿package tmpl;
+package tmpl;
 import jsfl.Element;
 class FieldForFlash extends FieldForFlashOrCreateJS{
 

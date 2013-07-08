@@ -1502,7 +1502,7 @@ haxe.xml.Parser.escapes = (function($this) {
 	return $r;
 }(this));
 tmpl.FieldForFlashOrCreateJS.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
-tmpl.FieldForOpenFL.fieldTemplate = new haxe.Template("\r\n    public var ::name::(get, never):::type::;\r\n    function get_::name::(){\r\n        return cast(this.getChildByName('::name::'), ::type::);\r\n    }\r\n");
+tmpl.FieldForOpenFL.fieldTemplate = new haxe.Template("\n    public var ::name::(get, never):::type::;\n    function get_::name::(){\n        return cast(this.getChildByName('::name::'), ::type::);\n    }\n");
 tmpl.createjs.Bitmap.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.Bitmap{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n\tpublic function new():Void;\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n}");
 tmpl.createjs.MovieClip.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.::superClassName::{\n::field::\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n\tpublic var frameBounds:Array<createjs.easeljs.Rectangle>;\n}");
 tmpl.createjs.Sound.template = new haxe.Template("package ::packageStr::;\nclass ::className::{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n}");
@@ -1511,5 +1511,5 @@ tmpl.flash.MovieClip.template = new haxe.Template("package ::packageStr::;\n::ex
 tmpl.flash.Sound.template = new haxe.Template("package ::packageStr::;\n::external::class ::className:: extends flash.media.Sound{\n}");
 tmpl.openfl.Bitmap.template = new haxe.Template("package ::packageStr::;\nimport flash.display.BitmapData;\nimport openfl.Assets;\nabstract ::className:: (BitmapData){\n\tfunction new()\n        this = Assets.getBitmap('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():BitmapData\n        return this;\n}");
 tmpl.openfl.MovieClip.template = new haxe.Template("package ::packageStr::;\nimport flash.display.MovieClip;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}");
-tmpl.openfl.Sound.template = new haxe.Template("package ::packageStr::;\nimport flash.media.Sound;\nimport openfl.Assets;\nabstract ::className::(Sound){\n    public function new()\n        this = Assets.getMovieClip('::packageStr::.::className::');\n    @:to public function getInstance():Sound\n        return this;\n}");
+tmpl.openfl.Sound.template = new haxe.Template("package ::packageStr::;\nimport flash.media.Sound;\nimport openfl.Assets;\nabstract ::className::(Sound){\n    public function new()\n        this = Assets.getSound('::packageStr::.::className::');\n    @:to public function getInstance():Sound\n        return this;\n}");
 Main.main();

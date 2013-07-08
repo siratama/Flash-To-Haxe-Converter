@@ -41,9 +41,9 @@ class Field {
 			}
 		}
 	}
-    private function getLine(element:Element):String{
-        return "";
-    }
+	private function getLine(element:Element):String{
+		return "";
+	}
 	public function getLines():String{
 		return fieldLines.join("\n");
 	}
