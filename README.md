@@ -69,6 +69,14 @@ fla ファイルと異なるディレクトリに出力したい場合、相対�
 
 ## Features
 
+### IDE 補完用出力
+
+リンケージ設定の行なっていない MovieClip 内部に存在するプロパティにアクセスするための出力が行われます。詳しくは以下をご参考ください。(Thanks! @tail_y)
+
+[http://qiita.com/tail_y/items/9d7f8cf903613c1037e6](http://qiita.com/tail_y/items/9d7f8cf903613c1037e6)
+
+### Toolkit for CreateJS 用 独自出力
+
 CreateJS用に出力された各 Haxe ファイルには、Toolkit for CreateJS から出力された javascript ファイルにアクセスしやすくなるような以下のプロパティを追加しています。
 
 * Sound.manifestId 
