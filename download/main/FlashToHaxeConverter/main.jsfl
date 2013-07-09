@@ -130,10 +130,9 @@ var Main = function(baseDirectory,flashExternDirectory,flashDirectory,createJsDi
 	this.flashDirectory = this.getOutputDirectory(flashDirectory);
 	this.createJsDirectory = this.getOutputDirectory(createJsDirectory);
 	this.openflDirectory = this.getOutputDirectory(openflDirectory);
-	this.packageDirectoryMap = new haxe.ds.StringMap();
-	this.outputDataSet = [];
+	this.libraryParser = new parser.LibraryParser();
+	this.libraryParser.execute();
 	this.createOutputDirectory();
-	this.parseLibraryItem();
 	this.setSwfName();
 	this.createFolder();
 	this.outputData();
@@ -152,7 +151,8 @@ Main.prototype = {
 		var outputLines = "";
 		switch(outputData.itemType) {
 		case "movie clip":
-			outputLines = tmpl.openfl.MovieClip.create(outputData.packageStr,outputData.className,this.swfName,new tmpl.FieldForOpenFL(outputData.itemName));
+			var templateMovieClip = new tmpl.openfl.MovieClip();
+			outputLines = templateMovieClip.create(outputData.baseInnerMovieClip,outputData.packageStr,this.swfName);
 			break;
 		case "sound":
 			outputLines = tmpl.openfl.Sound.create(outputData.packageStr,outputData.className);
@@ -167,7 +167,8 @@ Main.prototype = {
 		var outputLines = "";
 		switch(outputData.itemType) {
 		case "movie clip":
-			outputLines = tmpl.createjs.MovieClip.create(outputData.packageStr,outputData.className,new tmpl.FieldForCreateJS(outputData.itemName),this.symbolNameSpace,outputData.nativeClassName);
+			var templateMovieClip = new tmpl.createjs.MovieClip();
+			outputLines = templateMovieClip.create(outputData.baseInnerMovieClip,outputData.packageStr,this.symbolNameSpace,outputData.nativeClassName);
 			break;
 		case "sound":
 			outputLines = tmpl.createjs.Sound.create(outputData.packageStr,outputData.className,outputData.nativeClassName);
@@ -182,7 +183,8 @@ Main.prototype = {
 		var outputLines = "";
 		switch(outputData.itemType) {
 		case "movie clip":
-			outputLines = tmpl.flash.MovieClip.create(outputData.packageStr,outputData.className,external,new tmpl.FieldForFlash(outputData.itemName));
+			var templateMovieClip = external?new tmpl.flash.MovieClipForExtern():new tmpl.flash.MovieClip();
+			outputLines = templateMovieClip.create(outputData.baseInnerMovieClip,external,outputData.packageStr);
 			break;
 		case "sound":
 			outputLines = tmpl.flash.Sound.create(outputData.packageStr,outputData.className,external);
@@ -194,7 +196,7 @@ Main.prototype = {
 		return outputLines;
 	}
 	,outputData: function() {
-		var _g = 0, _g1 = this.outputDataSet;
+		var _g = 0, _g1 = this.libraryParser.outputDataSet;
 		while(_g < _g1.length) {
 			var outputData = _g1[_g];
 			++_g;
@@ -222,7 +224,7 @@ Main.prototype = {
 		}
 	}
 	,createFolder: function() {
-		var $it0 = this.packageDirectoryMap.keys();
+		var $it0 = this.libraryParser.packageDirectoryMap.keys();
 		while( $it0.hasNext() ) {
 			var key = $it0.next();
 			this.createFolderCommon(this.outputtedFlashExtern,this.flashExternDirectory + key);
@@ -235,29 +237,6 @@ Main.prototype = {
 		var profileXML = Xml.parse(fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new haxe.xml.Fast(profileXML.firstElement());
 		this.swfName = fastXML.node.resolve("PublishFormatProperties").node.resolve("flashFileName").get_innerData().split(".")[0];
-	}
-	,parseLibraryItem: function() {
-		var library = fl.getDocumentDOM().library;
-		tmpl.Field.initialize(library);
-		var items = library.items;
-		var itemsLength = items.length;
-		var _g = 0;
-		while(_g < itemsLength) {
-			var i = _g++;
-			var item = items[i];
-			var itemName = item.name;
-			var itemType = item.itemType;
-			if(itemType == "folder") continue;
-			if(item.linkageClassName == null) continue;
-			var pathNames = itemName.split("/");
-			var nativeClassName = pathNames.join("");
-			var className = pathNames.pop();
-			var packageStr = pathNames.join(".");
-			var directory = pathNames.join("/") + "/";
-			this.packageDirectoryMap.set(directory,true);
-			true;
-			this.outputDataSet.push(new OutputData(itemName,itemType,packageStr,className,nativeClassName));
-		}
 	}
 	,createOutputDirectoryCommon: function(outputted,outputDirectory) {
 		if(outputted && !FLfile.exists(outputDirectory)) FLfile.createFolder(outputDirectory);
@@ -276,17 +255,6 @@ Main.prototype = {
 }
 var IMap = function() { }
 IMap.__name__ = true;
-var OutputData = function(itemName,itemType,packageStr,className,nativeClassName) {
-	this.itemName = itemName;
-	this.itemType = itemType;
-	this.packageStr = packageStr;
-	this.className = className;
-	this.nativeClassName = nativeClassName;
-};
-OutputData.__name__ = true;
-OutputData.prototype = {
-	__class__: OutputData
-}
 var Reflect = function() { }
 Reflect.__name__ = true;
 Reflect.hasField = function(o,field) {
@@ -1312,92 +1280,191 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 }
-var tmpl = tmpl || {}
-tmpl.Field = function(itemName) {
-	this.isMovieClip = false;
-	this.fieldLines = [];
-	tmpl.Field.library.editItem(itemName);
-	var layers = fl.getDocumentDOM().getTimeline().layers;
-	var _g = 0;
-	while(_g < layers.length) {
-		var layer = layers[_g];
-		++_g;
-		var layerType = layer.layerType;
-		if(layerType == "folder") continue;
-		if(!this.isMovieClip && layer.frames.length > 1) this.isMovieClip = true;
-		var _g1 = 0, _g2 = layer.frames[0].elements;
-		while(_g1 < _g2.length) {
-			var element = _g2[_g1];
-			++_g1;
-			if(element.name == "") continue;
-			var line = this.getLine(element);
-			this.fieldLines.push(line);
+var parser = parser || {}
+parser.InnerMovieClip = function(propertyName,className) {
+	this.propertyName = propertyName;
+	this.className = className;
+	this.textFieldNameSet = [];
+	this.innerMovieClipSet = [];
+	this.framesLength = 0;
+};
+parser.InnerMovieClip.__name__ = true;
+parser.InnerMovieClip.prototype = {
+	hasInner: function() {
+		return this.textFieldNameSet.length != 0 || this.innerMovieClipSet.length != 0;
+	}
+	,create: function(childName) {
+		var inner = new parser.InnerMovieClip(childName,this.className + "_" + childName);
+		this.innerMovieClipSet.push(inner);
+		return inner;
+	}
+	,addTextFieldName: function(name) {
+		this.textFieldNameSet.push(name);
+	}
+	,isMovieClip: function() {
+		return this.framesLength > 1;
+	}
+	,setFramesLength: function(framesLength) {
+		this.framesLength = framesLength;
+	}
+	,isFrameLengthZero: function() {
+		return this.framesLength == 0;
+	}
+	,__class__: parser.InnerMovieClip
+}
+parser.LibraryParser = function() {
+	this.library = fl.getDocumentDOM().library;
+	this.packageDirectoryMap = new haxe.ds.StringMap();
+	this.outputDataSet = [];
+};
+parser.LibraryParser.__name__ = true;
+parser.LibraryParser.prototype = {
+	search: function(parentInnerMovieClip) {
+		var documentDom = fl.getDocumentDOM();
+		var layers = documentDom.getTimeline().layers;
+		var _g = 0;
+		while(_g < layers.length) {
+			var layer = layers[_g];
+			++_g;
+			var layerType = layer.layerType;
+			if(layerType == "folder") continue;
+			if(parentInnerMovieClip.isFrameLengthZero()) parentInnerMovieClip.setFramesLength(layer.frames.length);
+			var _g1 = 0, _g2 = layer.frames[0].elements;
+			while(_g1 < _g2.length) {
+				var element = _g2[_g1];
+				++_g1;
+				if(element.name == "") continue;
+				if(element.elementType != "instance") {
+					parentInnerMovieClip.addTextFieldName(element.name);
+					continue;
+				}
+				var innerMovieClip = parentInnerMovieClip.create(element.name);
+				documentDom.selectNone();
+				documentDom.selection = [element];
+				documentDom.enterEditMode("inPlace");
+				this.search(innerMovieClip);
+			}
+		}
+		documentDom.exitEditMode();
+	}
+	,execute: function() {
+		var items = this.library.items;
+		var itemsLength = items.length;
+		var _g = 0;
+		while(_g < itemsLength) {
+			var i = _g++;
+			var item = items[i];
+			var itemName = item.name;
+			var itemType = item.itemType;
+			if(itemType == "folder") continue;
+			if(item.linkageClassName == null) continue;
+			var pathNames = itemName.split("/");
+			var nativeClassName = pathNames.join("");
+			var className = pathNames.pop();
+			var packageStr = pathNames.join(".");
+			var directory = pathNames.join("/") + "/";
+			this.packageDirectoryMap.set(directory,true);
+			true;
+			fl.trace(":::" + itemName + ":" + className);
+			var baseInnerMovieClip = null;
+			if(itemType == "movie clip") {
+				this.library.editItem(itemName);
+				baseInnerMovieClip = new parser.InnerMovieClip(className,className);
+				this.search(baseInnerMovieClip);
+			}
+			this.outputDataSet.push(new parser.OutputData(itemName,itemType,packageStr,className,nativeClassName,baseInnerMovieClip));
 		}
 	}
-};
-tmpl.Field.__name__ = true;
-tmpl.Field.initialize = function(library) {
-	tmpl.Field.library = library;
+	,__class__: parser.LibraryParser
 }
-tmpl.Field.prototype = {
-	getLines: function() {
-		return this.fieldLines.join("\n");
+parser.OutputData = function(itemName,itemType,packageStr,className,nativeClassName,baseInnerMovieClip) {
+	this.itemName = itemName;
+	this.itemType = itemType;
+	this.packageStr = packageStr;
+	this.className = className;
+	this.nativeClassName = nativeClassName;
+	this.baseInnerMovieClip = baseInnerMovieClip;
+};
+parser.OutputData.__name__ = true;
+parser.OutputData.prototype = {
+	__class__: parser.OutputData
+}
+var tmpl = tmpl || {}
+tmpl.MovieClip = function() {
+};
+tmpl.MovieClip.__name__ = true;
+tmpl.MovieClip.prototype = {
+	getInnerMovieClipLines: function(baseInnerMovieClip) {
+		var lineSet = new Array();
+		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
+		while(_g < _g1.length) {
+			var innerMovieClip = _g1[_g];
+			++_g;
+			if(!innerMovieClip.hasInner()) continue;
+			var lines = this.createInner(innerMovieClip);
+			lineSet.push(lines);
+		}
+		return lineSet.join("\n");
 	}
-	,getLine: function(element) {
+	,getTextFieldPropertyLines: function(baseInnerMovieClip,inner) {
+		if(inner == null) inner = false;
+		var func = !inner?$bind(this,this.getTextFieldTemplateStr):$bind(this,this.getTextFieldTemplateStrForInner);
+		var lineSet = new Array();
+		var _g = 0, _g1 = baseInnerMovieClip.textFieldNameSet;
+		while(_g < _g1.length) {
+			var textFieldName = _g1[_g];
+			++_g;
+			var textFieldTemplate = new haxe.Template(func());
+			var line = textFieldTemplate.execute({ propertyName : textFieldName});
+			lineSet.push(line);
+		}
+		return lineSet.join("\n");
+	}
+	,getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
+		if(inner == null) inner = false;
+		var func = !inner?$bind(this,this.getMovieClipTemplateStr):$bind(this,this.getMovieClipTemplateStrForInner);
+		var lineSet = new Array();
+		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
+		while(_g < _g1.length) {
+			var innerMovieClip = _g1[_g];
+			++_g;
+			var className = innerMovieClip.hasInner()?innerMovieClip.className:this.getMovieClipPath();
+			var movieClipTemplate = new haxe.Template(func());
+			var line = movieClipTemplate.execute({ propertyName : innerMovieClip.propertyName, className : className});
+			lineSet.push(line);
+		}
+		return lineSet.join("\n");
+	}
+	,createInner: function(baseInnerMovieClip) {
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,true);
+		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip,true);
+		var classTemplate = new haxe.Template(this.getClassTemplateStr());
+		var lines = classTemplate.execute({ className : baseInnerMovieClip.className, field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
+	}
+	,getMovieClipPath: function() {
 		return "";
 	}
-	,__class__: tmpl.Field
-}
-tmpl.FieldForFlashOrCreateJS = function(itemName) {
-	tmpl.Field.call(this,itemName);
-};
-tmpl.FieldForFlashOrCreateJS.__name__ = true;
-tmpl.FieldForFlashOrCreateJS.__super__ = tmpl.Field;
-tmpl.FieldForFlashOrCreateJS.prototype = $extend(tmpl.Field.prototype,{
-	getType: function(element) {
+	,getMovieClipTemplateStrForInner: function() {
 		return "";
 	}
-	,getLine: function(element) {
-		return tmpl.FieldForFlashOrCreateJS.fieldTemplate.execute({ name : element.name, type : this.getType(element)});
+	,getTextFieldTemplateStrForInner: function() {
+		return "";
 	}
-	,__class__: tmpl.FieldForFlashOrCreateJS
-});
-tmpl.FieldForCreateJS = function(itemName) {
-	tmpl.FieldForFlashOrCreateJS.call(this,itemName);
-};
-tmpl.FieldForCreateJS.__name__ = true;
-tmpl.FieldForCreateJS.__super__ = tmpl.FieldForFlashOrCreateJS;
-tmpl.FieldForCreateJS.prototype = $extend(tmpl.FieldForFlashOrCreateJS.prototype,{
-	getType: function(element) {
-		return element.elementType == "instance"?"createjs.easeljs.MovieClip":"createjs.easeljs.Text";
+	,getMovieClipTemplateStr: function() {
+		return "";
 	}
-	,__class__: tmpl.FieldForCreateJS
-});
-tmpl.FieldForFlash = function(itemName) {
-	tmpl.FieldForFlashOrCreateJS.call(this,itemName);
-};
-tmpl.FieldForFlash.__name__ = true;
-tmpl.FieldForFlash.__super__ = tmpl.FieldForFlashOrCreateJS;
-tmpl.FieldForFlash.prototype = $extend(tmpl.FieldForFlashOrCreateJS.prototype,{
-	getType: function(element) {
-		return element.elementType == "instance"?"flash.display.MovieClip":"flash.text.TextField";
+	,getTextFieldTemplateStr: function() {
+		return "";
 	}
-	,__class__: tmpl.FieldForFlash
-});
-tmpl.FieldForOpenFL = function(itemName) {
-	tmpl.Field.call(this,itemName);
-};
-tmpl.FieldForOpenFL.__name__ = true;
-tmpl.FieldForOpenFL.__super__ = tmpl.Field;
-tmpl.FieldForOpenFL.prototype = $extend(tmpl.Field.prototype,{
-	getType: function(element) {
-		return element.elementType == "instance"?"flash.display.MovieClip":"flash.text.TextField";
+	,getClassTemplateStr: function() {
+		return "";
 	}
-	,getLine: function(element) {
-		return tmpl.FieldForOpenFL.fieldTemplate.execute({ name : element.name, type : this.getType(element)});
+	,getBaseClassTemplateStr: function() {
+		return "";
 	}
-	,__class__: tmpl.FieldForOpenFL
-});
+	,__class__: tmpl.MovieClip
+}
 if(!tmpl.createjs) tmpl.createjs = {}
 tmpl.createjs.Bitmap = function() { }
 tmpl.createjs.Bitmap.__name__ = true;
@@ -1405,12 +1472,42 @@ tmpl.createjs.Bitmap.create = function(packageStr,className,$namespace,nativeCla
 	var fileLines = tmpl.createjs.Bitmap.template.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : className});
 	return fileLines;
 }
-tmpl.createjs.MovieClip = function() { }
+tmpl.createjs.MovieClip = function() {
+	tmpl.MovieClip.call(this);
+};
 tmpl.createjs.MovieClip.__name__ = true;
-tmpl.createjs.MovieClip.create = function(packageStr,className,field,$namespace,nativeClassName) {
-	var fileLines = tmpl.createjs.MovieClip.template.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : className, field : field.getLines(), superClassName : field.isMovieClip?"MovieClip":"Container"});
-	return fileLines;
-}
+tmpl.createjs.MovieClip.__super__ = tmpl.MovieClip;
+tmpl.createjs.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
+	create: function(baseInnerMovieClip,packageStr,$namespace,nativeClassName) {
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip);
+		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
+		var lines = baseClassTemplate.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Container", field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
+	}
+	,getMovieClipPath: function() {
+		return "createjs.easeljs.MovieClip";
+	}
+	,getMovieClipTemplateStrForInner: function() {
+		return this.getMovieClipTemplateStr();
+	}
+	,getTextFieldTemplateStrForInner: function() {
+		return this.getTextFieldTemplateStr();
+	}
+	,getMovieClipTemplateStr: function() {
+		return "\tpublic var ::propertyName:::::className::;";
+	}
+	,getTextFieldTemplateStr: function() {
+		return "\tpublic var ::propertyName:::createjs.easeljs.Text;";
+	}
+	,getClassTemplateStr: function() {
+		return "extern class ::className:: extends createjs.easeljs.MovieClip{\n::field::\n}";
+	}
+	,getBaseClassTemplateStr: function() {
+		return "package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.::superClassName::{\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n\tpublic var frameBounds:Array<createjs.easeljs.Rectangle>;\n::field::\n}";
+	}
+	,__class__: tmpl.createjs.MovieClip
+});
 tmpl.createjs.Sound = function() { }
 tmpl.createjs.Sound.__name__ = true;
 tmpl.createjs.Sound.create = function(packageStr,className,nativeClassName) {
@@ -1424,12 +1521,53 @@ tmpl.flash.Bitmap.create = function(packageStr,className,external) {
 	var fileLines = tmpl.flash.Bitmap.template.execute({ packageStr : packageStr, className : className, external : external?"extern ":""});
 	return fileLines;
 }
-tmpl.flash.MovieClip = function() { }
+tmpl.flash.MovieClip = function() {
+	tmpl.MovieClip.call(this);
+};
 tmpl.flash.MovieClip.__name__ = true;
-tmpl.flash.MovieClip.create = function(packageStr,className,external,field) {
-	var fileLines = tmpl.flash.MovieClip.template.execute({ packageStr : packageStr, className : className, external : external?"extern ":"", field : field.getLines(), superClassName : field.isMovieClip?"MovieClip":"Sprite"});
-	return fileLines;
-}
+tmpl.flash.MovieClip.__super__ = tmpl.MovieClip;
+tmpl.flash.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
+	create: function(baseInnerMovieClip,external,packageStr) {
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip);
+		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, external : external?"extern ":"", className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Sprite", field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
+	}
+	,getMovieClipPath: function() {
+		return "flash.display.MovieClip";
+	}
+	,getMovieClipTemplateStrForInner: function() {
+		return this.getMovieClipTemplateStr();
+	}
+	,getTextFieldTemplateStrForInner: function() {
+		return this.getTextFieldTemplateStr();
+	}
+	,getMovieClipTemplateStr: function() {
+		return "\tpublic var ::propertyName:::::className::;";
+	}
+	,getTextFieldTemplateStr: function() {
+		return "\tpublic var ::propertyName:::flash.text.TextField;";
+	}
+	,getClassTemplateStr: function() {
+		return "typedef ::className:: =\n{ > flash.display.MovieClip,\n::field::\n}";
+	}
+	,getBaseClassTemplateStr: function() {
+		return "package ::packageStr::;\n::external::class ::className:: extends flash.display.::superClassName::{\n::field::\n}";
+	}
+	,__class__: tmpl.flash.MovieClip
+});
+tmpl.flash.MovieClipForExtern = function() {
+	tmpl.flash.MovieClip.call(this);
+};
+tmpl.flash.MovieClipForExtern.__name__ = true;
+tmpl.flash.MovieClipForExtern.__super__ = tmpl.flash.MovieClip;
+tmpl.flash.MovieClipForExtern.prototype = $extend(tmpl.flash.MovieClip.prototype,{
+	getClassTemplateStr: function() {
+		return "extern class ::className:: extends flash.display.MovieClip{\r\n::field::\r\n}";
+	}
+	,__class__: tmpl.flash.MovieClipForExtern
+});
 tmpl.flash.Sound = function() { }
 tmpl.flash.Sound.__name__ = true;
 tmpl.flash.Sound.create = function(packageStr,className,external) {
@@ -1443,12 +1581,57 @@ tmpl.openfl.Bitmap.create = function(packageStr,className,swfName) {
 	var fileLines = tmpl.openfl.Bitmap.template.execute({ packageStr : packageStr, className : className, swfName : swfName});
 	return fileLines;
 }
-tmpl.openfl.MovieClip = function() { }
+tmpl.openfl.MovieClip = function() {
+	tmpl.MovieClip.call(this);
+};
 tmpl.openfl.MovieClip.__name__ = true;
-tmpl.openfl.MovieClip.create = function(packageStr,className,swfName,field) {
-	var fileLines = tmpl.openfl.MovieClip.template.execute({ packageStr : packageStr, className : className, swfName : swfName, field : field.getLines()});
-	return fileLines;
-}
+tmpl.openfl.MovieClip.__super__ = tmpl.MovieClip;
+tmpl.openfl.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
+	getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
+		if(inner == null) inner = false;
+		var lineSet = new Array();
+		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
+		while(_g < _g1.length) {
+			var innerMovieClip = _g1[_g];
+			++_g;
+			var className = innerMovieClip.hasInner()?innerMovieClip.className:this.getMovieClipPath();
+			var func = innerMovieClip.hasInner()?$bind(this,this.getMovieClipTemplateStrHasInner):$bind(this,this.getMovieClipTemplateStrNotHasInner);
+			var movieClipTemplate = new haxe.Template(func());
+			var line = movieClipTemplate.execute({ propertyName : innerMovieClip.propertyName, className : className});
+			lineSet.push(line);
+		}
+		return lineSet.join("\n");
+	}
+	,create: function(baseInnerMovieClip,packageStr,swfName) {
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip);
+		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, swfName : swfName, field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
+	}
+	,getTextFieldTemplateStrForInner: function() {
+		return this.getTextFieldTemplateStr();
+	}
+	,getMovieClipPath: function() {
+		return "flash.display.MovieClip";
+	}
+	,getMovieClipTemplateStrHasInner: function() {
+		return "\n\tpublic var ::propertyName::(get, never):::className::;\n\tfunction get_::propertyName::(){\n\t\treturn new ::className::(cast this.getChildByName('::propertyName::'));\n\t}\n";
+	}
+	,getMovieClipTemplateStrNotHasInner: function() {
+		return "\n\tpublic var ::propertyName::(get, never):::className::;\n\tfunction get_::propertyName::(){\n\t\treturn cast(this.getChildByName('::propertyName::'), ::className::);\n\t}\n";
+	}
+	,getTextFieldTemplateStr: function() {
+		return "\n\tpublic var ::propertyName::(get, never):flash.text.TextField;\n\tfunction get_::propertyName::(){\n\t\treturn cast(this.getChildByName('::propertyName::'), flash.text.TextField);\n\t}\n";
+	}
+	,getClassTemplateStr: function() {
+		return "abstract ::className::(MovieClip){\n    public function new(mc:MovieClip)\n        this = mc;\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
+	}
+	,getBaseClassTemplateStr: function() {
+		return "package ::packageStr::;\nimport flash.display.MovieClip;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
+	}
+	,__class__: tmpl.openfl.MovieClip
+});
 tmpl.openfl.Sound = function() { }
 tmpl.openfl.Sound.__name__ = true;
 tmpl.openfl.Sound.create = function(packageStr,className) {
@@ -1501,15 +1684,10 @@ haxe.xml.Parser.escapes = (function($this) {
 	$r = h;
 	return $r;
 }(this));
-tmpl.FieldForFlashOrCreateJS.fieldTemplate = new haxe.Template("\tvar ::name:: : ::type::;");
-tmpl.FieldForOpenFL.fieldTemplate = new haxe.Template("\n    public var ::name::(get, never):::type::;\n    function get_::name::(){\n        return cast(this.getChildByName('::name::'), ::type::);\n    }\n");
 tmpl.createjs.Bitmap.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.Bitmap{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n\tpublic function new():Void;\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n}");
-tmpl.createjs.MovieClip.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.::superClassName::{\n::field::\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n\tpublic var frameBounds:Array<createjs.easeljs.Rectangle>;\n}");
 tmpl.createjs.Sound.template = new haxe.Template("package ::packageStr::;\nclass ::className::{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n}");
 tmpl.flash.Bitmap.template = new haxe.Template("package ::packageStr::;\n::external::class ::className:: extends flash.display.BitmapData{\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void;\n}");
-tmpl.flash.MovieClip.template = new haxe.Template("package ::packageStr::;\n::external::class ::className:: extends flash.display.::superClassName::{\n::field::\n}");
 tmpl.flash.Sound.template = new haxe.Template("package ::packageStr::;\n::external::class ::className:: extends flash.media.Sound{\n}");
 tmpl.openfl.Bitmap.template = new haxe.Template("package ::packageStr::;\nimport flash.display.BitmapData;\nimport openfl.Assets;\nabstract ::className:: (BitmapData){\n\tfunction new()\n        this = Assets.getBitmap('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():BitmapData\n        return this;\n}");
-tmpl.openfl.MovieClip.template = new haxe.Template("package ::packageStr::;\nimport flash.display.MovieClip;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}");
 tmpl.openfl.Sound.template = new haxe.Template("package ::packageStr::;\nimport flash.media.Sound;\nimport openfl.Assets;\nabstract ::className::(Sound){\n    public function new()\n        this = Assets.getSound('::packageStr::.::className::');\n    @:to public function getInstance():Sound\n        return this;\n}");
 Main.main();

@@ -1,9 +1,7 @@
 package;
-import tmpl.FieldForOpenFL;
-import tmpl.FieldForCreateJS;
-import tmpl.FieldForFlash;
+import parser.LibraryParser;
+import parser.OutputData;
 import haxe.xml.Fast;
-import tmpl.Field;
 import haxe.Template;
 import jsfl.Layer;
 import jsfl.Library;
@@ -27,8 +25,9 @@ class Main {
     private var outputtedOpenfl:Bool;
 
     private var swfName:String;
-	private var packageDirectoryMap:Map<String, Bool>;
-	private var outputDataSet:Array<OutputData>;
+	//private var packageDirectoryMap:Map<String, Bool>;
+	//private var outputDataSet:Array<OutputData>;
+    private var libraryParser:LibraryParser;
 
 	public static function main(){
 	}
@@ -57,11 +56,14 @@ class Main {
 		this.createJsDirectory = getOutputDirectory(createJsDirectory);
         this.openflDirectory = getOutputDirectory(openflDirectory);
 
-		packageDirectoryMap = new Map();
-		outputDataSet = [];
+		//packageDirectoryMap = new Map();
+		//outputDataSet = [];
+
+        libraryParser = new LibraryParser();
+        libraryParser.execute();
 
 		createOutputDirectory();
-		parseLibraryItem();
+		//parseLibraryItem();
         setSwfName();
 		createFolder();
 		outputData();
@@ -84,6 +86,7 @@ class Main {
 
         if(outputted && !FLfile.exists(outputDirectory)) FLfile.createFolder(outputDirectory);
     }
+    /*
 	private function parseLibraryItem(){
 
 		var library = Flash.getDocumentDOM().library;
@@ -108,9 +111,10 @@ class Main {
 			var directory = pathNames.join("/") + "/";
 			packageDirectoryMap[directory] = true;
 
-			outputDataSet.push(new OutputData(itemName, itemType, packageStr, className, nativeClassName));
+			outputDataSet.push(new OutputData(itemName, itemType, packageStr, className, nativeClassName, null));
 		}
 	}
+	*/
     private function setSwfName(){
 
         var profileXML = Xml.parse(Flash.getDocumentDOM().exportPublishProfileString());
@@ -121,7 +125,7 @@ class Main {
     //
 	private function createFolder(){
 
-	    for(key in packageDirectoryMap.keys()){
+	    for(key in libraryParser.packageDirectoryMap.keys()){
             createFolderCommon(outputtedFlashExtern, flashExternDirectory + key);
             createFolderCommon(outputtedFlash, flashDirectory + key);
             createFolderCommon(outputtedCreateJs, createJsDirectory + key);
@@ -142,7 +146,7 @@ class Main {
     //
 	private function outputData(){
 
-		for(outputData in outputDataSet){
+		for(outputData in libraryParser.outputDataSet){
 
 			if(outputtedFlashExtern){
 				var outputLines = getOutputLinesForFlash(outputData, true);
@@ -167,7 +171,9 @@ class Main {
 		var outputLines = "";
 		switch(outputData.itemType){
 			case "movie clip":
-				outputLines = tmpl.flash.MovieClip.create(outputData.packageStr, outputData.className, external, new FieldForFlash(outputData.itemName));
+
+                var templateMovieClip = (external) ? new tmpl.flash.MovieClipForExtern() : new tmpl.flash.MovieClip();
+                outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, external, outputData.packageStr);
 			case "sound":
 				outputLines = tmpl.flash.Sound.create(outputData.packageStr, outputData.className, external);
 			case "bitmap":
@@ -180,7 +186,8 @@ class Main {
 		var outputLines = "";
 		switch(outputData.itemType){
 			case "movie clip":
-				outputLines = tmpl.createjs.MovieClip.create(outputData.packageStr, outputData.className, new FieldForCreateJS(outputData.itemName), symbolNameSpace, outputData.nativeClassName);
+                var templateMovieClip = new tmpl.createjs.MovieClip();
+                outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, outputData.packageStr, symbolNameSpace, outputData.nativeClassName);
 			case "sound":
 				outputLines = tmpl.createjs.Sound.create(outputData.packageStr, outputData.className, outputData.nativeClassName);
 			case "bitmap":
@@ -193,7 +200,9 @@ class Main {
         var outputLines = "";
         switch(outputData.itemType){
             case "movie clip":
-                outputLines = tmpl.openfl.MovieClip.create(outputData.packageStr, outputData.className, swfName, new FieldForOpenFL(outputData.itemName));
+                var templateMovieClip = new tmpl.openfl.MovieClip();
+                outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, outputData.packageStr, swfName);
+                //outputLines = tmpl.openfl.MovieClipBak.create(outputData.packageStr, outputData.className, swfName, new FieldForOpenFL(outputData.itemName));
             case "sound":
                 outputLines = tmpl.openfl.Sound.create(outputData.packageStr, outputData.className);
             case "bitmap":
