@@ -67,7 +67,6 @@ fla ファイルと異なるディレクトリに出力したい場合、相対�
 
 ![dialog3](img/dialog3.png)
 
-
 ## Features
 
 CreateJS用に出力された各 Haxe ファイルには、Toolkit for CreateJS から出力された javascript ファイルにアクセスしやすくなるような以下のプロパティを追加しています。
@@ -79,7 +78,6 @@ CreateJS用に出力された各 Haxe ファイルには、Toolkit for CreateJS 
 * MovieClip.nominalBounds
 * MovieClip.frameBounds
 
-
 ## 廃止された機能
 
 意図しないファイル削除が行われてしまう事を避けるため、Haxe ファイル出力ディレクトリの自動クリア機能は削除されました。
@@ -88,6 +86,42 @@ CreateJS用に出力された各 Haxe ファイルには、Toolkit for CreateJS 
 
 無駄なファイルの削除を行いたい場合、一度手動で Haxe 出力ディレクトリの削除をお願いします。
 
+## OpenFL-Haxe Restrictions
+
+出力された OpenFL 用 hx ファイルの使用には制限事項があります。
+View という名前の MovieClip を OpenFL 用として出力した場合、View.hx(抽象型)は親に MovieClip を持っていないため、以下の trace 文はエラーとなります。
+
+	var view = new View();
+	addChild(view); //ok
+	trace(view.x); //error
+
+エラーを避けるためには一度 cast を行う必要があります。
+
+	var view = new View();
+	addChild(view);
+	var mc:MovieClip = cast view;
+	trace(mc.x); //ok
+
+Type.createInstance メソッド経由での生成は意図通り行えません。
+
+	var view = Type.createInstance(View, []);
+	addChild(view); //error
+
+ビットマップ画像にリンケージ設定を行った BitmapDataView クラスは、生成しようとしても null を返します。OpenFL の swf 解析機能はまだ α版のようで、必ず null を返すようになっているためです。ビットマップ画像を使用したい場合、MovieClip に配置し、その MovieClip にリンケージ設定を行なってください。
+
+	var bitmapDataView = new BitmapDataView();
+	trace(bitmapDataView); //null
+
+また、swf 内に埋め込んだビットマップ画像はどのような形式でも扱えるわけではないようです。PNG-8 形式の画像は読み込めず、PNG-24 形式の画像は読み込める、といった現象が発生します。MovieClip に配置したビットマップ画像が表示されない場合、画像形式を変えてみるなど色々試してみる必要があります。
+
+その他、swf 内に埋め込んだサウンドを取得するメソッドは、OpenFL には現在用意されていません。コンパイル用 xml ファイルに使用するサウンドファイルを手動で登録する必要があります。
+
+	<assets path="test/JumpSound.wav" id="test.JumpSound" />
+
+FlashToHaxeConverter から出力されるサウンド用 test.JumpSound.hx ファイルのコンストラクタには、以下の様な記述が行われるので、new JumpSound(); という記述で Sound インスタンスの生成が可能となります。
+
+	public function new()
+		this = Assets.getSound('test.JumpSound');
 
 ##制作の流れと FlashToHaxeConverter の役割箇所
 
@@ -97,17 +131,11 @@ Flash CC と Haxe を利用することで、Flash コンテンツ, html5 canvas
 
 まず、Photoshop や Illustrator を用いて画像素材を作成し、また、サウンド編集ソフトで音声ファイルを作成後、Flash CC に取り込みます。
 
-Flash CC では、各素材を利用してアニメーションを作成したり、各素材データをスクリプトから操作できるよう 素材に命名(リンケージ設定)を行います。編集作業完了後、Flash コンテンツを制作する場合は swf をパブリッシュ、html5 コンテンツを制作する場合は Toolkit for CreateJS でのパブリッシュを行います。
+Flash CC では、各素材を利用してアニメーションを作成したり、各素材データをスクリプトから操作できるよう 素材に命名(リンケージ設定)を行います。編集作業完了後、Flash or OpenFL コンテンツを制作する場合は swf をパブリッシュ、html5 コンテンツを制作する場合は Toolkit for CreateJS でのパブリッシュを行います。
 
 同時に当 JSFL(図内 FlashToHaxeConverter) を利用して、Flash CC 内ライブラリ構造を Haxe extern クラス群に変換を行います。
 
-出力された Flash & html5 用のデータは共通の構造を持つため、クロスプラットフォーム用言語 Haxe にて処理することにより、より少ない手間で Flash コンテンツや html5 canvas コンテンツの同時制作が可能となります。
-
-更に、Flash コンテンツはそのまま Adobe AIR に変換する事もできます。
-
-TFCLib は Toolkit for CreateJS のパブリッシュデータをスクリプト(javascript or Haxe)から利用しやすくするためのもので、別途制作しているライブラリです。当アプリケーションで出力される 図内 CreateJS-Haxe クラス群は無くても利用できますが、利用すると更に効率よく開発を進めることが可能となります。
-
-[https://github.com/siratama/haxelib](https://github.com/siratama/haxelib)
+出力された Flash & OpenFL & html5 用のデータは共通の構造を持つため、クロスプラットフォーム用言語 Haxe にて処理することにより、より少ない手間で Flash, OpenFL, html5 canvas コンテンツの同時制作が可能となります。
 
 ##サンプル解説
 
