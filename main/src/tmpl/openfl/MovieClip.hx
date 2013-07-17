@@ -7,6 +7,7 @@ class MovieClip extends tmpl.MovieClip{
         return (
 "package ::packageStr::;
 import flash.display.MovieClip;
+import flash.text.TextField;
 import openfl.Assets;
 abstract ::className::(MovieClip){
     public function new()
@@ -28,74 +29,73 @@ abstract ::className::(MovieClip){
     }
 
     override private function getTextFieldTemplateStr():String{
-		return "
-	public var ::propertyName::(get, never):flash.text.TextField;
+		return (
+"	public var ::propertyName::(get, never):TextField;
 	function get_::propertyName::(){
-		return cast(this.getChildByName('::propertyName::'), flash.text.TextField);
+		return cast(this.getChildByName('::propertyName::'), TextField);
 	}
-";
+");
     }
-/*
-	override private function getMovieClipTemplateStr():String{
-		return "
-	public var ::propertyName::(get, never):::className::;
+
+	/*
+	override private function getLinkageClassTemplateStr():String{
+		return (
+"	public var ::propertyName::(get, never):::linkageClassName::;
 	function get_::propertyName::(){
-		return cast(this.getChildByName('::propertyName::'), ::className::);
+		return cast(this.getChildByName('::propertyName::'), ::linkageClassName::);
 	}
-";
+");
 	}
-*/
+	*/
+
+	/*
+	override private function getLinkageClassTemplateStr():String{
+	}
+	*/
 
 	private function getMovieClipTemplateStrNotHasInner():String{
-		return "
-	public var ::propertyName::(get, never):::className::;
+		return (
+"	public var ::propertyName::(get, never):::className::;
 	function get_::propertyName::(){
 		return cast(this.getChildByName('::propertyName::'), ::className::);
 	}
-";
+");
 	}
     private function getMovieClipTemplateStrHasInner():String{
-        return "
-	public var ::propertyName::(get, never):::className::;
+        return (
+"	public var ::propertyName::(get, never):::className::;
 	function get_::propertyName::(){
 		return new ::className::(cast this.getChildByName('::propertyName::'));
 	}
-";
+");
     }
     override private function getMovieClipPath():String{
         return "flash.display.MovieClip";
     }
 
-	override private function getTextFieldTemplateStrForInner():String{
-		//return "\tpublic var ::propertyName:::flash.text.TextField;";
-		return getTextFieldTemplateStr();
-	}
-	/*
-	override private function getMovieClipTemplateStrForInner():String{
-		return "\tpublic var ::propertyName:::::className::;";
-	}
-	*/
-
     public function create(baseInnerMovieClip:InnerMovieClip, packageStr:String, swfName:String):String{
 
-        var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip);
+        var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip, false);
         var textFieldPropertyLines = getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = getLinkageClassPropertyLines(baseInnerMovieClip);
 
         var baseClassTemplate = new Template(getBaseClassTemplateStr());
         var lines = baseClassTemplate.execute({
             packageStr: packageStr,
             className: baseInnerMovieClip.className,
             swfName: swfName,
-            field: textFieldPropertyLines + "\n" + movieClipPropertyLines
+			field: [textFieldPropertyLines, linkageClassPropertyLines, movieClipPropertyLines].join("\n")
         });
 
-        return lines + "\n" + getInnerMovieClipLines(baseInnerMovieClip);
+        return lines + "\n" + getInnerMovieClipLines(baseInnerMovieClip, true);
     }
-	override private function getMovieClipPropertyLines(baseInnerMovieClip:InnerMovieClip, inner:Bool = false):String{
+	override private function getMovieClipPropertyLines(baseInnerMovieClip:InnerMovieClip, inner:Bool):String{
 
 		//var func = (!inner) ? getMovieClipTemplateStr : getMovieClipTemplateStrForInner;
 		var lineSet = new Array<String>();
 		for(innerMovieClip in baseInnerMovieClip.innerMovieClipSet){
+
+			//if(innerMovieClip.linkageClassName != null) continue;
 
 			var className = (innerMovieClip.hasInner()) ? innerMovieClip.className : getMovieClipPath();
 			var func = (innerMovieClip.hasInner()) ? getMovieClipTemplateStrHasInner: getMovieClipTemplateStrNotHasInner;
@@ -109,4 +109,10 @@ abstract ::className::(MovieClip){
 		}
 		return lineSet.join("\n");
 	}
+	override private function getLinkageClassPropertyLines(baseInnerMovieClip:InnerMovieClip):String{
+
+		//return getMovieClipPropertyLines(baseInnerMovieClip, inner);
+		return "";
+	}
+
 }

@@ -1,4 +1,5 @@
 package parser;
+import jsfl.Instance;
 import parser.InnerMovieClip;
 import jsfl.Item;
 import jsfl.Flash;
@@ -39,12 +40,12 @@ class LibraryParser {
             packageDirectoryMap[directory] = true;
 
             //
-            Flash.trace(":::" + itemName + ":" + className);
+            //Flash.trace(":::" + itemName + ":" + className);
 			var baseInnerMovieClip:InnerMovieClip = null;
 			if(itemType == "movie clip"){
 
 				library.editItem(itemName);
-				baseInnerMovieClip = new InnerMovieClip(className, className);
+				baseInnerMovieClip = new InnerMovieClip(className, className, item.linkageClassName);
 				search(baseInnerMovieClip);
 			}
             outputDataSet.push(new OutputData(itemName, itemType, packageStr, className, nativeClassName, baseInnerMovieClip));
@@ -70,10 +71,13 @@ class LibraryParser {
                 if(element.name == "") continue;
 
                 if(element.elementType != "instance"){
+
                     parentInnerMovieClip.addTextFieldName(element.name);
                     continue;
                 }
-                var innerMovieClip = parentInnerMovieClip.create(element.name);
+
+				var linkageClassName:String = untyped element.libraryItem.linkageClassName;
+                var innerMovieClip = parentInnerMovieClip.create(element.name, linkageClassName);
 
                 documentDom.selectNone();
                 documentDom.selection = [element];

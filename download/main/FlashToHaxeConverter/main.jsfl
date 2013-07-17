@@ -1281,9 +1281,10 @@ js.Boot.__instanceof = function(o,cl) {
 	}
 }
 var parser = parser || {}
-parser.InnerMovieClip = function(propertyName,className) {
+parser.InnerMovieClip = function(propertyName,className,linkageClassName) {
 	this.propertyName = propertyName;
 	this.className = className;
+	this.linkageClassName = linkageClassName;
 	this.textFieldNameSet = [];
 	this.innerMovieClipSet = [];
 	this.framesLength = 0;
@@ -1293,8 +1294,8 @@ parser.InnerMovieClip.prototype = {
 	hasInner: function() {
 		return this.textFieldNameSet.length != 0 || this.innerMovieClipSet.length != 0;
 	}
-	,create: function(childName) {
-		var inner = new parser.InnerMovieClip(childName,this.className + "_" + childName);
+	,create: function(childName,linkageClassName) {
+		var inner = new parser.InnerMovieClip(childName,this.className + "_" + childName,linkageClassName);
 		this.innerMovieClipSet.push(inner);
 		return inner;
 	}
@@ -1338,7 +1339,8 @@ parser.LibraryParser.prototype = {
 					parentInnerMovieClip.addTextFieldName(element.name);
 					continue;
 				}
-				var innerMovieClip = parentInnerMovieClip.create(element.name);
+				var linkageClassName = element.libraryItem.linkageClassName;
+				var innerMovieClip = parentInnerMovieClip.create(element.name,linkageClassName);
 				documentDom.selectNone();
 				documentDom.selection = [element];
 				documentDom.enterEditMode("inPlace");
@@ -1365,11 +1367,10 @@ parser.LibraryParser.prototype = {
 			var directory = pathNames.join("/") + "/";
 			this.packageDirectoryMap.set(directory,true);
 			true;
-			fl.trace(":::" + itemName + ":" + className);
 			var baseInnerMovieClip = null;
 			if(itemType == "movie clip") {
 				this.library.editItem(itemName);
-				baseInnerMovieClip = new parser.InnerMovieClip(className,className);
+				baseInnerMovieClip = new parser.InnerMovieClip(className,className,item.linkageClassName);
 				this.search(baseInnerMovieClip);
 			}
 			this.outputDataSet.push(new parser.OutputData(itemName,itemType,packageStr,className,nativeClassName,baseInnerMovieClip));
@@ -1394,40 +1395,53 @@ tmpl.MovieClip = function() {
 };
 tmpl.MovieClip.__name__ = true;
 tmpl.MovieClip.prototype = {
-	getInnerMovieClipLines: function(baseInnerMovieClip) {
+	getInnerMovieClipLines: function(baseInnerMovieClip,isOpenFL) {
+		if(isOpenFL == null) isOpenFL = false;
 		var lineSet = new Array();
 		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
 		while(_g < _g1.length) {
 			var innerMovieClip = _g1[_g];
 			++_g;
 			if(!innerMovieClip.hasInner()) continue;
+			if(!isOpenFL && innerMovieClip.linkageClassName != null) continue;
 			var lines = this.createInner(innerMovieClip);
 			lineSet.push(lines);
 		}
 		return lineSet.join("\n");
 	}
-	,getTextFieldPropertyLines: function(baseInnerMovieClip,inner) {
-		if(inner == null) inner = false;
-		var func = !inner?$bind(this,this.getTextFieldTemplateStr):$bind(this,this.getTextFieldTemplateStrForInner);
+	,getLinkageClassPropertyLines: function(baseInnerMovieClip) {
+		var lineSet = new Array();
+		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
+		while(_g < _g1.length) {
+			var innerMovieClip = _g1[_g];
+			++_g;
+			if(innerMovieClip.linkageClassName == null) continue;
+			var template = new haxe.Template(this.getLinkageClassTemplateStr());
+			var line = template.execute({ propertyName : innerMovieClip.propertyName, linkageClassName : innerMovieClip.linkageClassName});
+			lineSet.push(line);
+		}
+		return lineSet.join("\n");
+	}
+	,getTextFieldPropertyLines: function(baseInnerMovieClip) {
 		var lineSet = new Array();
 		var _g = 0, _g1 = baseInnerMovieClip.textFieldNameSet;
 		while(_g < _g1.length) {
 			var textFieldName = _g1[_g];
 			++_g;
-			var textFieldTemplate = new haxe.Template(func());
+			var textFieldTemplate = new haxe.Template(this.getTextFieldTemplateStr());
 			var line = textFieldTemplate.execute({ propertyName : textFieldName});
 			lineSet.push(line);
 		}
 		return lineSet.join("\n");
 	}
 	,getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
-		if(inner == null) inner = false;
 		var func = !inner?$bind(this,this.getMovieClipTemplateStr):$bind(this,this.getMovieClipTemplateStrForInner);
 		var lineSet = new Array();
 		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
 		while(_g < _g1.length) {
 			var innerMovieClip = _g1[_g];
 			++_g;
+			if(innerMovieClip.linkageClassName != null) continue;
 			var className = innerMovieClip.hasInner()?innerMovieClip.className:this.getMovieClipPath();
 			var movieClipTemplate = new haxe.Template(func());
 			var line = movieClipTemplate.execute({ propertyName : innerMovieClip.propertyName, className : className});
@@ -1437,9 +1451,10 @@ tmpl.MovieClip.prototype = {
 	}
 	,createInner: function(baseInnerMovieClip) {
 		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,true);
-		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip,true);
+		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var classTemplate = new haxe.Template(this.getClassTemplateStr());
-		var lines = classTemplate.execute({ className : baseInnerMovieClip.className, field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		var lines = classTemplate.execute({ className : baseInnerMovieClip.className, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
 		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
 	}
 	,getMovieClipPath: function() {
@@ -1448,10 +1463,10 @@ tmpl.MovieClip.prototype = {
 	,getMovieClipTemplateStrForInner: function() {
 		return "";
 	}
-	,getTextFieldTemplateStrForInner: function() {
+	,getMovieClipTemplateStr: function() {
 		return "";
 	}
-	,getMovieClipTemplateStr: function() {
+	,getLinkageClassTemplateStr: function() {
 		return "";
 	}
 	,getTextFieldTemplateStr: function() {
@@ -1479,10 +1494,11 @@ tmpl.createjs.MovieClip.__name__ = true;
 tmpl.createjs.MovieClip.__super__ = tmpl.MovieClip;
 tmpl.createjs.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	create: function(baseInnerMovieClip,packageStr,$namespace,nativeClassName) {
-		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip);
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,false);
 		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
-		var lines = baseClassTemplate.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Container", field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		var lines = baseClassTemplate.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Container", field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
 		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
 	}
 	,getMovieClipPath: function() {
@@ -1491,11 +1507,11 @@ tmpl.createjs.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	,getMovieClipTemplateStrForInner: function() {
 		return this.getMovieClipTemplateStr();
 	}
-	,getTextFieldTemplateStrForInner: function() {
-		return this.getTextFieldTemplateStr();
-	}
 	,getMovieClipTemplateStr: function() {
 		return "\tpublic var ::propertyName:::::className::;";
+	}
+	,getLinkageClassTemplateStr: function() {
+		return "\tpublic var ::propertyName:::::linkageClassName::;";
 	}
 	,getTextFieldTemplateStr: function() {
 		return "\tpublic var ::propertyName:::createjs.easeljs.Text;";
@@ -1528,10 +1544,11 @@ tmpl.flash.MovieClip.__name__ = true;
 tmpl.flash.MovieClip.__super__ = tmpl.MovieClip;
 tmpl.flash.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	create: function(baseInnerMovieClip,external,packageStr) {
-		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip);
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,false);
 		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
-		var lines = baseClassTemplate.execute({ packageStr : packageStr, external : external?"extern ":"", className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Sprite", field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, external : external?"extern ":"", className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Sprite", field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
 		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
 	}
 	,getMovieClipPath: function() {
@@ -1540,11 +1557,11 @@ tmpl.flash.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	,getMovieClipTemplateStrForInner: function() {
 		return this.getMovieClipTemplateStr();
 	}
-	,getTextFieldTemplateStrForInner: function() {
-		return this.getTextFieldTemplateStr();
-	}
 	,getMovieClipTemplateStr: function() {
 		return "\tpublic var ::propertyName:::::className::;";
+	}
+	,getLinkageClassTemplateStr: function() {
+		return "\tpublic var ::propertyName:::::linkageClassName::;";
 	}
 	,getTextFieldTemplateStr: function() {
 		return "\tpublic var ::propertyName:::flash.text.TextField;";
@@ -1587,8 +1604,10 @@ tmpl.openfl.MovieClip = function() {
 tmpl.openfl.MovieClip.__name__ = true;
 tmpl.openfl.MovieClip.__super__ = tmpl.MovieClip;
 tmpl.openfl.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
-	getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
-		if(inner == null) inner = false;
+	getLinkageClassPropertyLines: function(baseInnerMovieClip) {
+		return "";
+	}
+	,getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
 		var lineSet = new Array();
 		var _g = 0, _g1 = baseInnerMovieClip.innerMovieClipSet;
 		while(_g < _g1.length) {
@@ -1603,32 +1622,30 @@ tmpl.openfl.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 		return lineSet.join("\n");
 	}
 	,create: function(baseInnerMovieClip,packageStr,swfName) {
-		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip);
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,false);
 		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
-		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, swfName : swfName, field : textFieldPropertyLines + "\n" + movieClipPropertyLines});
-		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
-	}
-	,getTextFieldTemplateStrForInner: function() {
-		return this.getTextFieldTemplateStr();
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, swfName : swfName, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
+		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip,true);
 	}
 	,getMovieClipPath: function() {
 		return "flash.display.MovieClip";
 	}
 	,getMovieClipTemplateStrHasInner: function() {
-		return "\n\tpublic var ::propertyName::(get, never):::className::;\n\tfunction get_::propertyName::(){\n\t\treturn new ::className::(cast this.getChildByName('::propertyName::'));\n\t}\n";
+		return "\tpublic var ::propertyName::(get, never):::className::;\n\tfunction get_::propertyName::(){\n\t\treturn new ::className::(cast this.getChildByName('::propertyName::'));\n\t}\n";
 	}
 	,getMovieClipTemplateStrNotHasInner: function() {
-		return "\n\tpublic var ::propertyName::(get, never):::className::;\n\tfunction get_::propertyName::(){\n\t\treturn cast(this.getChildByName('::propertyName::'), ::className::);\n\t}\n";
+		return "\tpublic var ::propertyName::(get, never):::className::;\n\tfunction get_::propertyName::(){\n\t\treturn cast(this.getChildByName('::propertyName::'), ::className::);\n\t}\n";
 	}
 	,getTextFieldTemplateStr: function() {
-		return "\n\tpublic var ::propertyName::(get, never):flash.text.TextField;\n\tfunction get_::propertyName::(){\n\t\treturn cast(this.getChildByName('::propertyName::'), flash.text.TextField);\n\t}\n";
+		return "\tpublic var ::propertyName::(get, never):TextField;\n\tfunction get_::propertyName::(){\n\t\treturn cast(this.getChildByName('::propertyName::'), TextField);\n\t}\n";
 	}
 	,getClassTemplateStr: function() {
 		return "abstract ::className::(MovieClip){\n    public function new(mc:MovieClip)\n        this = mc;\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
 	}
 	,getBaseClassTemplateStr: function() {
-		return "package ::packageStr::;\nimport flash.display.MovieClip;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
+		return "package ::packageStr::;\nimport flash.display.MovieClip;\nimport flash.text.TextField;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
 	}
 	,__class__: tmpl.openfl.MovieClip
 });

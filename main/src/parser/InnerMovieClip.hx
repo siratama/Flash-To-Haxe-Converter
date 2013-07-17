@@ -5,13 +5,18 @@ class InnerMovieClip{
     public var propertyName(default, null):String;
     public var className(default, null):String;
     public var textFieldNameSet(default, null):Array<String>;
+	//public var linkageClassSet(default, null):Array<LinkageClass>;
+	public var linkageClassName:String;
     public var innerMovieClipSet(default, null):Array<InnerMovieClip>;
     private var framesLength:Int;
 
-    public function new(propertyName:String, className:String){
+    public function new(propertyName:String, className:String, linkageClassName:String){
+
         this.propertyName = propertyName;
         this.className = className;
+		this.linkageClassName = linkageClassName;
         textFieldNameSet = [];
+		//linkageClassSet = [];
         innerMovieClipSet = [];
         framesLength = 0;
     }
@@ -28,8 +33,13 @@ class InnerMovieClip{
     public function addTextFieldName(name:String){
         textFieldNameSet.push(name);
     }
-    public function create(childName:String):InnerMovieClip{
-        var inner = new InnerMovieClip(childName, className + "_" + childName);
+	/*
+	public function addLinkageClassName(childName:String, linkageClassName:String){
+		linkageClassSet.push({propertyName:childName, linkageClassName:linkageClassName});
+	}
+	*/
+    public function create(childName:String, linkageClassName:String):InnerMovieClip{
+        var inner = new InnerMovieClip(childName, className + "_" + childName, linkageClassName);
         innerMovieClipSet.push(inner);
         return inner;
     }
@@ -37,3 +47,4 @@ class InnerMovieClip{
         return (textFieldNameSet.length != 0) || (innerMovieClipSet.length != 0);
     }
 }
+

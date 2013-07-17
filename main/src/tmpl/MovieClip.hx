@@ -13,11 +13,11 @@ class MovieClip {
     private function getTextFieldTemplateStr():String{
         return "";
     }
+	private function getLinkageClassTemplateStr():String{
+		return "";
+	}
     private function getMovieClipTemplateStr():String{
         return "";
-	}
-	private function getTextFieldTemplateStrForInner():String{
-		return "";
 	}
 	private function getMovieClipTemplateStrForInner():String{
 		return "";
@@ -32,21 +32,24 @@ class MovieClip {
     public function createInner(baseInnerMovieClip:InnerMovieClip):String{
 
         var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip, true);
-        var textFieldPropertyLines = getTextFieldPropertyLines(baseInnerMovieClip, true);
+        var textFieldPropertyLines = getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = getLinkageClassPropertyLines(baseInnerMovieClip);
 
         var classTemplate = new Template(getClassTemplateStr());
         var lines = classTemplate.execute({
             className: baseInnerMovieClip.className,
-            field: textFieldPropertyLines + "\n" + movieClipPropertyLines
+            field: [textFieldPropertyLines, linkageClassPropertyLines, movieClipPropertyLines].join("\n")
         });
 
         return lines + "\n" + getInnerMovieClipLines(baseInnerMovieClip);
     }
-    private function getMovieClipPropertyLines(baseInnerMovieClip:InnerMovieClip, inner:Bool = false):String{
+    private function getMovieClipPropertyLines(baseInnerMovieClip:InnerMovieClip, inner:Bool):String{
 
 		var func = (!inner) ? getMovieClipTemplateStr : getMovieClipTemplateStrForInner;
         var lineSet = new Array<String>();
         for(innerMovieClip in baseInnerMovieClip.innerMovieClipSet){
+
+			if(innerMovieClip.linkageClassName != null) continue;
 
             var className = (innerMovieClip.hasInner()) ? innerMovieClip.className : getMovieClipPath();
 
@@ -59,13 +62,12 @@ class MovieClip {
         }
         return lineSet.join("\n");
     }
-    private function getTextFieldPropertyLines(baseInnerMovieClip:InnerMovieClip, inner:Bool = false):String{
+    private function getTextFieldPropertyLines(baseInnerMovieClip:InnerMovieClip):String{
 
-		var func = (!inner) ? getTextFieldTemplateStr : getTextFieldTemplateStrForInner;
         var lineSet = new Array<String>();
         for(textFieldName in baseInnerMovieClip.textFieldNameSet){
 
-            var textFieldTemplate = new Template(func());
+            var textFieldTemplate = new Template(getTextFieldTemplateStr());
             var line = textFieldTemplate.execute({
                 propertyName: textFieldName
             });
@@ -73,12 +75,29 @@ class MovieClip {
         }
         return lineSet.join("\n");
     }
-    private function getInnerMovieClipLines(baseInnerMovieClip:InnerMovieClip):String{
+	private function getLinkageClassPropertyLines(baseInnerMovieClip:InnerMovieClip):String{
+
+		var lineSet = new Array<String>();
+		for(innerMovieClip in baseInnerMovieClip.innerMovieClipSet){
+
+			if(innerMovieClip.linkageClassName == null) continue;
+
+			var template = new Template(getLinkageClassTemplateStr());
+			var line = template.execute({
+				propertyName: innerMovieClip.propertyName,
+				linkageClassName: innerMovieClip.linkageClassName
+			});
+			lineSet.push(line);
+		}
+		return lineSet.join("\n");
+	}
+    private function getInnerMovieClipLines(baseInnerMovieClip:InnerMovieClip, isOpenFL:Bool = false):String{
 
         var lineSet = new Array<String>();
         for(innerMovieClip in baseInnerMovieClip.innerMovieClipSet){
 
             if(!innerMovieClip.hasInner()) continue;
+			if(!isOpenFL && innerMovieClip.linkageClassName != null) continue;
 
             var lines = createInner(innerMovieClip);
             lineSet.push(lines);

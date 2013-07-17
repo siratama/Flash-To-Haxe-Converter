@@ -22,12 +22,12 @@ extern class ::className:: extends createjs.easeljs.::superClassName::{
     override private function getTextFieldTemplateStr():String{
         return "\tpublic var ::propertyName:::createjs.easeljs.Text;";
     }
+	override private function getLinkageClassTemplateStr():String{
+		return "\tpublic var ::propertyName:::::linkageClassName::;";
+	}
     override private function getMovieClipTemplateStr():String{
         return "\tpublic var ::propertyName:::::className::;";
     }
-	override private function getTextFieldTemplateStrForInner():String{
-		return getTextFieldTemplateStr();
-	}
 	override private function getMovieClipTemplateStrForInner():String{
 		return getMovieClipTemplateStr();
 	}
@@ -40,8 +40,9 @@ extern class ::className:: extends createjs.easeljs.::superClassName::{
         namespace:String, nativeClassName:String
     ):String{
 
-        var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip);
+        var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip, false);
         var textFieldPropertyLines = getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = getLinkageClassPropertyLines(baseInnerMovieClip);
 
         var baseClassTemplate = new Template(getBaseClassTemplateStr());
         var lines = baseClassTemplate.execute({
@@ -50,7 +51,7 @@ extern class ::className:: extends createjs.easeljs.::superClassName::{
             packageStr: packageStr,
             className: baseInnerMovieClip.className,
             superClassName: baseInnerMovieClip.isMovieClip() ? "MovieClip" : "Container",
-            field: textFieldPropertyLines + "\n" + movieClipPropertyLines
+			field: [textFieldPropertyLines, linkageClassPropertyLines, movieClipPropertyLines].join("\n")
         });
 
         return lines + "\n" + getInnerMovieClipLines(baseInnerMovieClip);

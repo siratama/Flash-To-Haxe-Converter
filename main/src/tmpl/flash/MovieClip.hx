@@ -20,12 +20,12 @@ class MovieClip extends tmpl.MovieClip{
     override private function getTextFieldTemplateStr():String{
         return "\tpublic var ::propertyName:::flash.text.TextField;";
     }
+	override private function getLinkageClassTemplateStr():String{
+		return "\tpublic var ::propertyName:::::linkageClassName::;";
+	}
     override private function getMovieClipTemplateStr():String{
         return "\tpublic var ::propertyName:::::className::;";
     }
-	override private function getTextFieldTemplateStrForInner():String{
-		return getTextFieldTemplateStr();
-	}
 	override private function getMovieClipTemplateStrForInner():String{
 		return getMovieClipTemplateStr();
 	}
@@ -35,8 +35,9 @@ class MovieClip extends tmpl.MovieClip{
 
     public function create(baseInnerMovieClip:InnerMovieClip, external:Bool, packageStr:String):String{
 
-        var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip);
+        var movieClipPropertyLines = getMovieClipPropertyLines(baseInnerMovieClip, false);
         var textFieldPropertyLines = getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = getLinkageClassPropertyLines(baseInnerMovieClip);
 
         var baseClassTemplate = new Template(getBaseClassTemplateStr());
         var lines = baseClassTemplate.execute({
@@ -44,7 +45,7 @@ class MovieClip extends tmpl.MovieClip{
             external: (external) ? "extern ": "",
             className: baseInnerMovieClip.className,
             superClassName: baseInnerMovieClip.isMovieClip() ? "MovieClip" : "Sprite",
-            field: textFieldPropertyLines + "\n" + movieClipPropertyLines
+			field: [textFieldPropertyLines, linkageClassPropertyLines, movieClipPropertyLines].join("\n")
         });
 
         return lines + "\n" + getInnerMovieClipLines(baseInnerMovieClip);
