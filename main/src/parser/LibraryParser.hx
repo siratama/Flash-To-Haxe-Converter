@@ -31,7 +31,9 @@ class LibraryParser {
             if(itemType == "folder") continue;
             if(item.linkageClassName == null) continue;
 
-            var pathNames = itemName.split("/");
+            //var pathNames = itemName.split("/");
+			var pathNames = item.linkageClassName.split(".");
+			var outputPath = pathNames.join("/");
             var nativeClassName = pathNames.join("");
             var className = pathNames.pop();
             var packageStr = pathNames.join(".");
@@ -48,7 +50,7 @@ class LibraryParser {
 				baseInnerMovieClip = new InnerMovieClip(className, className, item.linkageClassName);
 				search(baseInnerMovieClip);
 			}
-            outputDataSet.push(new OutputData(itemName, itemType, packageStr, className, nativeClassName, baseInnerMovieClip));
+			outputDataSet.push(new OutputData(outputPath, itemType, packageStr, className, nativeClassName, baseInnerMovieClip));
         }
     }
     public function search(parentInnerMovieClip:InnerMovieClip){
@@ -62,6 +64,13 @@ class LibraryParser {
 
             var layerType = layer.layerType;
             if(layerType == "folder") continue;
+			if(layerType == "guide") continue;
+
+			var layerLocked = layer.locked;
+			if(layerLocked) layer.locked = false;
+
+			var layerVisible = layer.visible;
+			if(!layerVisible) layer.visible = true;
 
             if(parentInnerMovieClip.isFrameLengthZero())
                 parentInnerMovieClip.setFramesLength(layer.frames.length);
@@ -85,6 +94,9 @@ class LibraryParser {
                 documentDom.enterEditMode("inPlace");
                 search(innerMovieClip);
             }
+
+			if(layerLocked) layer.locked = true;
+			if(!layerVisible) layer.visible = false;
         }
         documentDom.exitEditMode();
     }

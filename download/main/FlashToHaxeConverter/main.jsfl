@@ -202,19 +202,19 @@ Main.prototype = {
 			++_g;
 			if(this.outputtedFlashExtern) {
 				var outputLines = this.getOutputLinesForFlash(outputData,true);
-				this.output(this.flashExternDirectory,outputData.itemName,outputLines);
+				this.output(this.flashExternDirectory,outputData.outputPath,outputLines);
 			}
 			if(this.outputtedFlash) {
 				var outputLines = this.getOutputLinesForFlash(outputData,false);
-				this.output(this.flashDirectory,outputData.itemName,outputLines);
+				this.output(this.flashDirectory,outputData.outputPath,outputLines);
 			}
 			if(this.outputtedCreateJs) {
 				var outputLines = this.getOutputLinesForCreateJs(outputData);
-				this.output(this.createJsDirectory,outputData.itemName,outputLines);
+				this.output(this.createJsDirectory,outputData.outputPath,outputLines);
 			}
 			if(this.outputtedOpenfl) {
 				var outputLines = this.getOutputLinesForOpenfl(outputData);
-				this.output(this.openflDirectory,outputData.itemName,outputLines);
+				this.output(this.openflDirectory,outputData.outputPath,outputLines);
 			}
 		}
 	}
@@ -1329,6 +1329,11 @@ parser.LibraryParser.prototype = {
 			++_g;
 			var layerType = layer.layerType;
 			if(layerType == "folder") continue;
+			if(layerType == "guide") continue;
+			var layerLocked = layer.locked;
+			if(layerLocked) layer.locked = false;
+			var layerVisible = layer.visible;
+			if(!layerVisible) layer.visible = true;
 			if(parentInnerMovieClip.isFrameLengthZero()) parentInnerMovieClip.setFramesLength(layer.frames.length);
 			var _g1 = 0, _g2 = layer.frames[0].elements;
 			while(_g1 < _g2.length) {
@@ -1346,6 +1351,8 @@ parser.LibraryParser.prototype = {
 				documentDom.enterEditMode("inPlace");
 				this.search(innerMovieClip);
 			}
+			if(layerLocked) layer.locked = true;
+			if(!layerVisible) layer.visible = false;
 		}
 		documentDom.exitEditMode();
 	}
@@ -1360,7 +1367,8 @@ parser.LibraryParser.prototype = {
 			var itemType = item.itemType;
 			if(itemType == "folder") continue;
 			if(item.linkageClassName == null) continue;
-			var pathNames = itemName.split("/");
+			var pathNames = item.linkageClassName.split(".");
+			var outputPath = pathNames.join("/");
 			var nativeClassName = pathNames.join("");
 			var className = pathNames.pop();
 			var packageStr = pathNames.join(".");
@@ -1373,13 +1381,13 @@ parser.LibraryParser.prototype = {
 				baseInnerMovieClip = new parser.InnerMovieClip(className,className,item.linkageClassName);
 				this.search(baseInnerMovieClip);
 			}
-			this.outputDataSet.push(new parser.OutputData(itemName,itemType,packageStr,className,nativeClassName,baseInnerMovieClip));
+			this.outputDataSet.push(new parser.OutputData(outputPath,itemType,packageStr,className,nativeClassName,baseInnerMovieClip));
 		}
 	}
 	,__class__: parser.LibraryParser
 }
-parser.OutputData = function(itemName,itemType,packageStr,className,nativeClassName,baseInnerMovieClip) {
-	this.itemName = itemName;
+parser.OutputData = function(outputPath,itemType,packageStr,className,nativeClassName,baseInnerMovieClip) {
+	this.outputPath = outputPath;
 	this.itemType = itemType;
 	this.packageStr = packageStr;
 	this.className = className;

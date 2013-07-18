@@ -150,19 +150,19 @@ class Main {
 
 			if(outputtedFlashExtern){
 				var outputLines = getOutputLinesForFlash(outputData, true);
-				output(flashExternDirectory, outputData.itemName, outputLines);
+				output(flashExternDirectory, outputData.outputPath, outputLines);
 			}
             if(outputtedFlash){
                 var outputLines = getOutputLinesForFlash(outputData, false);
-                output(flashDirectory, outputData.itemName, outputLines);
+                output(flashDirectory, outputData.outputPath, outputLines);
             }
 			if(outputtedCreateJs){
 				var outputLines = getOutputLinesForCreateJs(outputData);
-				output(createJsDirectory, outputData.itemName, outputLines);
+				output(createJsDirectory, outputData.outputPath, outputLines);
 			}
             if(outputtedOpenfl){
                 var outputLines = getOutputLinesForOpenfl(outputData);
-                output(openflDirectory, outputData.itemName, outputLines);
+                output(openflDirectory, outputData.outputPath, outputLines);
             }
 		}
 	}
