@@ -75,6 +75,8 @@ fla ファイルと異なるディレクトリに出力したい場合、相対�
 
 [http://qiita.com/tail_y/items/9d7f8cf903613c1037e6](http://qiita.com/tail_y/items/9d7f8cf903613c1037e6)
 
+[http://www.dango-itimi.com/blog/archives/2013/001191.html](http://www.dango-itimi.com/blog/archives/2013/001191.html)
+
 ### Toolkit for CreateJS 用 独自出力
 
 CreateJS用に出力された各 Haxe ファイルには、Toolkit for CreateJS から出力された javascript ファイルにアクセスしやすくなるような以下のプロパティを追加しています。
