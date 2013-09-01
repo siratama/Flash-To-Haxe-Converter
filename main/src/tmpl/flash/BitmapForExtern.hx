@@ -1,13 +1,11 @@
 package tmpl.flash;
 import haxe.Template;
-class Bitmap {
+class BitmapForExtern {
 
 	static public var template:Template = new Template(
 "package ::packageStr::;
-class ::className:: extends flash.display.BitmapData{
-	function new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void{
-		super(width, height, transparent, fillColor);
-	}
+extern class ::className:: extends flash.display.BitmapData{
+	function new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void;
 }"
 	);
 

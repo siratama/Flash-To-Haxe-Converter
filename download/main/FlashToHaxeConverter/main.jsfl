@@ -190,7 +190,7 @@ Main.prototype = {
 			outputLines = tmpl.flash.Sound.create(outputData.packageStr,outputData.className,external);
 			break;
 		case "bitmap":
-			outputLines = tmpl.flash.Bitmap.create(outputData.packageStr,outputData.className,external);
+			outputLines = external?tmpl.flash.BitmapForExtern.create(outputData.packageStr,outputData.className):tmpl.flash.Bitmap.create(outputData.packageStr,outputData.className);
 			break;
 		}
 		return outputLines;
@@ -1541,8 +1541,14 @@ tmpl.createjs.Sound.create = function(packageStr,className,nativeClassName) {
 if(!tmpl.flash) tmpl.flash = {}
 tmpl.flash.Bitmap = function() { }
 tmpl.flash.Bitmap.__name__ = true;
-tmpl.flash.Bitmap.create = function(packageStr,className,external) {
-	var fileLines = tmpl.flash.Bitmap.template.execute({ packageStr : packageStr, className : className, external : external?"extern ":""});
+tmpl.flash.Bitmap.create = function(packageStr,className) {
+	var fileLines = tmpl.flash.Bitmap.template.execute({ packageStr : packageStr, className : className});
+	return fileLines;
+}
+tmpl.flash.BitmapForExtern = function() { }
+tmpl.flash.BitmapForExtern.__name__ = true;
+tmpl.flash.BitmapForExtern.create = function(packageStr,className) {
+	var fileLines = tmpl.flash.BitmapForExtern.template.execute({ packageStr : packageStr, className : className});
 	return fileLines;
 }
 tmpl.flash.MovieClip = function() {
@@ -1711,7 +1717,8 @@ haxe.xml.Parser.escapes = (function($this) {
 }(this));
 tmpl.createjs.Bitmap.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.Bitmap{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n\tpublic function new():Void;\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n}");
 tmpl.createjs.Sound.template = new haxe.Template("package ::packageStr::;\nclass ::className::{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n}");
-tmpl.flash.Bitmap.template = new haxe.Template("package ::packageStr::;\n::external::class ::className:: extends flash.display.BitmapData{\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void;\n}");
+tmpl.flash.Bitmap.template = new haxe.Template("package ::packageStr::;\nclass ::className:: extends flash.display.BitmapData{\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void{\n\t\tsuper(width, height, transparent, fillColor);\n\t}\n}");
+tmpl.flash.BitmapForExtern.template = new haxe.Template("package ::packageStr::;\nextern class ::className:: extends flash.display.BitmapData{\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void;\n}");
 tmpl.flash.Sound.template = new haxe.Template("package ::packageStr::;\n::external::class ::className:: extends flash.media.Sound{\n}");
 tmpl.openfl.Bitmap.template = new haxe.Template("package ::packageStr::;\nimport flash.display.BitmapData;\nimport openfl.Assets;\nabstract ::className:: (BitmapData){\n\tfunction new()\n        this = Assets.getBitmap('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():BitmapData\n        return this;\n}");
 tmpl.openfl.Sound.template = new haxe.Template("package ::packageStr::;\nimport flash.media.Sound;\nimport openfl.Assets;\nabstract ::className::(Sound){\n    public function new()\n        this = Assets.getSound('::packageStr::.::className::');\n    @:to public function getInstance():Sound\n        return this;\n}");
