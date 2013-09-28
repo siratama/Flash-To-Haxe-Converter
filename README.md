@@ -86,7 +86,6 @@ CreateJS用に出力された各 Haxe ファイルには、Toolkit for CreateJS 
 * Bitmap.nominalBounds
 * Container.nominalBounds
 * MovieClip.nominalBounds
-* MovieClip.frameBounds
 
 ## 廃止された機能
 

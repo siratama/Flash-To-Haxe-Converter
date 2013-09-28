@@ -9,7 +9,6 @@ class MovieClip extends tmpl.MovieClip{
 @:native("::namespace::.::nativeClassName::")
 extern class ::className:: extends createjs.easeljs.::superClassName::{
 	public var nominalBounds:createjs.easeljs.Rectangle;
-	public var frameBounds:Array<createjs.easeljs.Rectangle>;
 ::field::
 }');
     }

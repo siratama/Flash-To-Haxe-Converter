@@ -1528,7 +1528,7 @@ tmpl.createjs.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 		return "extern class ::className:: extends createjs.easeljs.MovieClip{\n::field::\n}";
 	}
 	,getBaseClassTemplateStr: function() {
-		return "package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.::superClassName::{\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n\tpublic var frameBounds:Array<createjs.easeljs.Rectangle>;\n::field::\n}";
+		return "package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.::superClassName::{\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n::field::\n}";
 	}
 	,__class__: tmpl.createjs.MovieClip
 });
