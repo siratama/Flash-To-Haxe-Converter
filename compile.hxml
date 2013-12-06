@@ -2,7 +2,6 @@
 -main Main
 -cp main/src
 -lib jsfl
--D js-classic
 
 --next
 

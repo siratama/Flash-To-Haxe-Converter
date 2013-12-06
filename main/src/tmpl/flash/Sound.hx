@@ -13,7 +13,7 @@ class Sound {
 		var fileLines = template.execute({
 			packageStr: packageStr,
 			className: className,
-            external: (external) ? "extern ": ""
+			external: (external) ? "extern " : ""
 		});
 		return fileLines;
 	}

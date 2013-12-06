@@ -1,3 +1,4 @@
+(function () { "use strict";
 var $estr = function() { return js.Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function inherit() {}; inherit.prototype = from; var proto = new inherit();
@@ -136,8 +137,11 @@ var Main = function(baseDirectory,flashExternDirectory,flashDirectory,createJsDi
 	this.setSwfName();
 	this.createFolder();
 	this.outputData();
+	delete String.prototype.__class__;
+	delete Array.prototype.__class__;
 	fl.trace("finish");
 };
+$hxExpose(Main, "Main");
 Main.__name__ = true;
 Main.main = function() {
 }
@@ -442,8 +446,8 @@ Xml.prototype = {
 	}
 	,__class__: Xml
 }
-var haxe = haxe || {}
-if(!haxe._Template) haxe._Template = {}
+var haxe = {}
+haxe._Template = {}
 haxe._Template.TemplateExpr = { __ename__ : true, __constructs__ : ["OpVar","OpExpr","OpIf","OpStr","OpBlock","OpForeach","OpMacro"] }
 haxe._Template.TemplateExpr.OpVar = function(v) { var $x = ["OpVar",0,v]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
 haxe._Template.TemplateExpr.OpExpr = function(expr) { var $x = ["OpExpr",1,expr]; $x.__enum__ = haxe._Template.TemplateExpr; $x.toString = $estr; return $x; }
@@ -823,7 +827,7 @@ haxe.Template.prototype = {
 	}
 	,__class__: haxe.Template
 }
-if(!haxe.ds) haxe.ds = {}
+haxe.ds = {}
 haxe.ds.StringMap = function() {
 	this.h = { };
 };
@@ -848,8 +852,8 @@ haxe.ds.StringMap.prototype = {
 	}
 	,__class__: haxe.ds.StringMap
 }
-if(!haxe.xml) haxe.xml = {}
-if(!haxe.xml._Fast) haxe.xml._Fast = {}
+haxe.xml = {}
+haxe.xml._Fast = {}
 haxe.xml._Fast.NodeAccess = function(x) {
 	this.__x = x;
 };
@@ -1169,7 +1173,7 @@ haxe.xml.Parser.doParse = function(str,p,parent) {
 	}
 	throw "Unexpected end";
 }
-var js = js || {}
+var js = {}
 js.Boot = function() { }
 js.Boot.__name__ = true;
 js.Boot.__string_rec = function(o,s) {
@@ -1280,7 +1284,7 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 }
-var parser = parser || {}
+var parser = {}
 parser.InnerMovieClip = function(propertyName,className,linkageClassName) {
 	this.propertyName = propertyName;
 	this.className = className;
@@ -1398,7 +1402,7 @@ parser.OutputData.__name__ = true;
 parser.OutputData.prototype = {
 	__class__: parser.OutputData
 }
-var tmpl = tmpl || {}
+var tmpl = {}
 tmpl.MovieClip = function() {
 };
 tmpl.MovieClip.__name__ = true;
@@ -1488,7 +1492,7 @@ tmpl.MovieClip.prototype = {
 	}
 	,__class__: tmpl.MovieClip
 }
-if(!tmpl.createjs) tmpl.createjs = {}
+tmpl.createjs = {}
 tmpl.createjs.Bitmap = function() { }
 tmpl.createjs.Bitmap.__name__ = true;
 tmpl.createjs.Bitmap.create = function(packageStr,className,$namespace,nativeClassName) {
@@ -1538,7 +1542,7 @@ tmpl.createjs.Sound.create = function(packageStr,className,nativeClassName) {
 	var fileLines = tmpl.createjs.Sound.template.execute({ packageStr : packageStr, className : className, nativeClassName : nativeClassName});
 	return fileLines;
 }
-if(!tmpl.flash) tmpl.flash = {}
+tmpl.flash = {}
 tmpl.flash.Bitmap = function() { }
 tmpl.flash.Bitmap.__name__ = true;
 tmpl.flash.Bitmap.create = function(packageStr,className) {
@@ -1605,7 +1609,7 @@ tmpl.flash.Sound.create = function(packageStr,className,external) {
 	var fileLines = tmpl.flash.Sound.template.execute({ packageStr : packageStr, className : className, external : external?"extern ":""});
 	return fileLines;
 }
-if(!tmpl.openfl) tmpl.openfl = {}
+tmpl.openfl = {}
 tmpl.openfl.Bitmap = function() { }
 tmpl.openfl.Bitmap.__name__ = true;
 tmpl.openfl.Bitmap.create = function(packageStr,className,swfName) {
@@ -1723,3 +1727,14 @@ tmpl.flash.Sound.template = new haxe.Template("package ::packageStr::;\n::extern
 tmpl.openfl.Bitmap.template = new haxe.Template("package ::packageStr::;\nimport flash.display.BitmapData;\nimport openfl.Assets;\nabstract ::className:: (BitmapData){\n\tfunction new()\n        this = Assets.getBitmap('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():BitmapData\n        return this;\n}");
 tmpl.openfl.Sound.template = new haxe.Template("package ::packageStr::;\nimport flash.media.Sound;\nimport openfl.Assets;\nabstract ::className::(Sound){\n    public function new()\n        this = Assets.getSound('::packageStr::.::className::');\n    @:to public function getInstance():Sound\n        return this;\n}");
 Main.main();
+function $hxExpose(src, path) {
+	var o = typeof window != "undefined" ? window : exports;
+	var parts = path.split(".");
+	for(var ii = 0; ii < parts.length-1; ++ii) {
+		var p = parts[ii];
+		if(typeof o[p] == "undefined") o[p] = {};
+		o = o[p];
+	}
+	o[parts[parts.length-1]] = src;
+}
+})();

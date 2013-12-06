@@ -7,42 +7,42 @@ import jsfl.Library;
 import jsfl.Layer;
 class LibraryParser {
 
-    public var packageDirectoryMap(default, null):Map<String, Bool>;
-    public var outputDataSet(default, null):Array<OutputData>;
-    private var library:Library;
+	public var packageDirectoryMap(default, null):Map<String, Bool>;
+	public var outputDataSet(default, null):Array<OutputData>;
+	private var library:Library;
 
-    public function new() {
+	public function new(){
 
-        library = Flash.getDocumentDOM().library;
-        packageDirectoryMap = new Map();
-        outputDataSet = [];
-    }
-    public function execute() {
+		library = Flash.getDocumentDOM().library;
+		packageDirectoryMap = new Map();
+		outputDataSet = [];
+	}
 
-        var items:Array<Item> = library.items;
-        var itemsLength = items.length;
-        for(i in 0...itemsLength){
+	public function execute(){
 
-            var item = items[i];
+		var items:Array<Item> = library.items;
+		var itemsLength = items.length;
+		for(i in 0...itemsLength){
 
-            var itemName = item.name;
-            var itemType = item.itemType;
+			var item = items[i];
 
-            if(itemType == "folder") continue;
-            if(item.linkageClassName == null) continue;
+			var itemName = item.name;
+			var itemType = item.itemType;
 
-            //var pathNames = itemName.split("/");
+			if(itemType == "folder") continue;
+			if(item.linkageClassName == null) continue;
+
 			var pathNames = item.linkageClassName.split(".");
 			var outputPath = pathNames.join("/");
-            var nativeClassName = pathNames.join("");
-            var className = pathNames.pop();
-            var packageStr = pathNames.join(".");
+			var nativeClassName = pathNames.join("");
+			var className = pathNames.pop();
+			var packageStr = pathNames.join(".");
 
-            var directory = pathNames.join("/") + "/";
-            packageDirectoryMap[directory] = true;
+			var directory = pathNames.join("/") + "/";
+			packageDirectoryMap[directory] = true;
 
-            //
-            //Flash.trace(":::" + itemName + ":" + className);
+			//
+			//Flash.trace(":::" + itemName + ":" + className);
 			var baseInnerMovieClip:InnerMovieClip = null;
 			if(itemType == "movie clip"){
 
@@ -51,19 +51,19 @@ class LibraryParser {
 				search(baseInnerMovieClip);
 			}
 			outputDataSet.push(new OutputData(outputPath, itemType, packageStr, className, nativeClassName, baseInnerMovieClip));
-        }
-    }
-    public function search(parentInnerMovieClip:InnerMovieClip){
+		}
+	}
 
-        var documentDom = Flash.getDocumentDOM();
-        var layers:Array<Layer> = documentDom.getTimeline().layers;
+	public function search(parentInnerMovieClip:InnerMovieClip){
 
-        //Flash.trace(parentInnerMovieClip.propertyName);
+		var documentDom = Flash.getDocumentDOM();
+		var layers:Array<Layer> = documentDom.getTimeline().layers;
 
-        for(layer in layers){
+		//Flash.trace(parentInnerMovieClip.propertyName);
+		for(layer in layers){
 
-            var layerType = layer.layerType;
-            if(layerType == "folder") continue;
+			var layerType = layer.layerType;
+			if(layerType == "folder") continue;
 			if(layerType == "guide") continue;
 
 			var layerLocked = layer.locked;
@@ -72,33 +72,33 @@ class LibraryParser {
 			var layerVisible = layer.visible;
 			if(!layerVisible) layer.visible = true;
 
-            if(parentInnerMovieClip.isFrameLengthZero())
-                parentInnerMovieClip.setFramesLength(layer.frames.length);
+			if(parentInnerMovieClip.isFrameLengthZero())
+				parentInnerMovieClip.setFramesLength(layer.frames.length);
 
-            for(element in layer.frames[0].elements){
+			for(element in layer.frames[0].elements){
 
-                if(element.name == "") continue;
+				if(element.name == "") continue;
 
-                if(element.elementType != "instance"){
+				if(element.elementType != "instance"){
 
-                    parentInnerMovieClip.addTextFieldName(element.name);
-                    continue;
-                }
+					parentInnerMovieClip.addTextFieldName(element.name);
+					continue;
+				}
 
 				var linkageClassName:String = untyped element.libraryItem.linkageClassName;
-                var innerMovieClip = parentInnerMovieClip.create(element.name, linkageClassName);
+				var innerMovieClip = parentInnerMovieClip.create(element.name, linkageClassName);
 
-                documentDom.selectNone();
-                documentDom.selection = [element];
+				documentDom.selectNone();
+				documentDom.selection = [element];
 
-                documentDom.enterEditMode("inPlace");
-                search(innerMovieClip);
-            }
+				documentDom.enterEditMode("inPlace");
+				search(innerMovieClip);
+			}
 
 			if(layerLocked) layer.locked = true;
 			if(!layerVisible) layer.visible = false;
-        }
-        documentDom.exitEditMode();
-    }
+		}
+		documentDom.exitEditMode();
+	}
 }
 

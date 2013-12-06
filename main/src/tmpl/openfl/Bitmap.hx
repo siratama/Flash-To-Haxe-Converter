@@ -18,8 +18,8 @@ abstract ::className:: (BitmapData){
 
 		var fileLines = template.execute({
 			packageStr: packageStr,
-            className: className,
-            swfName: swfName
+			className: className,
+			swfName: swfName
 		});
 		return fileLines;
 	}
