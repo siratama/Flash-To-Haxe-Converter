@@ -117,6 +117,7 @@ List.prototype = {
 var Main = function(baseDirectory,flashExternDirectory,flashDirectory,createJsDirectory,openflDirectory,symbolNameSpace) {
 	if(symbolNameSpace == null) symbolNameSpace = "lib";
 	fl.outputPanel.clear();
+	this.result = null;
 	this.outputtedFlashExtern = flashExternDirectory != "";
 	this.outputtedFlash = flashDirectory != "";
 	this.outputtedCreateJs = createJsDirectory != "";
@@ -133,20 +134,23 @@ var Main = function(baseDirectory,flashExternDirectory,flashDirectory,createJsDi
 	this.openflDirectory = this.getOutputDirectory(openflDirectory);
 	this.libraryParser = new parser.LibraryParser();
 	this.libraryParser.execute();
-	this.createOutputDirectory();
-	this.setSwfName();
-	this.createFolder();
-	this.outputData();
-	delete String.prototype.__class__;
-	delete Array.prototype.__class__;
-	fl.trace("finish");
+	this.mainFunction = $bind(this,this.createOutputDirectory);
 };
 $hxExpose(Main, "Main");
 Main.__name__ = true;
 Main.main = function() {
 }
 Main.prototype = {
-	output: function(baseUri,itemName,outputLines) {
+	finish: function() {
+	}
+	,initializeToFinish: function() {
+		this.result = "success";
+		delete String.prototype.__class__;
+		delete Array.prototype.__class__;
+		fl.trace("finish");
+		this.mainFunction = $bind(this,this.finish);
+	}
+	,output: function(baseUri,itemName,outputLines) {
 		var filePath = baseUri + itemName + ".hx";
 		FLfile.write(filePath,outputLines);
 		fl.trace(filePath);
@@ -200,10 +204,9 @@ Main.prototype = {
 		return outputLines;
 	}
 	,outputData: function() {
-		var _g = 0, _g1 = this.libraryParser.outputDataSet;
-		while(_g < _g1.length) {
-			var outputData = _g1[_g];
-			++_g;
+		var outputCount = 0;
+		while(this.libraryParser.outputDataSet.length > 0) {
+			var outputData = this.libraryParser.outputDataSet.shift();
 			if(this.outputtedFlashExtern) {
 				var outputLines = this.getOutputLinesForFlash(outputData,true);
 				this.output(this.flashExternDirectory,outputData.outputPath,outputLines);
@@ -220,7 +223,9 @@ Main.prototype = {
 				var outputLines = this.getOutputLinesForOpenfl(outputData);
 				this.output(this.openflDirectory,outputData.outputPath,outputLines);
 			}
+			if(++outputCount >= Main.OUTPUT_LOOP_ONCE) return;
 		}
+		this.mainFunction = $bind(this,this.initializeToFinish);
 	}
 	,createFolderCommon: function(outputted,directoryUri) {
 		if(outputted && !FLfile.exists(directoryUri)) {
@@ -235,12 +240,16 @@ Main.prototype = {
 			this.createFolderCommon(this.outputtedFlash,this.flashDirectory + key);
 			this.createFolderCommon(this.outputtedCreateJs,this.createJsDirectory + key);
 			this.createFolderCommon(this.outputtedOpenfl,this.openflDirectory + key);
+			this.libraryParser.packageDirectoryMap.remove(key);
+			return;
 		}
+		this.mainFunction = $bind(this,this.outputData);
 	}
 	,setSwfName: function() {
 		var profileXML = Xml.parse(fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new haxe.xml.Fast(profileXML.firstElement());
 		this.swfName = fastXML.node.resolve("PublishFormatProperties").node.resolve("flashFileName").get_innerData().split(".")[0];
+		this.mainFunction = $bind(this,this.createFolder);
 	}
 	,createOutputDirectoryCommon: function(outputted,outputDirectory) {
 		if(outputted && !FLfile.exists(outputDirectory)) FLfile.createFolder(outputDirectory);
@@ -250,6 +259,10 @@ Main.prototype = {
 		this.createOutputDirectoryCommon(this.outputtedFlash,this.flashDirectory);
 		this.createOutputDirectoryCommon(this.outputtedCreateJs,this.createJsDirectory);
 		this.createOutputDirectoryCommon(this.outputtedOpenfl,this.openflDirectory);
+		this.mainFunction = $bind(this,this.setSwfName);
+	}
+	,run: function() {
+		this.mainFunction();
 	}
 	,getOutputDirectory: function(outputDirectory) {
 		if(outputDirectory.charAt(outputDirectory.length - 1) != "/") outputDirectory += "/";
@@ -272,6 +285,8 @@ Reflect.field = function(o,field) {
 	}
 	return v;
 }
+var Result = function() { }
+Result.__name__ = true;
 var Std = function() { }
 Std.__name__ = true;
 Std.string = function(s) {
@@ -841,6 +856,12 @@ haxe.ds.StringMap.prototype = {
 		}
 		return HxOverrides.iter(a);
 	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
+	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
 	}
@@ -1284,6 +1305,18 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 }
+js.Boot.__cast = function(o,t) {
+	if(js.Boot.__instanceof(o,t)) return o; else throw "Cannot cast " + Std.string(o) + " to " + Std.string(t);
+}
+var jsfl = {}
+jsfl.EnterEditMode = function() { }
+jsfl.EnterEditMode.__name__ = true;
+jsfl.ElementType = function() { }
+jsfl.ElementType.__name__ = true;
+jsfl.ItemType = function() { }
+jsfl.ItemType.__name__ = true;
+jsfl.LayerType = function() { }
+jsfl.LayerType.__name__ = true;
 var parser = {}
 parser.InnerMovieClip = function(propertyName,className,linkageClassName) {
 	this.propertyName = propertyName;
@@ -1348,7 +1381,7 @@ parser.LibraryParser.prototype = {
 					parentInnerMovieClip.addTextFieldName(element.name);
 					continue;
 				}
-				var linkageClassName = element.libraryItem.linkageClassName;
+				var linkageClassName = (js.Boot.__cast(element , Instance)).libraryItem.linkageClassName;
 				var innerMovieClip = parentInnerMovieClip.create(element.name,linkageClassName);
 				documentDom.selectNone();
 				documentDom.selection = [element];
@@ -1701,6 +1734,8 @@ Xml.Comment = "comment";
 Xml.DocType = "doctype";
 Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
+Main.OUTPUT_LOOP_ONCE = 4;
+Result.SUCCESS = "success";
 haxe.Template.splitter = new EReg("(::[A-Za-z0-9_ ()&|!+=/><*.\"-]+::|\\$\\$([A-Za-z0-9_-]+)\\()","");
 haxe.Template.expr_splitter = new EReg("(\\(|\\)|[ \r\n\t]*\"[^\"]*\"[ \r\n\t]*|[!+=/><*.&|-]+)","");
 haxe.Template.expr_trim = new EReg("^[ ]*([^ ]+)[ ]*$","");
@@ -1719,6 +1754,30 @@ haxe.xml.Parser.escapes = (function($this) {
 	$r = h;
 	return $r;
 }(this));
+jsfl.EnterEditMode.IN_PLACE = "inPlace";
+jsfl.EnterEditMode.NEW_WINDOW = "newWindow";
+jsfl.ElementType.SHAPE = "shape";
+jsfl.ElementType.TEXT = "text";
+jsfl.ElementType.TLF_TEXT = "tlfText";
+jsfl.ElementType.INSTANCE = "instance";
+jsfl.ElementType.SHAPE_OBJ = "shapeObj";
+jsfl.ItemType.UNDEFINED = "undefined";
+jsfl.ItemType.COMPONENT = "component";
+jsfl.ItemType.GRAPHIC = "graphic";
+jsfl.ItemType.BUTTON = "button";
+jsfl.ItemType.FOLDER = "folder";
+jsfl.ItemType.COMPILED_CLIP = "compiled clip";
+jsfl.ItemType.SCREEN = "screen";
+jsfl.ItemType.VIDEO = "video";
+jsfl.ItemType.MOVIE_CLIP = "movie clip";
+jsfl.ItemType.SOUND = "sound";
+jsfl.ItemType.BITMAP = "bitmap";
+jsfl.LayerType.NORMAL = "normal";
+jsfl.LayerType.GUIDE = "guide";
+jsfl.LayerType.GUIDED = "guided";
+jsfl.LayerType.MASK = "mask";
+jsfl.LayerType.MASKED = "masked";
+jsfl.LayerType.FOLDER = "folder";
 tmpl.createjs.Bitmap.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.Bitmap{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n\tpublic function new():Void;\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n}");
 tmpl.createjs.Sound.template = new haxe.Template("package ::packageStr::;\nclass ::className::{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n}");
 tmpl.flash.Bitmap.template = new haxe.Template("package ::packageStr::;\nclass ::className:: extends flash.display.BitmapData{\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void{\n\t\tsuper(width, height, transparent, fillColor);\n\t}\n}");

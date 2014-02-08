@@ -1,7 +1,7 @@
 -js download/main/FlashToHaxeConverter/main.jsfl
 -main Main
 -cp main/src
--lib jsfl
+-cp ../hxclasses
 
 --next
 
@@ -12,5 +12,6 @@
 -swf-lib dialog/fla/view.swf
 -cp dialog/src/main
 -cp dialog/src/flash_extern
--lib jsfl
+-cp main/src
+-cp ../hxclasses
 

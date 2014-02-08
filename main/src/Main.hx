@@ -12,6 +12,8 @@ import jsfl.Flash;
 @:expose("Main")
 class Main {
 
+	private static var OUTPUT_LOOP_ONCE = 4;
+
 	private var baseDirectory:String;
 
 	private var flashExternDirectory:String;
@@ -28,16 +30,18 @@ class Main {
 
 	private var swfName:String;
 	private var libraryParser:LibraryParser;
+	private var mainFunction:Void->Void;
+
+	public var result(default, null):String;
 
 	public static function main(){
 	}
-
 	public function new(
 		baseDirectory:String, flashExternDirectory:String, flashDirectory:String, createJsDirectory:String, openflDirectory:String,
 		symbolNameSpace:String = "lib"
 	){
-
 		Flash.outputPanel.clear();
+		result = null;
 
 		this.outputtedFlashExtern = flashExternDirectory != "";
 		this.outputtedFlash = flashDirectory != "";
@@ -60,37 +64,41 @@ class Main {
 		libraryParser = new LibraryParser();
 		libraryParser.execute();
 
-		createOutputDirectory();
-		setSwfName();
-		createFolder();
-		outputData();
-
-		untyped __js__("delete String.prototype.__class__");
-		untyped __js__("delete Array.prototype.__class__");
-
-		Flash.trace("finish");
+		mainFunction = createOutputDirectory;
 	}
 	private function getOutputDirectory(outputDirectory:String){
 
 		if(outputDirectory.charAt(outputDirectory.length - 1) != "/") outputDirectory += "/";
 		return baseDirectory + outputDirectory;
 	}
+
+	public function run(){
+		mainFunction();
+	}
+
+	//
 	private function createOutputDirectory(){
 
 		createOutputDirectoryCommon(outputtedFlashExtern, flashExternDirectory);
 		createOutputDirectoryCommon(outputtedFlash, flashDirectory);
 		createOutputDirectoryCommon(outputtedCreateJs, createJsDirectory);
 		createOutputDirectoryCommon(outputtedOpenfl, openflDirectory);
+
+		mainFunction = setSwfName;
 	}
 	private function createOutputDirectoryCommon(outputted:Bool, outputDirectory:String){
 
 		if(outputted && !FLfile.exists(outputDirectory)) FLfile.createFolder(outputDirectory);
 	}
+
+	//
 	private function setSwfName(){
 
 		var profileXML = Xml.parse(Flash.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new Fast(profileXML.firstElement());
 		swfName = fastXML.node.PublishFormatProperties.node.flashFileName.innerData.split(".")[0];
+
+		mainFunction = createFolder;
 	}
 
 	//
@@ -101,7 +109,12 @@ class Main {
 			createFolderCommon(outputtedFlash, flashDirectory + key);
 			createFolderCommon(outputtedCreateJs, createJsDirectory + key);
 			createFolderCommon(outputtedOpenfl, openflDirectory + key);
+
+			libraryParser.packageDirectoryMap.remove(key);
+			return;
 		}
+
+		mainFunction = outputData;
 	}
 	private function createFolderCommon(outputted:Bool, directoryUri:String){
 
@@ -117,7 +130,10 @@ class Main {
 	//
 	private function outputData(){
 
-		for(outputData in libraryParser.outputDataSet){
+		var outputCount = 0;
+		while(libraryParser.outputDataSet.length > 0){
+
+			var outputData = libraryParser.outputDataSet.shift();
 
 			if(outputtedFlashExtern){
 				var outputLines = getOutputLinesForFlash(outputData, true);
@@ -135,21 +151,23 @@ class Main {
 				var outputLines = getOutputLinesForOpenfl(outputData);
 				output(openflDirectory, outputData.outputPath, outputLines);
 			}
+			if(++outputCount >= OUTPUT_LOOP_ONCE) return;
 		}
+		mainFunction = initializeToFinish;
 	}
 	private function getOutputLinesForFlash(outputData:OutputData, external:Bool):String{
 
 		var outputLines = "";
 		switch(outputData.itemType){
-			case "movie clip":
+			case ItemType.MOVIE_CLIP:
 				var templateMovieClip = (external) ? new tmpl.flash.MovieClipForExtern() : new tmpl.flash.MovieClip();
 				outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, external, outputData.packageStr);
-			case "sound":
+			case ItemType.SOUND:
 				outputLines = tmpl.flash.Sound.create(outputData.packageStr, outputData.className, external);
-			case "bitmap":
+			case ItemType.BITMAP:
 				outputLines = (external) ?
-				tmpl.flash.BitmapForExtern.create(outputData.packageStr, outputData.className) :
-				tmpl.flash.Bitmap.create(outputData.packageStr, outputData.className);
+					tmpl.flash.BitmapForExtern.create(outputData.packageStr, outputData.className) :
+					tmpl.flash.Bitmap.create(outputData.packageStr, outputData.className);
 		}
 		return outputLines;
 	}
@@ -157,12 +175,12 @@ class Main {
 
 		var outputLines = "";
 		switch(outputData.itemType){
-			case "movie clip":
+			case ItemType.MOVIE_CLIP:
 				var templateMovieClip = new tmpl.createjs.MovieClip();
 				outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, outputData.packageStr, symbolNameSpace, outputData.nativeClassName);
-			case "sound":
+			case ItemType.SOUND:
 				outputLines = tmpl.createjs.Sound.create(outputData.packageStr, outputData.className, outputData.nativeClassName);
-			case "bitmap":
+			case ItemType.BITMAP:
 				outputLines = tmpl.createjs.Bitmap.create(outputData.packageStr, outputData.className, symbolNameSpace, outputData.nativeClassName);
 		}
 		return outputLines;
@@ -171,12 +189,12 @@ class Main {
 
 		var outputLines = "";
 		switch(outputData.itemType){
-			case "movie clip":
+			case ItemType.MOVIE_CLIP:
 				var templateMovieClip = new tmpl.openfl.MovieClip();
 				outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, outputData.packageStr, swfName);
-			case "sound":
+			case ItemType.SOUND:
 				outputLines = tmpl.openfl.Sound.create(outputData.packageStr, outputData.className);
-			case "bitmap":
+			case ItemType.BITMAP:
 				outputLines = tmpl.openfl.Bitmap.create(outputData.packageStr, outputData.className, swfName);
 		}
 		return outputLines;
@@ -187,5 +205,21 @@ class Main {
 		FLfile.write(filePath, outputLines);
 		Flash.trace(filePath);
 	}
+
+	//
+	private function initializeToFinish(){
+
+		result = Result.SUCCESS;
+
+		untyped __js__("delete String.prototype.__class__");
+		untyped __js__("delete Array.prototype.__class__");
+
+		Flash.trace("finish");
+
+		mainFunction = finish;
+	}
+	private function finish(){
+	}
 }
+
 

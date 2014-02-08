@@ -1,4 +1,6 @@
 package parser;
+import jsfl.Document.EnterEditMode;
+import jsfl.Element.ElementType;
 import jsfl.Instance;
 import parser.InnerMovieClip;
 import jsfl.Item;
@@ -29,7 +31,7 @@ class LibraryParser {
 			var itemName = item.name;
 			var itemType = item.itemType;
 
-			if(itemType == "folder") continue;
+			if(itemType == ItemType.FOLDER) continue;
 			if(item.linkageClassName == null) continue;
 
 			var pathNames = item.linkageClassName.split(".");
@@ -44,7 +46,7 @@ class LibraryParser {
 			//
 			//Flash.trace(":::" + itemName + ":" + className);
 			var baseInnerMovieClip:InnerMovieClip = null;
-			if(itemType == "movie clip"){
+			if(itemType == ItemType.MOVIE_CLIP){
 
 				library.editItem(itemName);
 				baseInnerMovieClip = new InnerMovieClip(className, className, item.linkageClassName);
@@ -63,8 +65,8 @@ class LibraryParser {
 		for(layer in layers){
 
 			var layerType = layer.layerType;
-			if(layerType == "folder") continue;
-			if(layerType == "guide") continue;
+			if(layerType == LayerType.FOLDER) continue;
+			if(layerType == LayerType.GUIDE) continue;
 
 			var layerLocked = layer.locked;
 			if(layerLocked) layer.locked = false;
@@ -79,19 +81,19 @@ class LibraryParser {
 
 				if(element.name == "") continue;
 
-				if(element.elementType != "instance"){
+				if(element.elementType != ElementType.INSTANCE){
 
 					parentInnerMovieClip.addTextFieldName(element.name);
 					continue;
 				}
 
-				var linkageClassName:String = untyped element.libraryItem.linkageClassName;
+				var linkageClassName:String = cast(element, Instance).libraryItem.linkageClassName;
 				var innerMovieClip = parentInnerMovieClip.create(element.name, linkageClassName);
 
 				documentDom.selectNone();
 				documentDom.selection = [element];
 
-				documentDom.enterEditMode("inPlace");
+				documentDom.enterEditMode(EnterEditMode.IN_PLACE);
 				search(innerMovieClip);
 			}
 

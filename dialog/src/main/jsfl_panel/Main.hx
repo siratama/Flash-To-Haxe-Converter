@@ -8,7 +8,10 @@ class Main {
 
 	private var stage:MovieClip;
 	private var view:View;
+	private var analysisView:AnalysisView;
+	private var runningView:RunningView;
 	private var flashFileDirectory:String;
+	private var mainFunction:Void->Void;
 
 	private static inline var TEXT_KEY_FLASH_EXTERN = "FLASH_EXTERN";
 	private static inline var TEXT_KEY_FLASH = "FLASH";
@@ -16,13 +19,19 @@ class Main {
 	private static inline var TEXT_KEY_OPENFL = "OPENFL";
 	private static inline var TEXT_KEY_JS_NAMESPACE = "JS";
 
+	private static var LIBRARY_ANALYSIS_PREPARATION_COUNT = 10;
+	private var libraryAnalysisPreparationCount = 0;
+
 	public static function main(){
 		new Main();
 	}
 	public function new(){
 
-		stage = flash.Lib.current;
 		view = new View();
+		analysisView = new AnalysisView();
+		runningView = new RunningView();
+
+		stage = flash.Lib.current;
 		stage.addChild(view);
 
 		setFlashFileDirectory();
@@ -56,6 +65,31 @@ class Main {
 	}
 	private function onMouseDownRun(event){
 
+		stage.removeChild(view);
+		stage.addChild(analysisView);
+
+		view.closeButton.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDownClose);
+		view.runButton.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDownRun);
+
+		mainFunction = waitToPrepareLibraryAnalysis;
+		stage.addEventListener(Event.ENTER_FRAME, run);
+	}
+
+	public function run(event:Event){
+		mainFunction();
+	}
+
+	//一定時間待機しないと描画切り替えが正常に行われない
+	private function waitToPrepareLibraryAnalysis(){
+
+		if(++libraryAnalysisPreparationCount > LIBRARY_ANALYSIS_PREPARATION_COUNT)
+			mainFunction = initializeToExecute;
+	}
+	private function initializeToExecute(){
+
+		stage.removeChild(analysisView);
+		stage.addChild(runningView);
+
 		var jsflUri = executeJsflCommand("fl.configURI;") + "FlashToHaxeConverter/main.jsfl";
 		executeJsflCommand('fl.runScript("$jsflUri");');
 
@@ -65,17 +99,29 @@ class Main {
 		var openflDirectory = view.openflOutputPathText.text;
 
 		var jsSymbolNamespace = view.jsSymbolNamespaceText.text;
-		executeJsflCommand('new Main("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
-		closeDialog();
+		executeJsflCommand('var main = new Main("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
 
 		addDataToDocument(TEXT_KEY_FLASH_EXTERN, flashExternDirectory);
 		addDataToDocument(TEXT_KEY_FLASH, flashDirectory);
 		addDataToDocument(TEXT_KEY_CREATEJS, createJsDirectory);
 		addDataToDocument(TEXT_KEY_OPENFL, openflDirectory);
 		addDataToDocument(TEXT_KEY_JS_NAMESPACE, jsSymbolNamespace);
+
+		mainFunction = execute;
+	}
+	private function execute(){
+		executeJsflCommand('main.run();');
+		if(executeJsflCommand('main.result;') == Result.SUCCESS)
+			finish();
+	}
+	private function finish(){
+
+		stage.removeEventListener(Event.ENTER_FRAME, run);
+		closeDialog();
 	}
 
-	private function executeJsflCommand(command:String):Dynamic{
+	//
+	private function executeJsflCommand(command:String):String{
 		return untyped __global__["adobe.utils.MMExecute"](command);
 	}
 	private function flTrace(text:String){
