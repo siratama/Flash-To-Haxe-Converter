@@ -1,4 +1,5 @@
 package;
+import haxe.Serializer;
 import parser.LibraryParser;
 import parser.OutputData;
 import haxe.xml.Fast;
@@ -32,8 +33,6 @@ class Main {
 	private var libraryParser:LibraryParser;
 	private var mainFunction:Void->Void;
 
-	public var result(default, null):String;
-
 	public static function main(){
 	}
 	public function new(
@@ -41,7 +40,6 @@ class Main {
 		symbolNameSpace:String = "lib"
 	){
 		Flash.outputPanel.clear();
-		result = null;
 
 		this.outputtedFlashExtern = flashExternDirectory != "";
 		this.outputtedFlash = flashDirectory != "";
@@ -209,8 +207,6 @@ class Main {
 	//
 	private function initializeToFinish(){
 
-		result = Result.SUCCESS;
-
 		untyped __js__("delete String.prototype.__class__");
 		untyped __js__("delete Array.prototype.__class__");
 
@@ -219,6 +215,11 @@ class Main {
 		mainFunction = finish;
 	}
 	private function finish(){
+	}
+	public function isFinished():String{
+		return Serializer.run(
+			Reflect.compareMethods(mainFunction, finish)
+		);
 	}
 }
 

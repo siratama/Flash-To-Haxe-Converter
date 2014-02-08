@@ -1,4 +1,5 @@
 package jsfl_panel;
+import haxe.Unserializer;
 import flash.text.TextField;
 import flash.events.MouseEvent;
 import flash.events.Event;
@@ -111,7 +112,9 @@ class Main {
 	}
 	private function execute(){
 		executeJsflCommand('main.run();');
-		if(executeJsflCommand('main.result;') == Result.SUCCESS)
+		if(Unserializer.run(
+			executeJsflCommand('main.isFinished();')
+		))
 			finish();
 	}
 	private function finish(){
