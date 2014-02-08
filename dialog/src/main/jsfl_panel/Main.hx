@@ -1,4 +1,5 @@
 package jsfl_panel;
+import jsfl.Document.AddDataToDocumentType;
 import haxe.Unserializer;
 import flash.text.TextField;
 import flash.events.MouseEvent;
@@ -134,7 +135,7 @@ class Main {
 		executeJsflCommand("fl.xmlui.cancel();");
 	}
 	private function addDataToDocument(key:String, data:String){
-		executeJsflCommand('document.addDataToDocument("$key", "string", "$data");');
+		executeJsflCommand('document.addDataToDocument("$key", "${AddDataToDocumentType.STRING}", "$data");');
 	}
 	private function getDataFromDocument(key:String):String{
 		return executeJsflCommand('document.getDataFromDocument("$key");');
