@@ -1,4 +1,5 @@
 package ;
+import DocumentState;
 import jsfl.EventType;
 import jsfl.FLfile;
 import jsfl.Lib;
@@ -248,8 +249,15 @@ class FlashToHaxeConverter {
 	public static function isOpenedFlashDocument():String{
 		return Serializer.run(Lib.fl.getDocumentDOM() != null);
 	}
-	public static function isNewDocument():String{
-		return Serializer.run(Lib.fl.getDocumentDOM().pathURI == null);
+	public static function getDocumentState():String{
+
+	    if(Lib.fl.getDocumentDOM() == null)
+			return Serializer.run(DocumentState.CLOSED_DOCUMENT);
+
+		return Serializer.run(
+			Lib.fl.getDocumentDOM().pathURI == null ?
+				DocumentState.IS_NOT_SAVED_NEW_DOCUMENT : DocumentState.SAVED_DOCUMENT
+		);
 	}
 	public static function getFlashFileDirectory():String{
 

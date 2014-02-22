@@ -1,6 +1,7 @@
 -js download/main/FlashToHaxeConverter/main.jsfl
 -main FlashToHaxeConverter
 -cp src/main/app
+-cp src/common
 -cp ../hxclasses
 
 --next
@@ -8,6 +9,7 @@
 -js extension_content/lib/main.jsfl
 -main FlashToHaxeConverter
 -cp src/main/app
+-cp src/common
 -cp ../hxclasses
 
 --next

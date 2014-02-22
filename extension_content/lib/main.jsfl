@@ -6,6 +6,16 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var DocumentState = { __ename__ : ["DocumentState"], __constructs__ : ["CLOSED_DOCUMENT","IS_NOT_SAVED_NEW_DOCUMENT","SAVED_DOCUMENT"] }
+DocumentState.CLOSED_DOCUMENT = ["CLOSED_DOCUMENT",0];
+DocumentState.CLOSED_DOCUMENT.toString = $estr;
+DocumentState.CLOSED_DOCUMENT.__enum__ = DocumentState;
+DocumentState.IS_NOT_SAVED_NEW_DOCUMENT = ["IS_NOT_SAVED_NEW_DOCUMENT",1];
+DocumentState.IS_NOT_SAVED_NEW_DOCUMENT.toString = $estr;
+DocumentState.IS_NOT_SAVED_NEW_DOCUMENT.__enum__ = DocumentState;
+DocumentState.SAVED_DOCUMENT = ["SAVED_DOCUMENT",2];
+DocumentState.SAVED_DOCUMENT.toString = $estr;
+DocumentState.SAVED_DOCUMENT.__enum__ = DocumentState;
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -73,8 +83,9 @@ FlashToHaxeConverter.removeDocumentChangedEvent = function() {
 FlashToHaxeConverter.isOpenedFlashDocument = function() {
 	return haxe.Serializer.run(jsfl.Lib.fl.getDocumentDOM() != null);
 }
-FlashToHaxeConverter.isNewDocument = function() {
-	return haxe.Serializer.run(jsfl.Lib.fl.getDocumentDOM().pathURI == null);
+FlashToHaxeConverter.getDocumentState = function() {
+	if(jsfl.Lib.fl.getDocumentDOM() == null) return haxe.Serializer.run(DocumentState.CLOSED_DOCUMENT);
+	return haxe.Serializer.run(jsfl.Lib.fl.getDocumentDOM().pathURI == null?DocumentState.IS_NOT_SAVED_NEW_DOCUMENT:DocumentState.SAVED_DOCUMENT);
 }
 FlashToHaxeConverter.getFlashFileDirectory = function() {
 	var path = jsfl.Lib.fl.getDocumentDOM().pathURI;

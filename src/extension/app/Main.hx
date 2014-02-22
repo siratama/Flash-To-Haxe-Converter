@@ -1,13 +1,11 @@
 package ;
-import js.html.ButtonElement;
-import js.Lib;
-import jsfl.PersistentReturnData;
+import haxe.Unserializer;
 import haxe.Unserializer;
 import haxe.Timer;
-import jsfl.PersistentDataType;
 import flash_extension.csinterface.CSInterfaceUtil;
 import jQuery.JQuery;
 import js.Browser;
+import DocumentState;
 class Main {
 
 	private static var csInterfaceUtil:CSInterfaceUtil;
@@ -16,9 +14,9 @@ class Main {
 	private static inline var TIMER_SPEED_DEFAULT = 250;
 	private static inline var TIMER_SPEED_RUNNING = 50;
 
+	private var inputTextSet:InputTextSet;
 	private var haxeElement:JQuery;
 	private var optionElement:JQuery;
-	private var inputAllElement:JQuery;
 	private var runButtonElement:JQuery;
 	private var runButtonMessageElement:JQuery;
 	private var runButtonClicked:Bool;
@@ -44,6 +42,7 @@ class Main {
 	private static inline var WAIT_INTERVAL = 2;
 	private var waitIntervalCount:Int;
 
+
 	public static function main(){
 		new Main();
 	}
@@ -58,7 +57,8 @@ class Main {
 		optionElement = new JQuery("#option");
 		runButtonElement = new JQuery("#button button");
 		runButtonMessageElement = new JQuery("#button .message");
-		inputAllElement = new JQuery("input");
+
+		inputTextSet = new InputTextSet(csInterfaceUtil);
 
 		setTitleBar("title_haxe", haxeElement);
 		setTitleBar("title_option", optionElement);
@@ -116,12 +116,14 @@ class Main {
 				return;
 			}
 
-			callFlashToHaxeConverterScript("isNewDocument()", function(result){
+			callFlashToHaxeConverterScript("getDocumentState()", function(result){
 
-				if(Unserializer.run(result))
-					initializeToWaitDocumentSaved();
-				else
-					initializeToGetDocumentData();
+				var jsflApiCalledResult:DocumentState = Unserializer.run(result);
+				switch(jsflApiCalledResult){
+					case DocumentState.CLOSED_DOCUMENT: checkDocumentOpened();
+					case DocumentState.IS_NOT_SAVED_NEW_DOCUMENT: initializeToWaitDocumentSaved();
+					case DocumentState.SAVED_DOCUMENT: initializeToGetDocumentData();
+				}
 			});
 		});
 	}
@@ -148,6 +150,7 @@ class Main {
 	private function initializeToWaitDocumentSaved(){
 
 		documentSaved = false;
+		documentChanged = false;
 		runButtonMessageElement.css("display", "block");
 		startRunning(waitDocumentSaved, TIMER_SPEED_DEFAULT);
 	}
@@ -160,8 +163,17 @@ class Main {
 			return;
 		}
 
-		callFlashToHaxeConverterScript("isNewDocument()", function(result){
-			if(Unserializer.run(result) && !documentSaved)
+		callFlashToHaxeConverterScript("getDocumentState()", function(result){
+
+		    var jsflApiCalledResult:DocumentState = Unserializer.run(result);
+			switch(jsflApiCalledResult){
+			    case DocumentState.CLOSED_DOCUMENT | DocumentState.IS_NOT_SAVED_NEW_DOCUMENT: return;
+				case DocumentState.SAVED_DOCUMENT:
+					if(!documentSaved)
+						documentSaved = true;
+			}
+
+			if(!Unserializer.run(result) && !documentSaved)
 				documentSaved = true;
 		});
 		if(documentSaved){
@@ -214,41 +226,18 @@ class Main {
 	}
 	private function setTextField(){
 
-		inputAllElement.unbind("change").removeAttr(DISABLED);
+	    inputTextSet.inputAllElement.removeAttr(DISABLED);
 		runButtonElement.removeAttr(DISABLED);
 
-		setTextFieldCommon(PersistentDataKey.FLASH_EXTERN, PersistentDefaultDirectoryData.FLASH_EXTERN, savedFlashExternDocumentData);
-		setTextFieldCommon(PersistentDataKey.FLASH, PersistentDefaultDirectoryData.FLASH, savedFlashDocumentData);
-		setTextFieldCommon(PersistentDataKey.CREATEJS, PersistentDefaultDirectoryData.CREATEJS, savedCreateJSDocumentData);
-		setTextFieldCommon(PersistentDataKey.OPENFL, PersistentDefaultDirectoryData.OPENFL, savedOpenFLJSDocumentData);
-		setTextFieldCommon(PersistentDataKey.JS_NAMESPACE, PersistentDefaultDirectoryData.JS_NAMESPACE, savedJSNamespaceDocumentData);
+		inputTextSet.initialize(
+			savedFlashExternDocumentData,
+			savedFlashDocumentData,
+			savedCreateJSDocumentData,
+			savedOpenFLJSDocumentData,
+			savedJSNamespaceDocumentData
+		);
 
 		initializeToWaitUserControlled();
-	}
-	private function setTextFieldCommon(key:PersistentDataKey, defaultValue:PersistentDefaultDirectoryData,  value:String){
-
-		if(value == cast PersistentReturnData.NULL) value = cast defaultValue;
-
-		var inputElement = getInputElement(key);
-		inputElement.val(value);
-
-		inputElement.change(function(event){
-			csInterfaceUtil.addDataToDocument(cast key, PersistentDataType.STRING, inputElement.val());
-		});
-	}
-	private function getInputElement(key:PersistentDataKey):JQuery{
-
-		return inputAllElement.eq(getInputId(key));
-	}
-	private function getInputId(key:PersistentDataKey):Int{
-
-		return switch(key){
-			case PersistentDataKey.FLASH_EXTERN: 0;
-			case PersistentDataKey.FLASH: 1;
-			case PersistentDataKey.CREATEJS: 2;
-			case PersistentDataKey.OPENFL: 3;
-			case PersistentDataKey.JS_NAMESPACE: 4;
-		}
 	}
 
 	//
@@ -260,12 +249,28 @@ class Main {
 	}
 	private function waitUserControlled(){
 
+		inputTextSet.run();
+
 		checkDocumentChanged();
 		if(documentChanged)
 			destroy();
 
-		else if(runButtonClicked)
-			prepareToRunFlashToHaxeConverter();
+		else if(runButtonClicked){
+
+			runButtonClicked = false;
+
+			var flashExternDirectory = inputTextSet.getValue(PersistentDataKey.FLASH_EXTERN);
+			var flashDirectory = inputTextSet.getValue(PersistentDataKey.FLASH);
+			var createJsDirectory = inputTextSet.getValue(PersistentDataKey.CREATEJS);
+			var openflDirectory = inputTextSet.getValue(PersistentDataKey.OPENFL);
+			var jsSymbolNamespace = inputTextSet.getValue(PersistentDataKey.JS_NAMESPACE);
+
+			if(flashExternDirectory == "" && flashDirectory == "" && createJsDirectory == "" && openflDirectory == ""){
+				csInterfaceUtil.flTrace("Set output directory");
+			}
+			else
+				prepareToRunFlashToHaxeConverter();
+		}
 	}
 
 	//
@@ -273,7 +278,7 @@ class Main {
 
 		csInterfaceUtil.flTrace(ClassName.FLASH_TO_HAXE_CONVERTER + ": Library Analysis Start...");
 
-		inputAllElement.attr(DISABLED, DISABLED);
+		inputTextSet.inputAllElement.attr(DISABLED, DISABLED);
 		runButtonElement.attr(DISABLED, DISABLED);
 		runButtonElement.text(BUTTON_RUNNING_TEXT);
 
@@ -288,11 +293,11 @@ class Main {
 	}
 	private function initializeToRunFlashToHaxeConverter(){
 
-		var flashExternDirectory = getInputElement(PersistentDataKey.FLASH_EXTERN).val();
-		var flashDirectory = getInputElement(PersistentDataKey.FLASH).val();
-		var createJsDirectory = getInputElement(PersistentDataKey.CREATEJS).val();
-		var openflDirectory = getInputElement(PersistentDataKey.OPENFL).val();
-		var jsSymbolNamespace = getInputElement(PersistentDataKey.JS_NAMESPACE).val();
+		var flashExternDirectory = inputTextSet.getValue(PersistentDataKey.FLASH_EXTERN);
+		var flashDirectory = inputTextSet.getValue(PersistentDataKey.FLASH);
+		var createJsDirectory = inputTextSet.getValue(PersistentDataKey.CREATEJS);
+		var openflDirectory = inputTextSet.getValue(PersistentDataKey.OPENFL);
+		var jsSymbolNamespace = inputTextSet.getValue(PersistentDataKey.JS_NAMESPACE);
 
 		csInterfaceUtil.evalScript('var $INSTANCE_NAME = new ${ClassName.FLASH_TO_HAXE_CONVERTER}("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
 
@@ -320,10 +325,11 @@ class Main {
 	}
 	private function destroyToRunFlashToHaxeConverter(){
 
-		inputAllElement.removeAttr(DISABLED);
+		inputTextSet.inputAllElement.removeAttr(DISABLED);
 		runButtonElement.removeAttr(DISABLED);
 		runButtonElement.text(BUTTON_RUN_TEXT);
 
+		timer.stop();
 		setTimer(TIMER_SPEED_DEFAULT);
 		initializeToWaitUserControlled();
 	}
@@ -331,8 +337,8 @@ class Main {
 	//
 	private function destroy(){
 
-		inputAllElement.val("");
-		inputAllElement.attr(DISABLED, DISABLED);
+		inputTextSet.inputAllElement.val("");
+		inputTextSet.inputAllElement.attr(DISABLED, DISABLED);
 		runButtonElement.attr(DISABLED, DISABLED);
 		runButtonElement.text(BUTTON_RUN_TEXT);
 
