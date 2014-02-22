@@ -1,11 +1,14 @@
 package jsfl_panel;
-import jsfl.Document.AddDataToDocumentType;
+import jsfl.PersistentReturnData;
+import jsfl.PersistentDataType;
+import PersistentDataKey;
+import PersistentDefaultDirectoryData;
 import haxe.Unserializer;
 import flash.text.TextField;
 import flash.events.MouseEvent;
 import flash.events.Event;
 import flash.display.MovieClip;
-import jsfl.Flash;
+import flash.Lib;
 class Main {
 
 	private var stage:MovieClip;
@@ -14,12 +17,6 @@ class Main {
 	private var runningView:RunningView;
 	private var flashFileDirectory:String;
 	private var mainFunction:Void->Void;
-
-	private static inline var TEXT_KEY_FLASH_EXTERN = "FLASH_EXTERN";
-	private static inline var TEXT_KEY_FLASH = "FLASH";
-	private static inline var TEXT_KEY_CREATEJS = "CREATEJS";
-	private static inline var TEXT_KEY_OPENFL = "OPENFL";
-	private static inline var TEXT_KEY_JS_NAMESPACE = "JS";
 
 	private static var LIBRARY_ANALYSIS_PREPARATION_COUNT = 10;
 	private var libraryAnalysisPreparationCount = 0;
@@ -33,7 +30,7 @@ class Main {
 		analysisView = new AnalysisView();
 		runningView = new RunningView();
 
-		stage = flash.Lib.current;
+		stage = Lib.current;
 		stage.addChild(view);
 
 		setFlashFileDirectory();
@@ -51,16 +48,16 @@ class Main {
 	}
 	private function setDefaultText(){
 
-		setDefaultTextCommon(TEXT_KEY_FLASH_EXTERN, view.flashExternOutputPathText);
-		setDefaultTextCommon(TEXT_KEY_FLASH, view.flashOutputPathText);
-		setDefaultTextCommon(TEXT_KEY_CREATEJS, view.createJsOutputPathText);
-		setDefaultTextCommon(TEXT_KEY_OPENFL, view.openflOutputPathText);
-		setDefaultTextCommon(TEXT_KEY_JS_NAMESPACE, view.jsSymbolNamespaceText);
+		setDefaultTextCommon(PersistentDataKey.FLASH_EXTERN, view.flashExternOutputPathText, PersistentDefaultDirectoryData.FLASH_EXTERN);
+		setDefaultTextCommon(PersistentDataKey.FLASH, view.flashOutputPathText, PersistentDefaultDirectoryData.FLASH);
+		setDefaultTextCommon(PersistentDataKey.CREATEJS, view.createJsOutputPathText, PersistentDefaultDirectoryData.CREATEJS);
+		setDefaultTextCommon(PersistentDataKey.OPENFL, view.openflOutputPathText, PersistentDefaultDirectoryData.OPENFL);
+		setDefaultTextCommon(PersistentDataKey.JS_NAMESPACE, view.jsSymbolNamespaceText, PersistentDefaultDirectoryData.JS_NAMESPACE);
 	}
-	private function setDefaultTextCommon(textKey:String, textField:TextField){
+	private function setDefaultTextCommon(textKey:PersistentDataKey, textField:TextField, defaultDirectory:PersistentDefaultDirectoryData){
 
 		var text = getDataFromDocument(textKey);
-		if(text != "0") textField.text = text;
+		textField.text = (text != cast PersistentReturnData.NULL) ? text : cast defaultDirectory;
 	}
 	private function onMouseDownClose(event){
 		closeDialog();
@@ -101,13 +98,13 @@ class Main {
 		var openflDirectory = view.openflOutputPathText.text;
 
 		var jsSymbolNamespace = view.jsSymbolNamespaceText.text;
-		executeJsflCommand('var main = new Main("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
+		executeJsflCommand('var main = new ${ClassName.FLASH_TO_HAXE_CONVERTER}("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
 
-		addDataToDocument(TEXT_KEY_FLASH_EXTERN, flashExternDirectory);
-		addDataToDocument(TEXT_KEY_FLASH, flashDirectory);
-		addDataToDocument(TEXT_KEY_CREATEJS, createJsDirectory);
-		addDataToDocument(TEXT_KEY_OPENFL, openflDirectory);
-		addDataToDocument(TEXT_KEY_JS_NAMESPACE, jsSymbolNamespace);
+		addDataToDocument(PersistentDataKey.FLASH_EXTERN, flashExternDirectory);
+		addDataToDocument(PersistentDataKey.FLASH, flashDirectory);
+		addDataToDocument(PersistentDataKey.CREATEJS, createJsDirectory);
+		addDataToDocument(PersistentDataKey.OPENFL, openflDirectory);
+		addDataToDocument(PersistentDataKey.JS_NAMESPACE, jsSymbolNamespace);
 
 		mainFunction = execute;
 	}
@@ -134,10 +131,11 @@ class Main {
 	private function closeDialog(){
 		executeJsflCommand("fl.xmlui.cancel();");
 	}
-	private function addDataToDocument(key:String, data:String){
-		executeJsflCommand('document.addDataToDocument("$key", "${AddDataToDocumentType.STRING}", "$data");');
+	private function addDataToDocument(key:PersistentDataKey, data:String){
+
+		executeJsflCommand('document.addDataToDocument("$key", "${PersistentDataType.STRING}", "$data");');
 	}
-	private function getDataFromDocument(key:String):String{
+	private function getDataFromDocument(key:PersistentDataKey):String{
 		return executeJsflCommand('document.getDataFromDocument("$key");');
 	}
 }

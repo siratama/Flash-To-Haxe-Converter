@@ -1,6 +1,10 @@
 package parser;
-import jsfl.Document.EnterEditMode;
-import jsfl.Element.ElementType;
+import jsfl.DocumentEnterEditMode;
+import jsfl.Lib;
+import jsfl.ElementType;
+import jsfl.LayerType;
+import jsfl.ItemType;
+import jsfl.Document;
 import jsfl.Instance;
 import parser.InnerMovieClip;
 import jsfl.Item;
@@ -15,7 +19,7 @@ class LibraryParser {
 
 	public function new(){
 
-		library = Flash.getDocumentDOM().library;
+		library = Lib.fl.getDocumentDOM().library;
 		packageDirectoryMap = new Map();
 		outputDataSet = [];
 	}
@@ -58,7 +62,7 @@ class LibraryParser {
 
 	public function search(parentInnerMovieClip:InnerMovieClip){
 
-		var documentDom = Flash.getDocumentDOM();
+		var documentDom = Lib.fl.getDocumentDOM();
 		var layers:Array<Layer> = documentDom.getTimeline().layers;
 
 		//Flash.trace(parentInnerMovieClip.propertyName);
@@ -93,7 +97,7 @@ class LibraryParser {
 				documentDom.selectNone();
 				documentDom.selection = [element];
 
-				documentDom.enterEditMode(EnterEditMode.IN_PLACE);
+				documentDom.enterEditMode(DocumentEnterEditMode.IN_PLACE);
 				search(innerMovieClip);
 			}
 

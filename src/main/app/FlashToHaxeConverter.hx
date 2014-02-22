@@ -1,19 +1,21 @@
-package;
+package ;
+import jsfl.EventType;
+import jsfl.FLfile;
+import jsfl.Lib;
+import jsfl.ItemType;
 import haxe.Serializer;
 import parser.LibraryParser;
 import parser.OutputData;
 import haxe.xml.Fast;
-import haxe.Template;
-import jsfl.Layer;
-import jsfl.Library;
-import jsfl.FLfile;
-import jsfl.Item;
 import jsfl.Flash;
+import tmpl.createjs.Sound;
+import tmpl.openfl.Bitmap;
+import tmpl.flash.BitmapForExtern;
 
-@:expose("Main")
-class Main {
+@:expose("FlashToHaxeConverter")
+class FlashToHaxeConverter {
 
-	private static var OUTPUT_LOOP_ONCE = 4;
+	private static var OUTPUT_LOOP_ONCE = 2;
 
 	private var baseDirectory:String;
 
@@ -39,7 +41,7 @@ class Main {
 		baseDirectory:String, flashExternDirectory:String, flashDirectory:String, createJsDirectory:String, openflDirectory:String,
 		symbolNameSpace:String = "lib"
 	){
-		Flash.outputPanel.clear();
+		Lib.fl.outputPanel.clear();
 
 		this.outputtedFlashExtern = flashExternDirectory != "";
 		this.outputtedFlash = flashDirectory != "";
@@ -47,7 +49,7 @@ class Main {
 		this.outputtedOpenfl = openflDirectory != "";
 
 		if(!outputtedFlashExtern && !outputtedFlash && !outputtedCreateJs && !outputtedOpenfl){
-			Flash.trace("Set output directory");
+			Lib.fl.trace("Set output directory");
 			return;
 		}
 
@@ -59,10 +61,7 @@ class Main {
 		this.createJsDirectory = getOutputDirectory(createJsDirectory);
 		this.openflDirectory = getOutputDirectory(openflDirectory);
 
-		libraryParser = new LibraryParser();
-		libraryParser.execute();
-
-		mainFunction = createOutputDirectory;
+		parseLibrary();
 	}
 	private function getOutputDirectory(outputDirectory:String){
 
@@ -72,6 +71,15 @@ class Main {
 
 	public function run(){
 		mainFunction();
+	}
+
+	//
+	private function parseLibrary(){
+
+		libraryParser = new LibraryParser();
+		libraryParser.execute();
+
+		mainFunction = createOutputDirectory;
 	}
 
 	//
@@ -92,7 +100,7 @@ class Main {
 	//
 	private function setSwfName(){
 
-		var profileXML = Xml.parse(Flash.getDocumentDOM().exportPublishProfileString());
+		var profileXML = Xml.parse(Lib.fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new Fast(profileXML.firstElement());
 		swfName = fastXML.node.PublishFormatProperties.node.flashFileName.innerData.split(".")[0];
 
@@ -119,9 +127,9 @@ class Main {
 		if(outputted && !FLfile.exists(directoryUri)){
 
 			if(!FLfile.createFolder(directoryUri))
-				Flash.trace("create error: " + directoryUri);
+				Lib.fl.trace("create error: " + directoryUri);
 			else
-				Flash.trace(directoryUri);
+				Lib.fl.trace(directoryUri);
 		}
 	}
 
@@ -201,7 +209,7 @@ class Main {
 
 		var filePath = baseUri + itemName + ".hx";
 		FLfile.write(filePath, outputLines);
-		Flash.trace(filePath);
+		Lib.fl.trace(filePath);
 	}
 
 	//
@@ -210,7 +218,7 @@ class Main {
 		untyped __js__("delete String.prototype.__class__");
 		untyped __js__("delete Array.prototype.__class__");
 
-		Flash.trace("finish");
+		Lib.fl.trace("finish");
 
 		mainFunction = finish;
 	}
@@ -220,6 +228,35 @@ class Main {
 		return Serializer.run(
 			Reflect.compareMethods(mainFunction, finish)
 		);
+	}
+
+	/*
+	 * for Flash CC Extension
+	 */
+	private static var documentChanged:Bool = false;
+	public static function setEventListener(){
+	    Lib.fl.addEventListener(EventType.DOCUMENT_CHANGED, onDocumentChanged);
+	}
+	private static function onDocumentChanged(){
+		documentChanged = true;
+	}
+	public static function removeDocumentChangedEvent():String{
+		var n = documentChanged;
+		documentChanged = false;
+		return Serializer.run(n);
+	}
+	public static function isOpenedFlashDocument():String{
+		return Serializer.run(Lib.fl.getDocumentDOM() != null);
+	}
+	public static function isNewDocument():String{
+		return Serializer.run(Lib.fl.getDocumentDOM().pathURI == null);
+	}
+	public static function getFlashFileDirectory():String{
+
+		var path = Lib.fl.getDocumentDOM().pathURI;
+		var arr = path.split("/");
+		arr.pop();
+		return arr.join("/") + "/";
 	}
 }
 

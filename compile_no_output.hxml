@@ -2,6 +2,7 @@
 -main FlashToHaxeConverter
 -cp src/main/app
 -cp ../hxclasses
+--no-output
 
 --next
 
@@ -9,6 +10,7 @@
 -main FlashToHaxeConverter
 -cp src/main/app
 -cp ../hxclasses
+--no-output
 
 --next
 
@@ -22,13 +24,15 @@
 -cp src/common
 -cp main/src
 -cp ../hxclasses
+--no-output
 
 --next
 
--js extension_content/index.js
+-js original_javascript/index.js
 -main Main
 -cp src/extension/app
 -cp src/common
 -cp ../hxclasses
 -cp ../haxelib/adobe_extension
 -lib jQueryExtern
+--no-output
