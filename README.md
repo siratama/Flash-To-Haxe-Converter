@@ -108,6 +108,21 @@ In addition, it is foldable if it clicks a title bar.
 ![window3](img/window_compact.png)
 
 ---
+## FAQ
+
+### Difference with output file Flash(extern) and Flash : 出力ファイル Flash(extern) と Flashの違い
+
+#### Flash(extern)
+
+* Using the compile option -swf-lib of Haxe, when embedding assets swf at swf outputed from Haxe, it uses. 
+* Haxe のコンパイルオプション -swf-lib にて「素材用 swf」を「Haxe から出力する swf」内に埋め込む場合に利用
+
+#### Flash
+
+* It uses, when loading assets swf from the exterior using Loader class. 
+* Loader クラス等を用い 「素材用 swf」 を外部から読み込む場合に利用
+
+---
 ## Features
 
 ### IDE complement output : IDE 補完用出力
@@ -136,6 +151,7 @@ When the structure of a library is changed, a former unnecessary file will remai
 
 fla ファイル内ライブラリの構造に変更を行った場合、Haxe 出力ディレクトリ内には以前の無駄なファイルが残ってしまいます。無駄なファイルの削除を行いたい場合、手動で Haxe 出力ディレクトリの削除をお願いします。
 
+---
 ## OpenFL-Haxe Restrictions
 
 出力された OpenFL 用 hx ファイルの使用には制限事項があります。
@@ -176,7 +192,7 @@ FlashToHaxeConverter から出力されるサウンド用 test.JumpSound.hx フ�
 
 **追記 2014年2月**) 現在、OpenFL ではビットマップシンボルの生成が可能になっているようです。OpenFLのバージョンが上がるにつれ可能な事が増えており、上記私が行った調査内容は古くなっている可能性があります。
 
-
+---
 ##制作の流れと FlashToHaxeConverter の役割箇所
 
 Flash CC と Haxe を利用することで、Flash コンテンツ, html5 canvas コンテンツ, Desktop アプリケーション, Android アプリ, iOS アプリ といった様々なプラットフォーム向けのコンテンツ並行制作が可能となります。制作の流れは以下の図のようになります。
@@ -191,6 +207,7 @@ Flash CC では、各素材を利用してアニメーションを作成した�
 
 出力された Flash & OpenFL & html5 用のデータは共通の構造を持つため、クロスプラットフォーム用言語 Haxe にて処理することにより、より少ない手間で Flash, OpenFL, html5 canvas コンテンツの同時制作が可能となります。
 
+---
 ##サンプル解説
 
 * examples/1/
