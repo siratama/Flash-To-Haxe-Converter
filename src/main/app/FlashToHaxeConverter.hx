@@ -44,6 +44,12 @@ class FlashToHaxeConverter {
 	){
 		Lib.fl.outputPanel.clear();
 
+		if(isHtml5CanvasDocument()){
+			if(openflDirectory != "")
+				Lib.fl.trace("HTML5 canvas document is not supported OpenFL output.");
+			openflDirectory = "";
+		}
+
 		this.outputtedFlashExtern = flashExternDirectory != "";
 		this.outputtedFlash = flashDirectory != "";
 		this.outputtedCreateJs = createJsDirectory != "";
@@ -91,7 +97,7 @@ class FlashToHaxeConverter {
 		createOutputDirectoryCommon(outputtedCreateJs, createJsDirectory);
 		createOutputDirectoryCommon(outputtedOpenfl, openflDirectory);
 
-		mainFunction = setSwfName;
+		mainFunction = (outputtedOpenfl) ? setSwfName: createFolder;
 	}
 	private function createOutputDirectoryCommon(outputted:Bool, outputDirectory:String){
 
@@ -265,6 +271,10 @@ class FlashToHaxeConverter {
 		var arr = path.split("/");
 		arr.pop();
 		return arr.join("/") + "/";
+	}
+
+	public static function isHtml5CanvasDocument():Bool{
+		return Lib.fl.getDocumentDOM().exportPublishProfileString().indexOf("JavaScript/HTML") != -1;
 	}
 }
 
