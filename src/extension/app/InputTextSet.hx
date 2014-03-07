@@ -73,7 +73,7 @@ private class InputText{
 		if(savedValue == cast PersistentReturnData.NULL) savedValue = cast defaultValue;
 		inputElement.val(savedValue);
 		beforeValue = savedValue;
-		csInterfaceUtil.addDataToDocument(cast key, PersistentDataType.STRING, savedValue);
+		//csInterfaceUtil.addDataToDocument(cast key, PersistentDataType.STRING, savedValue);
 	}
 	private function getDefaultValue():PersistentDefaultDirectoryData{
 

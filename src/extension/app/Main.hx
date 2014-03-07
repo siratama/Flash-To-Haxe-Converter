@@ -1,6 +1,5 @@
 package ;
 import haxe.Unserializer;
-import haxe.Unserializer;
 import haxe.Timer;
 import flash_extension.csinterface.CSInterfaceUtil;
 import jQuery.JQuery;
@@ -109,6 +108,7 @@ class Main {
 	}
 	private function checkDocumentOpened(){
 
+		documentChanged = false;
 		callFlashToHaxeConverterScript("isOpenedFlashDocument()", function(result){
 
 			if(!Unserializer.run(result)){
@@ -129,7 +129,6 @@ class Main {
 	}
 	private function initializeToWaitDocumentOpened(){
 
-		documentChanged = false;
 		startRunning(waitDocumentOpened, TIMER_SPEED_DEFAULT);
 	}
 	private function waitDocumentOpened(){
@@ -141,8 +140,9 @@ class Main {
 	private function checkDocumentChanged(){
 
 		callFlashToHaxeConverterScript("removeDocumentChangedEvent()", function(result){
-		    if(Unserializer.run(result) && !documentChanged)
+		    if(Unserializer.run(result) && !documentChanged){
 				documentChanged = true;
+			}
 		});
 	}
 
@@ -150,7 +150,6 @@ class Main {
 	private function initializeToWaitDocumentSaved(){
 
 		documentSaved = false;
-		documentChanged = false;
 		runButtonMessageElement.css("display", "block");
 		startRunning(waitDocumentSaved, TIMER_SPEED_DEFAULT);
 	}
@@ -244,18 +243,19 @@ class Main {
 	private function initializeToWaitUserControlled(){
 
 		runButtonClicked = false;
-		documentChanged = false;
 		mainFunction = waitUserControlled;
 	}
 	private function waitUserControlled(){
 
+		checkDocumentChanged();
+		if(documentChanged){
+			destroy();
+			return;
+		}
+
 		inputTextSet.run();
 
-		checkDocumentChanged();
-		if(documentChanged)
-			destroy();
-
-		else if(runButtonClicked){
+		if(runButtonClicked){
 
 			runButtonClicked = false;
 
@@ -301,7 +301,6 @@ class Main {
 
 		csInterfaceUtil.evalScript('var $INSTANCE_NAME = new ${ClassName.FLASH_TO_HAXE_CONVERTER}("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
 
-		documentChanged = false;
 		runFinished = false;
 		mainFunction = runFlashToHaxeConverter;
 	}
