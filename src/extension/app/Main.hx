@@ -1,14 +1,16 @@
-package ;
+package;
+
 import haxe.Unserializer;
 import haxe.Timer;
 import flash_extension.csinterface.CSInterfaceUtil;
 import jQuery.JQuery;
 import js.Browser;
 import DocumentState;
+
 class Main {
 
 	private static var csInterfaceUtil:CSInterfaceUtil;
-	public var mainFunction:Void->Void;
+	public var mainFunction:Void -> Void;
 	private var timer:Timer;
 	private static inline var TIMER_SPEED_DEFAULT = 250;
 	private static inline var TIMER_SPEED_RUNNING = 50;
@@ -41,7 +43,6 @@ class Main {
 	private static inline var WAIT_INTERVAL = 2;
 	private var waitIntervalCount:Int;
 
-
 	public static function main(){
 		new Main();
 	}
@@ -66,8 +67,7 @@ class Main {
 		callFlashToHaxeConverterScript("setEventListener()");
 		checkDocumentOpened();
 	}
-
-	private function callFlashToHaxeConverterScript(script:String, ?callback:Dynamic->Void){
+	private function callFlashToHaxeConverterScript(script:String, ?callback:Dynamic -> Void){
 		csInterfaceUtil.evalScript('${ClassName.FLASH_TO_HAXE_CONVERTER}.$script', callback);
 	}
 	private function setTitleBar(titleBarId:String, slideElement:JQuery){
@@ -88,7 +88,7 @@ class Main {
 	}
 
 	//
-	private function startRunning(func:Void->Void, speed:Int){
+	private function startRunning(func:Void -> Void, speed:Int){
 		setTimer(speed);
 		mainFunction = func;
 	}
@@ -140,7 +140,7 @@ class Main {
 	private function checkDocumentChanged(){
 
 		callFlashToHaxeConverterScript("removeDocumentChangedEvent()", function(result){
-		    if(Unserializer.run(result) && !documentChanged){
+			if(Unserializer.run(result) && !documentChanged){
 				documentChanged = true;
 			}
 		});
@@ -164,9 +164,9 @@ class Main {
 
 		callFlashToHaxeConverterScript("getDocumentState()", function(result){
 
-		    var jsflApiCalledResult:DocumentState = Unserializer.run(result);
+			var jsflApiCalledResult:DocumentState = Unserializer.run(result);
 			switch(jsflApiCalledResult){
-			    case DocumentState.CLOSED_DOCUMENT | DocumentState.IS_NOT_SAVED_NEW_DOCUMENT: return;
+				case DocumentState.CLOSED_DOCUMENT | DocumentState.IS_NOT_SAVED_NEW_DOCUMENT: return;
 				case DocumentState.SAVED_DOCUMENT:
 					if(!documentSaved)
 						documentSaved = true;
@@ -213,7 +213,7 @@ class Main {
 	}
 	private function waitToGetDocumentData(){
 
-	    if(
+		if(
 			flashFileDirectory != null &&
 			savedFlashExternDocumentData != null &&
 			savedFlashDocumentData != null &&
@@ -225,7 +225,7 @@ class Main {
 	}
 	private function setTextField(){
 
-	    inputTextSet.inputAllElement.removeAttr(DISABLED);
+		inputTextSet.inputAllElement.removeAttr(DISABLED);
 		runButtonElement.removeAttr(DISABLED);
 
 		inputTextSet.initialize(
@@ -304,7 +304,7 @@ class Main {
 		runFinished = false;
 		mainFunction = runFlashToHaxeConverter;
 	}
-	public function runFlashToHaxeConverter(){
+	private function runFlashToHaxeConverter(){
 
 		checkDocumentChanged();
 		if(documentChanged){

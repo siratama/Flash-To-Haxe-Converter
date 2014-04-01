@@ -121,7 +121,8 @@ FlashToHaxeConverter.prototype = {
 	,setSwfName: function() {
 		var profileXML = Xml.parse(jsfl.Lib.fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new haxe.xml.Fast(profileXML.firstElement());
-		this.swfName = fastXML.node.resolve("PublishFormatProperties").node.resolve("flashFileName").get_innerData().split(".")[0];
+		var swfPath = fastXML.node.resolve("PublishFormatProperties").node.resolve("flashFileName").get_innerData();
+		this.swfName = swfPath.split("/").slice(-1)[0].split("\\").slice(-1)[0].split(".swf")[0];
 		this.mainFunction = $bind(this,this.createFolder);
 	}
 	,createFolder: function() {
@@ -624,15 +625,15 @@ haxe.Serializer.prototype = {
 		var x = this.shash.get(s);
 		if(x != null) {
 			this.buf.b += "R";
-			this.buf.b += "" + x;
+			if(x == null) this.buf.b += "null"; else this.buf.b += "" + x;
 			return;
 		}
 		this.shash.set(s,this.scount++);
 		this.buf.b += "y";
 		s = encodeURIComponent(s);
-		this.buf.b += "" + s.length;
+		if(s.length == null) this.buf.b += "null"; else this.buf.b += "" + s.length;
 		this.buf.b += ":";
-		this.buf.b += s;
+		if(s == null) this.buf.b += "null"; else this.buf.b += "" + s;
 	}
 	,serializeRef: function(v) {
 		var vt = typeof(v);
@@ -643,7 +644,7 @@ haxe.Serializer.prototype = {
 			var ci = this.cache[i];
 			if(typeof(ci) == vt && ci == v) {
 				this.buf.b += "r";
-				this.buf.b += "" + i;
+				if(i == null) this.buf.b += "null"; else this.buf.b += "" + i;
 				return true;
 			}
 		}
@@ -675,13 +676,13 @@ haxe.Serializer.prototype = {
 					return;
 				}
 				this.buf.b += "i";
-				this.buf.b += "" + v1;
+				if(v1 == null) this.buf.b += "null"; else this.buf.b += "" + v1;
 				break;
 			case 2:
 				var v2 = v;
 				if(Math.isNaN(v2)) this.buf.b += "k"; else if(!Math.isFinite(v2)) if(v2 < 0) this.buf.b += "m"; else this.buf.b += "p"; else {
 					this.buf.b += "d";
-					this.buf.b += "" + v2;
+					if(v2 == null) this.buf.b += "null"; else this.buf.b += "" + v2;
 				}
 				break;
 			case 3:
@@ -706,7 +707,7 @@ haxe.Serializer.prototype = {
 							if(ucount > 0) {
 								if(ucount == 1) this.buf.b += "n"; else {
 									this.buf.b += "u";
-									this.buf.b += "" + ucount;
+									if(ucount == null) this.buf.b += "null"; else this.buf.b += "" + ucount;
 								}
 								ucount = 0;
 							}
@@ -716,7 +717,7 @@ haxe.Serializer.prototype = {
 					if(ucount > 0) {
 						if(ucount == 1) this.buf.b += "n"; else {
 							this.buf.b += "u";
-							this.buf.b += "" + ucount;
+							if(ucount == null) this.buf.b += "null"; else this.buf.b += "" + ucount;
 						}
 					}
 					this.buf.b += "h";
@@ -754,7 +755,7 @@ haxe.Serializer.prototype = {
 					while( $it2.hasNext() ) {
 						var k1 = $it2.next();
 						this.buf.b += ":";
-						this.buf.b += "" + k1;
+						if(k1 == null) this.buf.b += "null"; else this.buf.b += "" + k1;
 						this.serialize(v5.get(k1));
 					}
 					this.buf.b += "h";
@@ -801,9 +802,9 @@ haxe.Serializer.prototype = {
 					}
 					var chars = charsBuf.b;
 					this.buf.b += "s";
-					this.buf.b += "" + chars.length;
+					if(chars.length == null) this.buf.b += "null"; else this.buf.b += "" + chars.length;
 					this.buf.b += ":";
-					this.buf.b += chars;
+					if(chars == null) this.buf.b += "null"; else this.buf.b += "" + chars;
 					break;
 				default:
 					if(this.useCache) this.cache.pop();
@@ -840,7 +841,7 @@ haxe.Serializer.prototype = {
 				} else this.serializeString(v[0]);
 				this.buf.b += ":";
 				var l1 = v.length;
-				this.buf.b += "" + (l1 - 2);
+				this.buf.b += Std.string(l1 - 2);
 				var _g11 = 2;
 				while(_g11 < l1) {
 					var i3 = _g11++;
@@ -870,7 +871,7 @@ haxe._Template.TemplateExpr.OpMacro = function(name,params) { var $x = ["OpMacro
 haxe.Template = function(str) {
 	var tokens = this.parseTokens(str);
 	this.expr = this.parseBlock(tokens);
-	if(!tokens.isEmpty()) throw "Unexpected '" + ("" + tokens.first().s) + "'";
+	if(!tokens.isEmpty()) throw "Unexpected '" + Std.string(tokens.first().s) + "'";
 };
 haxe.Template.__name__ = ["haxe","Template"];
 haxe.Template.prototype = {
@@ -1148,7 +1149,7 @@ haxe.Template.prototype = {
 			break;
 		case 3:
 			var str = e[2];
-			this.buf.b += str;
+			if(str == null) this.buf.b += "null"; else this.buf.b += "" + str;
 			break;
 		case 4:
 			var l = e[2];
@@ -1595,7 +1596,7 @@ haxe.xml.Parser.doParse = function(str,p,parent) {
 					var i;
 					if(s.charCodeAt(1) == 120) i = Std.parseInt("0" + HxOverrides.substr(s,1,s.length - 1)); else i = Std.parseInt(HxOverrides.substr(s,1,s.length - 1));
 					buf.add(String.fromCharCode(i));
-				} else if(!haxe.xml.Parser.escapes.exists(s)) buf.b += "&" + s + ";"; else buf.add(haxe.xml.Parser.escapes.get(s));
+				} else if(!haxe.xml.Parser.escapes.exists(s)) buf.b += Std.string("&" + s + ";"); else buf.add(haxe.xml.Parser.escapes.get(s));
 				start = p + 1;
 				state = next;
 			}
@@ -1991,8 +1992,8 @@ tmpl.MovieClip.prototype = {
 tmpl.createjs = {};
 tmpl.createjs.Bitmap = function() { };
 tmpl.createjs.Bitmap.__name__ = ["tmpl","createjs","Bitmap"];
-tmpl.createjs.Bitmap.create = function(packageStr,className,namespace,nativeClassName) {
-	var fileLines = tmpl.createjs.Bitmap.template.execute({ namespace : namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : className});
+tmpl.createjs.Bitmap.create = function(packageStr,className,$namespace,nativeClassName) {
+	var fileLines = tmpl.createjs.Bitmap.template.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : className});
 	return fileLines;
 };
 tmpl.createjs.MovieClip = function() {
@@ -2022,12 +2023,12 @@ tmpl.createjs.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	,getMovieClipPath: function() {
 		return "createjs.easeljs.MovieClip";
 	}
-	,create: function(baseInnerMovieClip,packageStr,namespace,nativeClassName) {
+	,create: function(baseInnerMovieClip,packageStr,$namespace,nativeClassName) {
 		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,false);
 		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
 		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
-		var lines = baseClassTemplate.execute({ namespace : namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Container", field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
+		var lines = baseClassTemplate.execute({ 'namespace' : $namespace, nativeClassName : nativeClassName, packageStr : packageStr, className : baseInnerMovieClip.className, superClassName : baseInnerMovieClip.isMovieClip()?"MovieClip":"Container", field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
 		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip);
 	}
 	,__class__: tmpl.createjs.MovieClip

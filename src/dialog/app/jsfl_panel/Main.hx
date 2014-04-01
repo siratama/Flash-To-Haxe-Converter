@@ -16,7 +16,7 @@ class Main {
 	private var analysisView:AnalysisView;
 	private var runningView:RunningView;
 	private var flashFileDirectory:String;
-	private var mainFunction:Void->Void;
+	private var mainFunction:Void -> Void;
 
 	private static var LIBRARY_ANALYSIS_PREPARATION_COUNT = 10;
 	private var libraryAnalysisPreparationCount = 0;
@@ -73,7 +73,6 @@ class Main {
 		mainFunction = waitToPrepareLibraryAnalysis;
 		stage.addEventListener(Event.ENTER_FRAME, run);
 	}
-
 	public function run(event:Event){
 		mainFunction();
 	}
@@ -132,7 +131,6 @@ class Main {
 		executeJsflCommand("fl.xmlui.cancel();");
 	}
 	private function addDataToDocument(key:PersistentDataKey, data:String){
-
 		executeJsflCommand('document.addDataToDocument("$key", "${PersistentDataType.STRING}", "$data");');
 	}
 	private function getDataFromDocument(key:PersistentDataKey):String{

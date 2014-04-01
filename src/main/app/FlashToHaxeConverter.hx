@@ -109,7 +109,16 @@ class FlashToHaxeConverter {
 
 		var profileXML = Xml.parse(Lib.fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new Fast(profileXML.firstElement());
-		swfName = fastXML.node.PublishFormatProperties.node.flashFileName.innerData.split(".")[0];
+		var swfPath:String = fastXML.node.PublishFormatProperties.node.flashFileName.innerData;
+
+		//
+		// split path
+		//
+		// test.swf -> test
+		// ../sample/test.swf -> test.swf -> test
+		// ..\sample\test.swf -> test.swf -> test
+		// ..\sample/test.swf -> test.swf -> test
+		swfName = swfPath.split("/").slice(-1)[0].split("\\").slice(-1)[0].split(".swf")[0];
 
 		mainFunction = createFolder;
 	}

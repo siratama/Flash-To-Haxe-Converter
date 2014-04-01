@@ -32,5 +32,5 @@
 -cp src/extension/app
 -cp src/common
 -cp ../hxclasses
--cp ../haxelib/adobe_extension
+-cp H:\eclipse\workspace\MyHaxelib\haxelib\src\adobe_extension
 -lib jQueryExtern
