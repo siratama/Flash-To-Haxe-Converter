@@ -109,17 +109,33 @@ class FlashToHaxeConverter {
 
 		var profileXML = Xml.parse(Lib.fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new Fast(profileXML.firstElement());
-		var swfPath:String = fastXML.node.PublishFormatProperties.node.flashFileName.innerData;
 
-		//
-		// split path
-		//
-		// test.swf -> test
-		// ../sample/test.swf -> test.swf -> test
-		// ..\sample\test.swf -> test.swf -> test
-		// ..\sample/test.swf -> test.swf -> test
-		swfName = swfPath.split("/").slice(-1)[0].split("\\").slice(-1)[0].split(".swf")[0];
+		/*
+		Lib.fl.trace("check");
+		Lib.fl.trace(fastXML.node.PublishFormatProperties.node);
+		Lib.fl.trace(fastXML.node.PublishFormatProperties.node.hasNode.innerData);
+		mainFunction = finish;
+		*/
 
+		try{
+
+			var swfPath:String = fastXML.node.PublishFormatProperties.node.flashFileName.innerData;
+
+			//
+			// split path
+			//
+			// test.swf -> test
+			// ../sample/test.swf -> test.swf -> test
+			// ..\sample\test.swf -> test.swf -> test
+			// ..\sample/test.swf -> test.swf -> test
+			swfName = swfPath.split("/").slice(-1)[0].split("\\").slice(-1)[0].split(".swf")[0];
+		}
+		catch(error:String){
+
+			Lib.fl.trace(error);
+			Lib.fl.trace("This document is not supported the OpenFL-Haxe output.");
+			outputtedOpenfl = false;
+		}
 		mainFunction = createFolder;
 	}
 

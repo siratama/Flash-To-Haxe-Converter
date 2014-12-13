@@ -2,7 +2,7 @@
 -main FlashToHaxeConverter
 -cp src/main/app
 -cp src/common
--cp ../hxclasses
+-lib haxe-jsfl
 
 --next
 
@@ -10,7 +10,7 @@
 -main FlashToHaxeConverter
 -cp src/main/app
 -cp src/common
--cp ../hxclasses
+-lib haxe-jsfl
 
 --next
 
@@ -23,7 +23,7 @@
 -cp src/dialog/flash_extern
 -cp src/common
 -cp main/src
--cp ../hxclasses
+-lib haxe-jsfl
 
 --next
 
@@ -31,6 +31,6 @@
 -main Main
 -cp src/extension/app
 -cp src/common
--cp ../hxclasses
--cp H:\eclipse\workspace\MyHaxelib\haxelib\src\adobe_extension
+-cp C:\googledrive\workspace\MyHaxelib\haxelib\src\adobe_extension
 -lib jQueryExtern
+-lib haxe-jsfl

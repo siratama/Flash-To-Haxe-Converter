@@ -121,8 +121,16 @@ FlashToHaxeConverter.prototype = {
 	,setSwfName: function() {
 		var profileXML = Xml.parse(jsfl.Lib.fl.getDocumentDOM().exportPublishProfileString());
 		var fastXML = new haxe.xml.Fast(profileXML.firstElement());
-		var swfPath = fastXML.node.resolve("PublishFormatProperties").node.resolve("flashFileName").get_innerData();
-		this.swfName = swfPath.split("/").slice(-1)[0].split("\\").slice(-1)[0].split(".swf")[0];
+		try {
+			var swfPath = fastXML.node.resolve("PublishFormatProperties").node.resolve("flashFileName").get_innerData();
+			this.swfName = swfPath.split("/").slice(-1)[0].split("\\").slice(-1)[0].split(".swf")[0];
+		} catch( error ) {
+			if( js.Boot.__instanceof(error,String) ) {
+				jsfl.Lib.fl.trace(error);
+				jsfl.Lib.fl.trace("This document is not supported the OpenFL-Haxe output.");
+				this.outputtedOpenfl = false;
+			} else throw(error);
+		}
 		this.mainFunction = $bind(this,this.createFolder);
 	}
 	,createFolder: function() {
@@ -603,6 +611,11 @@ Xml.prototype = {
 	,__class__: Xml
 };
 var haxe = {};
+haxe.Log = function() { };
+haxe.Log.__name__ = ["haxe","Log"];
+haxe.Log.trace = function(v,infos) {
+	js.Boot.__trace(v,infos);
+};
 haxe.Serializer = function() {
 	this.buf = new StringBuf();
 	this.cache = new Array();
@@ -905,12 +918,21 @@ haxe.Template.prototype = {
 			}
 			var parp = p.pos + p.len;
 			var npar = 1;
-			while(npar > 0) {
+			var params = [];
+			var part = "";
+			while(true) {
 				var c = HxOverrides.cca(data,parp);
-				if(c == 40) npar++; else if(c == 41) npar--; else if(c == null) throw "Unclosed macro parenthesis";
 				parp++;
+				if(c == 40) npar++; else if(c == 41) {
+					npar--;
+					if(npar <= 0) break;
+				} else if(c == null) throw "Unclosed macro parenthesis";
+				if(c == 44 && npar == 1) {
+					params.push(part);
+					part = "";
+				} else part += String.fromCharCode(c);
 			}
-			var params = HxOverrides.substr(data,p.pos + p.len,parp - (p.pos + p.len) - 1).split(",");
+			params.push(part);
 			tokens.add({ p : haxe.Template.splitter.matched(2), s : false, l : params});
 			data = HxOverrides.substr(data,parp,data.length - parp);
 		}
@@ -1291,6 +1313,14 @@ haxe.io.Bytes.prototype = {
 	}
 	,__class__: haxe.io.Bytes
 };
+haxe.io.Eof = function() { };
+haxe.io.Eof.__name__ = ["haxe","io","Eof"];
+haxe.io.Eof.prototype = {
+	toString: function() {
+		return "Eof";
+	}
+	,__class__: haxe.io.Eof
+};
 haxe.xml = {};
 haxe.xml._Fast = {};
 haxe.xml._Fast.NodeAccess = function(x) {
@@ -1617,6 +1647,25 @@ haxe.xml.Parser.doParse = function(str,p,parent) {
 var js = {};
 js.Boot = function() { };
 js.Boot.__name__ = ["js","Boot"];
+js.Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js.Boot.__trace = function(v,i) {
+	var msg;
+	if(i != null) msg = i.fileName + ":" + i.lineNumber + ": "; else msg = "";
+	msg += js.Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js.Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js.Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
+};
 js.Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) return Array; else return o.__class__;
 };
@@ -1737,6 +1786,12 @@ jsfl.AlignMode = function() { };
 jsfl.AlignMode.__name__ = ["jsfl","AlignMode"];
 jsfl.ArrangeMode = function() { };
 jsfl.ArrangeMode.__name__ = ["jsfl","ArrangeMode"];
+jsfl.Boot = function() { };
+jsfl.Boot.__name__ = ["jsfl","Boot"];
+jsfl.Boot.trace = function(v,infos) {
+};
+jsfl.ColorMode = function() { };
+jsfl.ColorMode.__name__ = ["jsfl","ColorMode"];
 jsfl.CompressionType = function() { };
 jsfl.CompressionType.__name__ = ["jsfl","CompressionType"];
 jsfl.DocumentEnterEditMode = function() { };
@@ -1747,6 +1802,9 @@ jsfl.EventType = function() { };
 jsfl.EventType.__name__ = ["jsfl","EventType"];
 jsfl.FilterType = function() { };
 jsfl.FilterType.__name__ = ["jsfl","FilterType"];
+jsfl._InstanceType = {};
+jsfl._InstanceType.InstanceType_Impl_ = function() { };
+jsfl._InstanceType.InstanceType_Impl_.__name__ = ["jsfl","_InstanceType","InstanceType_Impl_"];
 jsfl.ItemType = function() { };
 jsfl.ItemType.__name__ = ["jsfl","ItemType"];
 jsfl.LayerType = function() { };
@@ -1763,17 +1821,27 @@ jsfl.Lib.prompt = function(promptMsg,text) {
 	if(text == null) text = "";
 	return prompt(promptMsg,text);
 };
-jsfl.Lib.trace = function(v,posInfos) {
-	jsfl.Lib.fl.trace("" + posInfos.fileName + ":" + posInfos.lineNumber + ": " + Std.string(v));
-};
 jsfl.Lib.throwError = function(object,posInfos) {
 	jsfl.Lib.fl.trace("Error : " + Std.string(object) + " at " + posInfos.methodName + "[" + posInfos.fileName + ":" + posInfos.lineNumber + "]");
 	throw object;
 };
 jsfl.PersistentDataType = function() { };
 jsfl.PersistentDataType.__name__ = ["jsfl","PersistentDataType"];
+jsfl._SpriteSheetExporter = {};
+jsfl._SpriteSheetExporter.SpriteSheetExporterAlgorithm_Impl_ = function() { };
+jsfl._SpriteSheetExporter.SpriteSheetExporterAlgorithm_Impl_.__name__ = ["jsfl","_SpriteSheetExporter","SpriteSheetExporterAlgorithm_Impl_"];
+jsfl._SpriteSheetExporter.SpriteSheetExporterFormat_Impl_ = function() { };
+jsfl._SpriteSheetExporter.SpriteSheetExporterFormat_Impl_.__name__ = ["jsfl","_SpriteSheetExporter","SpriteSheetExporterFormat_Impl_"];
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_ = function() { };
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.__name__ = ["jsfl","_SpriteSheetExporter","SpriteSheetExporterLayoutFormat_Impl_"];
+jsfl._SymbolInstance = {};
+jsfl._SymbolInstance.LoopType_Impl_ = function() { };
+jsfl._SymbolInstance.LoopType_Impl_.__name__ = ["jsfl","_SymbolInstance","LoopType_Impl_"];
 jsfl.SymbolType = function() { };
 jsfl.SymbolType.__name__ = ["jsfl","SymbolType"];
+jsfl._TweenType = {};
+jsfl._TweenType.TweenType_Impl_ = function() { };
+jsfl._TweenType.TweenType_Impl_.__name__ = ["jsfl","_TweenType","TweenType_Impl_"];
 var parser = {};
 parser.InnerMovieClip = function(propertyName,className,linkageClassName) {
 	this.propertyName = propertyName;
@@ -2208,6 +2276,7 @@ Xml.Comment = "comment";
 Xml.DocType = "doctype";
 Xml.ProcessingInstruction = "processingInstruction";
 Xml.Document = "document";
+haxe.Log.trace = jsfl.Boot.trace;
 FlashToHaxeConverter.OUTPUT_LOOP_ONCE = 2;
 FlashToHaxeConverter.documentChanged = false;
 haxe.Serializer.USE_CACHE = false;
@@ -2241,6 +2310,11 @@ jsfl.ArrangeMode.BACK = "back";
 jsfl.ArrangeMode.BACKWARD = "backward";
 jsfl.ArrangeMode.FORWARD = "forward";
 jsfl.ArrangeMode.FRONT = "front";
+jsfl.ColorMode.NONE = "none";
+jsfl.ColorMode.BRIGHTNESS = "brightness";
+jsfl.ColorMode.TINT = "tint";
+jsfl.ColorMode.ALPHA = "alpha";
+jsfl.ColorMode.ADVANCED = "advanced";
 jsfl.CompressionType.PHOTO = "photo";
 jsfl.CompressionType.LOSSLESS = "lossless";
 jsfl.DocumentEnterEditMode.IN_PLACE = "inPlace";
@@ -2269,6 +2343,12 @@ jsfl.FilterType.DROPSHADOW = "dropShadowFilter";
 jsfl.FilterType.GLOW = "glowFilter";
 jsfl.FilterType.GRADIENT_BEVEL = "gradientBevelFilter";
 jsfl.FilterType.GRADIENT_GLOW = "gradientGlowFilter";
+jsfl._InstanceType.InstanceType_Impl_.SYMBOL = "symbol";
+jsfl._InstanceType.InstanceType_Impl_.BITMAP = "bitmap";
+jsfl._InstanceType.InstanceType_Impl_.EMBEDDED_VIDEO = "embedded video";
+jsfl._InstanceType.InstanceType_Impl_.LINKED_VIDEO = "linked video";
+jsfl._InstanceType.InstanceType_Impl_.VIDEO = "video";
+jsfl._InstanceType.InstanceType_Impl_.COMPILED_CLIP = "compiled clip";
 jsfl.ItemType.UNDEFINED = "undefined";
 jsfl.ItemType.COMPONENT = "component";
 jsfl.ItemType.MOVIE_CLIP = "movie clip";
@@ -2294,9 +2374,29 @@ jsfl.PersistentDataType.DOUBLE = "double";
 jsfl.PersistentDataType.DOUBLE_ARRAY = "doubleArray";
 jsfl.PersistentDataType.STRING = "string";
 jsfl.PersistentDataType.BYTE_ARRAY = "byteArray";
+jsfl._SpriteSheetExporter.SpriteSheetExporterAlgorithm_Impl_.BASIC = "basic";
+jsfl._SpriteSheetExporter.SpriteSheetExporterAlgorithm_Impl_.MAX_RECTS = "maxRects";
+jsfl._SpriteSheetExporter.SpriteSheetExporterFormat_Impl_.RGBA8888 = "RGBA8888";
+jsfl._SpriteSheetExporter.SpriteSheetExporterFormat_Impl_.RGB888x = "RGB888x";
+jsfl._SpriteSheetExporter.SpriteSheetExporterFormat_Impl_.RGB8 = "RGB8";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.COCOS2D_V2 = "cocos2dv2";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.COCOS2D_V3 = "cocos2dv3";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.EASEL_JS = "easeljs";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.JSON = "JSON";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.JSON_ARRAY = "JSON-Array";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.SPARROW_V1 = "Sparrow-v1";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.SPARROW_V2 = "Sparrow-v2";
+jsfl._SpriteSheetExporter.SpriteSheetExporterLayoutFormat_Impl_.STARLING = "Starling";
+jsfl._SymbolInstance.LoopType_Impl_.LOOP = "loop";
+jsfl._SymbolInstance.LoopType_Impl_.PLAY_ONCE = "play once";
+jsfl._SymbolInstance.LoopType_Impl_.SINGLE_FRAME = "single frame";
 jsfl.SymbolType.MOVIE_CLIP = "movie clip";
 jsfl.SymbolType.GRAPHIC = "graphic";
 jsfl.SymbolType.BUTTON = "button";
+jsfl._TweenType.TweenType_Impl_.MOTION = "motion";
+jsfl._TweenType.TweenType_Impl_.SHAPE = "shape";
+jsfl._TweenType.TweenType_Impl_.NONE = "none";
+jsfl._TweenType.TweenType_Impl_.MOTION_OBJECT = "motion object";
 tmpl.createjs.Bitmap.template = new haxe.Template("package ::packageStr::;\n@:native(\"::namespace::.::nativeClassName::\")\nextern class ::className:: extends createjs.easeljs.Bitmap{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n\tpublic function new():Void;\n\tpublic var nominalBounds:createjs.easeljs.Rectangle;\n}");
 tmpl.createjs.Sound.template = new haxe.Template("package ::packageStr::;\nclass ::className::{\n\tpublic static inline var manifestId:String = \"::nativeClassName::\";\n}");
 tmpl.flash.Bitmap.template = new haxe.Template("package ::packageStr::;\nclass ::className:: extends flash.display.BitmapData{\n\tfunction new(width:Int = 0, height:Int = 0, transparent:Bool = true, fillColor:UInt = 0xFFFFFFFF):Void{\n\t\tsuper(width, height, transparent, fillColor);\n\t}\n}");

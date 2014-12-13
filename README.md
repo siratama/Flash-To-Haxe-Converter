@@ -145,7 +145,8 @@ CreateJS用に出力された各 Haxe ファイルには、html5 canvas ドキ�
 * Container.nominalBounds
 * MovieClip.nominalBounds
 
-### .hx file deletion : .hx ファイル削除に関して
+---
+## .hx file deletion : .hx ファイル削除に関して
 
 When the structure of a library is changed, a former unnecessary file will remain in a Haxe output directory. Please delete a Haxe output directory manually to delete an unnecessary file.
 
@@ -173,12 +174,14 @@ Type.createInstance メソッド経由での生成は意図通り行えません
 	var view = Type.createInstance(View, []);
 	addChild(view); //error
 
-ビットマップ画像にリンケージ設定を行った BitmapDataView クラスは、生成しようとしても null を返します。OpenFL の swf 解析機能はまだ α版のようで、必ず null を返すようになっているためです。ビットマップ画像を使用したい場合、MovieClip に配置し、その MovieClip にリンケージ設定を行なってください。
+以下の記述ですと生成は可能です。
 
-	var bitmapDataView = new BitmapDataView();
-	trace(bitmapDataView); //null
+	var view = Type.createInstance(View, [])._new();
+	addChild(view); //ok
 
-また、swf 内に埋め込んだビットマップ画像はどのような形式でも扱えるわけではないようです。PNG-8 形式の画像は読み込めず、PNG-24 形式の画像は読み込める、といった現象が発生します。MovieClip に配置したビットマップ画像が表示されない場合、画像形式を変えてみるなど色々試してみる必要があります。
+クロスプラットフォームプログラミングを行いたい場合、以下の様な TypeUtil クラスを用意しておくと便利です。
+
+[TypeUtil.hx](https://gist.github.com/siratama/4f46732f912ec031d8d1)
 
 その他、swf 内に埋め込んだサウンドを取得するメソッドは、OpenFL には現在用意されていません。コンパイル用 xml ファイルに使用するサウンドファイルを手動で登録する必要があります。
 
@@ -188,9 +191,6 @@ FlashToHaxeConverter から出力されるサウンド用 test.JumpSound.hx フ�
 
 	public function new()
 		this = Assets.getSound('test.JumpSound');
-
-
-**追記 2014年2月**) 現在、OpenFL ではビットマップシンボルの生成が可能になっているようです。OpenFLのバージョンが上がるにつれ可能な事が増えており、上記私が行った調査内容は古くなっている可能性があります。
 
 ---
 ##制作の流れと FlashToHaxeConverter の役割箇所
@@ -219,6 +219,13 @@ Flash CC では、各素材を利用してアニメーションを作成した�
 	プラットフォームごとに、一つのソースコード内に Flash 用ソースコードと javascript 用ソースコード両方を記述した例
 
 examples/2/air/ ディレクトリ内には Adobe AIR (Android アプリ)を出力するサンプルも作成しています。
+
+---
+##利用ライブラリ
+
+FlashToHaxeConverter は以下のライブラリを利用して作成しています。
+
+[haxe-jsfl](https://github.com/tmskst/haxe-jsfl)
 
 
 
