@@ -26,7 +26,8 @@ class Main {
 	private var savedFlashExternDocumentData:String;
 	private var savedFlashDocumentData:String;
 	private var savedCreateJSDocumentData:String;
-	private var savedOpenFLJSDocumentData:String;
+	private var savedOpenFLDocumentData:String;
+	private var savedGAFDocumentData:String;
 	private var savedJSNamespaceDocumentData:String;
 
 	private var flashFileDirectory:String;
@@ -188,7 +189,7 @@ class Main {
 		savedFlashExternDocumentData = null;
 		savedFlashDocumentData = null;
 		savedCreateJSDocumentData = null;
-		savedOpenFLJSDocumentData = null;
+		savedOpenFLDocumentData = null;
 		savedJSNamespaceDocumentData = null;
 
 		callFlashToHaxeConverterScript("getFlashFileDirectory()", function(n){
@@ -204,7 +205,10 @@ class Main {
 			savedCreateJSDocumentData = n;
 		});
 		csInterfaceUtil.getDataFromDocument(cast PersistentDataKey.OPENFL, function(n){
-			savedOpenFLJSDocumentData = n;
+			savedOpenFLDocumentData = n;
+		});
+		csInterfaceUtil.getDataFromDocument(cast PersistentDataKey.GAF, function(n){
+			savedGAFDocumentData = n;
 		});
 		csInterfaceUtil.getDataFromDocument(cast PersistentDataKey.JS_NAMESPACE, function(n){
 			savedJSNamespaceDocumentData = n;
@@ -218,7 +222,8 @@ class Main {
 			savedFlashExternDocumentData != null &&
 			savedFlashDocumentData != null &&
 			savedCreateJSDocumentData != null &&
-			savedOpenFLJSDocumentData != null &&
+			savedOpenFLDocumentData != null &&
+			savedGAFDocumentData != null &&
 			savedJSNamespaceDocumentData != null
 		)
 			setTextField();
@@ -232,7 +237,8 @@ class Main {
 			savedFlashExternDocumentData,
 			savedFlashDocumentData,
 			savedCreateJSDocumentData,
-			savedOpenFLJSDocumentData,
+			savedOpenFLDocumentData,
+			savedGAFDocumentData,
 			savedJSNamespaceDocumentData
 		);
 
@@ -263,9 +269,10 @@ class Main {
 			var flashDirectory = inputTextSet.getValue(PersistentDataKey.FLASH);
 			var createJsDirectory = inputTextSet.getValue(PersistentDataKey.CREATEJS);
 			var openflDirectory = inputTextSet.getValue(PersistentDataKey.OPENFL);
+			var gafDirectory = inputTextSet.getValue(PersistentDataKey.GAF);
 			var jsSymbolNamespace = inputTextSet.getValue(PersistentDataKey.JS_NAMESPACE);
 
-			if(flashExternDirectory == "" && flashDirectory == "" && createJsDirectory == "" && openflDirectory == ""){
+			if(flashExternDirectory == "" && flashDirectory == "" && createJsDirectory == "" && openflDirectory == "" && gafDirectory == ""){
 				csInterfaceUtil.flTrace("Set output directory");
 			}
 			else
@@ -297,9 +304,10 @@ class Main {
 		var flashDirectory = inputTextSet.getValue(PersistentDataKey.FLASH);
 		var createJsDirectory = inputTextSet.getValue(PersistentDataKey.CREATEJS);
 		var openflDirectory = inputTextSet.getValue(PersistentDataKey.OPENFL);
+		var gafDirectory = inputTextSet.getValue(PersistentDataKey.GAF);
 		var jsSymbolNamespace = inputTextSet.getValue(PersistentDataKey.JS_NAMESPACE);
 
-		csInterfaceUtil.evalScript('var $INSTANCE_NAME = new ${ClassName.FLASH_TO_HAXE_CONVERTER}("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$jsSymbolNamespace");');
+		csInterfaceUtil.evalScript('var $INSTANCE_NAME = new ${ClassName.FLASH_TO_HAXE_CONVERTER}("$flashFileDirectory", "$flashExternDirectory", "$flashDirectory", "$createJsDirectory", "$openflDirectory", "$gafDirectory", "$jsSymbolNamespace");');
 
 		runFinished = false;
 		mainFunction = runFlashToHaxeConverter;

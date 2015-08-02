@@ -60,12 +60,13 @@ var InputTextSet = function(csInterfaceUtil) {
 $hxClasses["InputTextSet"] = InputTextSet;
 InputTextSet.__name__ = true;
 InputTextSet.prototype = {
-	initialize: function(savedFlashExternDocumentData,savedFlashDocumentData,savedCreateJSDocumentData,savedOpenFLJSDocumentData,savedJSNamespaceDocumentData) {
+	initialize: function(savedFlashExternDocumentData,savedFlashDocumentData,savedCreateJSDocumentData,savedOpenFLDocumentData,savedGAFDocumentData,savedJSNamespaceDocumentData) {
 		this.set = [];
 		this.add(PersistentDataKey.FLASH_EXTERN,savedFlashExternDocumentData);
 		this.add(PersistentDataKey.FLASH,savedFlashDocumentData);
 		this.add(PersistentDataKey.CREATEJS,savedCreateJSDocumentData);
-		this.add(PersistentDataKey.OPENFL,savedOpenFLJSDocumentData);
+		this.add(PersistentDataKey.OPENFL,savedOpenFLDocumentData);
+		this.add(PersistentDataKey.GAF,savedGAFDocumentData);
 		this.add(PersistentDataKey.JS_NAMESPACE,savedJSNamespaceDocumentData);
 	}
 	,add: function(key,savedValue) {
@@ -83,8 +84,10 @@ InputTextSet.prototype = {
 			return 2;
 		case PersistentDataKey.OPENFL:
 			return 3;
-		case PersistentDataKey.JS_NAMESPACE:
+		case PersistentDataKey.GAF:
 			return 4;
+		case PersistentDataKey.JS_NAMESPACE:
+			return 5;
 		}
 	}
 	,getValue: function(key) {
@@ -123,6 +126,8 @@ _InputTextSet.InputText.prototype = {
 			return PersistentDefaultDirectoryData.CREATEJS;
 		case PersistentDataKey.OPENFL:
 			return PersistentDefaultDirectoryData.OPENFL;
+		case PersistentDataKey.GAF:
+			return PersistentDefaultDirectoryData.GAF;
 		case PersistentDataKey.JS_NAMESPACE:
 			return PersistentDefaultDirectoryData.JS_NAMESPACE;
 		}
@@ -275,7 +280,7 @@ Main.prototype = {
 		this.savedFlashExternDocumentData = null;
 		this.savedFlashDocumentData = null;
 		this.savedCreateJSDocumentData = null;
-		this.savedOpenFLJSDocumentData = null;
+		this.savedOpenFLDocumentData = null;
 		this.savedJSNamespaceDocumentData = null;
 		this.callFlashToHaxeConverterScript("getFlashFileDirectory()",function(n) {
 			_g.flashFileDirectory = n;
@@ -290,20 +295,23 @@ Main.prototype = {
 			_g.savedCreateJSDocumentData = n3;
 		});
 		Main.csInterfaceUtil.getDataFromDocument(PersistentDataKey.OPENFL,function(n4) {
-			_g.savedOpenFLJSDocumentData = n4;
+			_g.savedOpenFLDocumentData = n4;
 		});
-		Main.csInterfaceUtil.getDataFromDocument(PersistentDataKey.JS_NAMESPACE,function(n5) {
-			_g.savedJSNamespaceDocumentData = n5;
+		Main.csInterfaceUtil.getDataFromDocument(PersistentDataKey.GAF,function(n5) {
+			_g.savedGAFDocumentData = n5;
+		});
+		Main.csInterfaceUtil.getDataFromDocument(PersistentDataKey.JS_NAMESPACE,function(n6) {
+			_g.savedJSNamespaceDocumentData = n6;
 		});
 		this.startRunning($bind(this,this.waitToGetDocumentData),250);
 	}
 	,waitToGetDocumentData: function() {
-		if(this.flashFileDirectory != null && this.savedFlashExternDocumentData != null && this.savedFlashDocumentData != null && this.savedCreateJSDocumentData != null && this.savedOpenFLJSDocumentData != null && this.savedJSNamespaceDocumentData != null) this.setTextField();
+		if(this.flashFileDirectory != null && this.savedFlashExternDocumentData != null && this.savedFlashDocumentData != null && this.savedCreateJSDocumentData != null && this.savedOpenFLDocumentData != null && this.savedGAFDocumentData != null && this.savedJSNamespaceDocumentData != null) this.setTextField();
 	}
 	,setTextField: function() {
 		this.inputTextSet.inputAllElement.removeAttr("disabled");
 		this.runButtonElement.removeAttr("disabled");
-		this.inputTextSet.initialize(this.savedFlashExternDocumentData,this.savedFlashDocumentData,this.savedCreateJSDocumentData,this.savedOpenFLJSDocumentData,this.savedJSNamespaceDocumentData);
+		this.inputTextSet.initialize(this.savedFlashExternDocumentData,this.savedFlashDocumentData,this.savedCreateJSDocumentData,this.savedOpenFLDocumentData,this.savedGAFDocumentData,this.savedJSNamespaceDocumentData);
 		this.initializeToWaitUserControlled();
 	}
 	,initializeToWaitUserControlled: function() {
@@ -323,8 +331,9 @@ Main.prototype = {
 			var flashDirectory = this.inputTextSet.getValue(PersistentDataKey.FLASH);
 			var createJsDirectory = this.inputTextSet.getValue(PersistentDataKey.CREATEJS);
 			var openflDirectory = this.inputTextSet.getValue(PersistentDataKey.OPENFL);
+			var gafDirectory = this.inputTextSet.getValue(PersistentDataKey.GAF);
 			var jsSymbolNamespace = this.inputTextSet.getValue(PersistentDataKey.JS_NAMESPACE);
-			if(flashExternDirectory == "" && flashDirectory == "" && createJsDirectory == "" && openflDirectory == "") Main.csInterfaceUtil.flTrace("Set output directory"); else this.prepareToRunFlashToHaxeConverter();
+			if(flashExternDirectory == "" && flashDirectory == "" && createJsDirectory == "" && openflDirectory == "" && gafDirectory == "") Main.csInterfaceUtil.flTrace("Set output directory"); else this.prepareToRunFlashToHaxeConverter();
 		}
 	}
 	,prepareToRunFlashToHaxeConverter: function() {
@@ -344,8 +353,9 @@ Main.prototype = {
 		var flashDirectory = this.inputTextSet.getValue(PersistentDataKey.FLASH);
 		var createJsDirectory = this.inputTextSet.getValue(PersistentDataKey.CREATEJS);
 		var openflDirectory = this.inputTextSet.getValue(PersistentDataKey.OPENFL);
+		var gafDirectory = this.inputTextSet.getValue(PersistentDataKey.GAF);
 		var jsSymbolNamespace = this.inputTextSet.getValue(PersistentDataKey.JS_NAMESPACE);
-		Main.csInterfaceUtil.evalScript("var " + "main" + " = new " + "FlashToHaxeConverter" + "(\"" + this.flashFileDirectory + "\", \"" + flashExternDirectory + "\", \"" + flashDirectory + "\", \"" + createJsDirectory + "\", \"" + openflDirectory + "\", \"" + jsSymbolNamespace + "\");");
+		Main.csInterfaceUtil.evalScript("var " + "main" + " = new " + "FlashToHaxeConverter" + "(\"" + this.flashFileDirectory + "\", \"" + flashExternDirectory + "\", \"" + flashDirectory + "\", \"" + createJsDirectory + "\", \"" + openflDirectory + "\", \"" + gafDirectory + "\", \"" + jsSymbolNamespace + "\");");
 		this.runFinished = false;
 		this.mainFunction = $bind(this,this.runFlashToHaxeConverter);
 	}
@@ -935,6 +945,7 @@ jsfl.Boot = function() { };
 $hxClasses["jsfl.Boot"] = jsfl.Boot;
 jsfl.Boot.__name__ = true;
 jsfl.Boot.trace = function(v,infos) {
+	fl.trace("" + Std.string(v));
 };
 jsfl.EventType = function() { };
 $hxClasses["jsfl.EventType"] = jsfl.EventType;
@@ -975,11 +986,13 @@ PersistentDataKey.FLASH_EXTERN = "FLASH_EXTERN";
 PersistentDataKey.FLASH = "FLASH";
 PersistentDataKey.CREATEJS = "CREATEJS";
 PersistentDataKey.OPENFL = "OPENFL";
+PersistentDataKey.GAF = "GAF";
 PersistentDataKey.JS_NAMESPACE = "LIB";
 PersistentDefaultDirectoryData.FLASH_EXTERN = "flash_extern";
 PersistentDefaultDirectoryData.FLASH = "flash";
 PersistentDefaultDirectoryData.CREATEJS = "createjs";
 PersistentDefaultDirectoryData.OPENFL = "openfl";
+PersistentDefaultDirectoryData.GAF = "gaf";
 PersistentDefaultDirectoryData.JS_NAMESPACE = "lib";
 haxe.Unserializer.DEFAULT_RESOLVER = Type;
 haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";

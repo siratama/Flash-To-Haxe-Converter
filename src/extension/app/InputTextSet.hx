@@ -17,14 +17,16 @@ class InputTextSet {
 		savedFlashExternDocumentData:String,
 		savedFlashDocumentData:String,
 		savedCreateJSDocumentData:String,
-		savedOpenFLJSDocumentData:String,
+		savedOpenFLDocumentData:String,
+		savedGAFDocumentData:String,
 		savedJSNamespaceDocumentData:String
 	){
 		set = [];
 		add(PersistentDataKey.FLASH_EXTERN, savedFlashExternDocumentData);
 		add(PersistentDataKey.FLASH, savedFlashDocumentData);
 		add(PersistentDataKey.CREATEJS, savedCreateJSDocumentData);
-		add(PersistentDataKey.OPENFL, savedOpenFLJSDocumentData);
+		add(PersistentDataKey.OPENFL, savedOpenFLDocumentData);
+		add(PersistentDataKey.GAF, savedGAFDocumentData);
 		add(PersistentDataKey.JS_NAMESPACE, savedJSNamespaceDocumentData);
 	}
 	private function add(key:PersistentDataKey, savedValue:String){
@@ -40,7 +42,8 @@ class InputTextSet {
 			case PersistentDataKey.FLASH: 1;
 			case PersistentDataKey.CREATEJS: 2;
 			case PersistentDataKey.OPENFL: 3;
-			case PersistentDataKey.JS_NAMESPACE: 4;
+			case PersistentDataKey.GAF: 4;
+			case PersistentDataKey.JS_NAMESPACE: 5;
 		}
 	}
 	public function getValue(key:PersistentDataKey):String{
@@ -73,7 +76,6 @@ private class InputText{
 		if(savedValue == cast PersistentReturnData.NULL) savedValue = cast defaultValue;
 		inputElement.val(savedValue);
 		beforeValue = savedValue;
-		//csInterfaceUtil.addDataToDocument(cast key, PersistentDataType.STRING, savedValue);
 	}
 	private function getDefaultValue():PersistentDefaultDirectoryData{
 
@@ -82,6 +84,7 @@ private class InputText{
 			case PersistentDataKey.FLASH: PersistentDefaultDirectoryData.FLASH;
 			case PersistentDataKey.CREATEJS: PersistentDefaultDirectoryData.CREATEJS;
 			case PersistentDataKey.OPENFL: PersistentDefaultDirectoryData.OPENFL;
+			case PersistentDataKey.GAF: PersistentDefaultDirectoryData.GAF;
 			case PersistentDataKey.JS_NAMESPACE: PersistentDefaultDirectoryData.JS_NAMESPACE;
 		}
 	}

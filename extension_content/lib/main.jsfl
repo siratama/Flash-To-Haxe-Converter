@@ -42,18 +42,20 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 };
-var FlashToHaxeConverter = $hx_exports.FlashToHaxeConverter = function(baseDirectory,flashExternDirectory,flashDirectory,createJsDirectory,openflDirectory,symbolNameSpace) {
+var FlashToHaxeConverter = $hx_exports.FlashToHaxeConverter = function(baseDirectory,flashExternDirectory,flashDirectory,createJsDirectory,openflDirectory,gafDirectory,symbolNameSpace) {
 	if(symbolNameSpace == null) symbolNameSpace = "lib";
 	jsfl.Lib.fl.outputPanel.clear();
 	if(FlashToHaxeConverter.isHtml5CanvasDocument()) {
-		if(openflDirectory != "") jsfl.Lib.fl.trace("HTML5 canvas document is not supported OpenFL output.");
+		if(openflDirectory != "" || gafDirectory != "") jsfl.Lib.fl.trace("HTML5 canvas document is not supported OpenFL or GAF output.");
 		openflDirectory = "";
+		gafDirectory = "";
 	}
 	this.outputtedFlashExtern = flashExternDirectory != "";
 	this.outputtedFlash = flashDirectory != "";
 	this.outputtedCreateJs = createJsDirectory != "";
 	this.outputtedOpenfl = openflDirectory != "";
-	if(!this.outputtedFlashExtern && !this.outputtedFlash && !this.outputtedCreateJs && !this.outputtedOpenfl) {
+	this.outputtedGAF = gafDirectory != "";
+	if(!this.outputtedFlashExtern && !this.outputtedFlash && !this.outputtedCreateJs && !this.outputtedOpenfl && !this.outputtedGAF) {
 		jsfl.Lib.fl.trace("Set output directory");
 		return;
 	}
@@ -63,6 +65,7 @@ var FlashToHaxeConverter = $hx_exports.FlashToHaxeConverter = function(baseDirec
 	this.flashDirectory = this.getOutputDirectory(flashDirectory);
 	this.createJsDirectory = this.getOutputDirectory(createJsDirectory);
 	this.openflDirectory = this.getOutputDirectory(openflDirectory);
+	this.gafDirectory = this.getOutputDirectory(gafDirectory);
 	this.parseLibrary();
 };
 FlashToHaxeConverter.__name__ = ["FlashToHaxeConverter"];
@@ -113,7 +116,8 @@ FlashToHaxeConverter.prototype = {
 		this.createOutputDirectoryCommon(this.outputtedFlash,this.flashDirectory);
 		this.createOutputDirectoryCommon(this.outputtedCreateJs,this.createJsDirectory);
 		this.createOutputDirectoryCommon(this.outputtedOpenfl,this.openflDirectory);
-		if(this.outputtedOpenfl) this.mainFunction = $bind(this,this.setSwfName); else this.mainFunction = $bind(this,this.createFolder);
+		this.createOutputDirectoryCommon(this.outputtedGAF,this.gafDirectory);
+		if(this.outputtedOpenfl || this.outputtedGAF) this.mainFunction = $bind(this,this.setSwfName); else this.mainFunction = $bind(this,this.createFolder);
 	}
 	,createOutputDirectoryCommon: function(outputted,outputDirectory) {
 		if(outputted && !FLfile.exists(outputDirectory)) FLfile.createFolder(outputDirectory);
@@ -127,8 +131,9 @@ FlashToHaxeConverter.prototype = {
 		} catch( error ) {
 			if( js.Boot.__instanceof(error,String) ) {
 				jsfl.Lib.fl.trace(error);
-				jsfl.Lib.fl.trace("This document is not supported the OpenFL-Haxe output.");
+				jsfl.Lib.fl.trace("This document is not supported the OpenFL or GAF output.");
 				this.outputtedOpenfl = false;
+				this.outputtedGAF = false;
 			} else throw(error);
 		}
 		this.mainFunction = $bind(this,this.createFolder);
@@ -141,6 +146,7 @@ FlashToHaxeConverter.prototype = {
 			this.createFolderCommon(this.outputtedFlash,this.flashDirectory + key);
 			this.createFolderCommon(this.outputtedCreateJs,this.createJsDirectory + key);
 			this.createFolderCommon(this.outputtedOpenfl,this.openflDirectory + key);
+			this.createFolderCommon(this.outputtedGAF,this.gafDirectory + key);
 			this.libraryParser.packageDirectoryMap.remove(key);
 			return;
 		}
@@ -170,6 +176,10 @@ FlashToHaxeConverter.prototype = {
 			if(this.outputtedOpenfl) {
 				var outputLines3 = this.getOutputLinesForOpenfl(outputData);
 				this.output(this.openflDirectory,outputData.outputPath,outputLines3);
+			}
+			if(this.outputtedGAF) {
+				var outputLines4 = this.getOutputLinesForGAF(outputData);
+				this.output(this.gafDirectory,outputData.outputPath,outputLines4);
 			}
 			if(++outputCount >= FlashToHaxeConverter.OUTPUT_LOOP_ONCE) return;
 		}
@@ -220,6 +230,22 @@ FlashToHaxeConverter.prototype = {
 			break;
 		case jsfl.ItemType.BITMAP:
 			outputLines = tmpl.openfl.Bitmap.create(outputData.packageStr,outputData.className,this.swfName);
+			break;
+		}
+		return outputLines;
+	}
+	,getOutputLinesForGAF: function(outputData) {
+		var outputLines = "";
+		switch(outputData.itemType) {
+		case jsfl.ItemType.MOVIE_CLIP:
+			var templateMovieClip = new tmpl.gaf.MovieClip();
+			outputLines = templateMovieClip.create(outputData.baseInnerMovieClip,outputData.packageStr,this.swfName);
+			break;
+		case jsfl.ItemType.SOUND:
+			"";
+			break;
+		case jsfl.ItemType.BITMAP:
+			"";
 			break;
 		}
 		return outputLines;
@@ -1789,6 +1815,7 @@ jsfl.ArrangeMode.__name__ = ["jsfl","ArrangeMode"];
 jsfl.Boot = function() { };
 jsfl.Boot.__name__ = ["jsfl","Boot"];
 jsfl.Boot.trace = function(v,infos) {
+	fl.trace("" + Std.string(v));
 };
 jsfl.ColorMode = function() { };
 jsfl.ColorMode.__name__ = ["jsfl","ColorMode"];
@@ -2174,6 +2201,64 @@ tmpl.flash.Sound.create = function(packageStr,className,external) {
 	var fileLines = tmpl.flash.Sound.template.execute({ packageStr : packageStr, className : className, external : external?"extern ":""});
 	return fileLines;
 };
+tmpl.gaf = {};
+tmpl.gaf.MovieClip = function() {
+	tmpl.MovieClip.call(this);
+};
+tmpl.gaf.MovieClip.__name__ = ["tmpl","gaf","MovieClip"];
+tmpl.gaf.MovieClip.__super__ = tmpl.MovieClip;
+tmpl.gaf.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
+	getBaseClassTemplateStr: function() {
+		return "package ::packageStr::;\r\nimport com.catalystapps.gaf.display.GAFMovieClip;\r\nimport com.catalystapps.gaf.core.GAFTimelinesManager;\r\nabstract ::className::(GAFMovieClip){\r\n    public function new()\r\n        this = GAFTimelinesManager.getGAFMovieClip('::swfName::', '::packageStr::.::className::');\r\n    @:to public function getInstance():GAFMovieClip\r\n        return this;\r\n::field::\r\n}";
+	}
+	,getClassTemplateStr: function() {
+		return "abstract ::className::(GAFMovieClip){\r\n    public function new(mc:GAFMovieClip)\r\n        this = mc;\r\n    @:to public function getInstance():GAFMovieClip\r\n        return this;\r\n::field::\r\n}";
+	}
+	,getTextFieldTemplateStr: function() {
+		return "\tpublic var ::propertyName::(get, never):com.catalystapps.gaf.display.GAFTextField;\r\n\tfunction get_::propertyName::(){\r\n\t\treturn cast(this.getChildByName('::propertyName::'), com.catalystapps.gaf.display.GAFTextField);\r\n\t}\r\n";
+	}
+	,getMovieClipTemplateStrNotHasInner: function() {
+		return "\tpublic var ::propertyName::(get, never):::className::;\r\n\tfunction get_::propertyName::(){\r\n\t\treturn cast(this.getChildByName('::propertyName::'), ::className::);\r\n\t}\r\n";
+	}
+	,getMovieClipTemplateStrHasInner: function() {
+		return "\tpublic var ::propertyName::(get, never):::className::;\r\n\tfunction get_::propertyName::(){\r\n\t\treturn new ::className::(cast this.getChildByName('::propertyName::'));\r\n\t}\r\n";
+	}
+	,getMovieClipPath: function() {
+		return "com.catalystapps.gaf.display.GAFMovieClip";
+	}
+	,getImagePath: function() {
+		return "com.catalystapps.gaf.display.GAFImage";
+	}
+	,create: function(baseInnerMovieClip,packageStr,swfName) {
+		var movieClipPropertyLines = this.getMovieClipPropertyLines(baseInnerMovieClip,false);
+		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
+		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
+		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, swfName : swfName, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
+		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip,true);
+	}
+	,getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
+		var lineSet = new Array();
+		var _g = 0;
+		var _g1 = baseInnerMovieClip.innerMovieClipSet;
+		while(_g < _g1.length) {
+			var innerMovieClip = _g1[_g];
+			++_g;
+			var className;
+			if(innerMovieClip.hasInner()) className = innerMovieClip.className; else if(innerMovieClip.linkageClassName == null && innerMovieClip.framesLength <= 1) className = this.getImagePath(); else className = this.getMovieClipPath();
+			var func;
+			if(innerMovieClip.hasInner()) func = $bind(this,this.getMovieClipTemplateStrHasInner); else func = $bind(this,this.getMovieClipTemplateStrNotHasInner);
+			var movieClipTemplate = new haxe.Template(func());
+			var line = movieClipTemplate.execute({ propertyName : innerMovieClip.propertyName, className : className});
+			lineSet.push(line);
+		}
+		return lineSet.join("\n");
+	}
+	,getLinkageClassPropertyLines: function(baseInnerMovieClip) {
+		return "";
+	}
+	,__class__: tmpl.gaf.MovieClip
+});
 tmpl.openfl = {};
 tmpl.openfl.Bitmap = function() { };
 tmpl.openfl.Bitmap.__name__ = ["tmpl","openfl","Bitmap"];

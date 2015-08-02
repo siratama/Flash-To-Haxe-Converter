@@ -24,6 +24,7 @@ class FlashToHaxeConverter {
 	private var flashDirectory:String;
 	private var createJsDirectory:String;
 	private var openflDirectory:String;
+	private var gafDirectory:String;
 
 	private var symbolNameSpace:String;
 
@@ -31,6 +32,7 @@ class FlashToHaxeConverter {
 	private var outputtedFlash:Bool;
 	private var outputtedCreateJs:Bool;
 	private var outputtedOpenfl:Bool;
+	private var outputtedGAF:Bool;
 
 	private var swfName:String;
 	private var libraryParser:LibraryParser;
@@ -39,23 +41,25 @@ class FlashToHaxeConverter {
 	public static function main(){
 	}
 	public function new(
-		baseDirectory:String, flashExternDirectory:String, flashDirectory:String, createJsDirectory:String, openflDirectory:String,
+		baseDirectory:String, flashExternDirectory:String, flashDirectory:String, createJsDirectory:String, openflDirectory:String, gafDirectory:String,
 		symbolNameSpace:String = "lib"
 	){
 		Lib.fl.outputPanel.clear();
 
 		if(isHtml5CanvasDocument()){
-			if(openflDirectory != "")
-				Lib.fl.trace("HTML5 canvas document is not supported OpenFL output.");
+			if(openflDirectory != "" || gafDirectory != "")
+				Lib.fl.trace("HTML5 canvas document is not supported OpenFL or GAF output.");
 			openflDirectory = "";
+			gafDirectory = "";
 		}
 
-		this.outputtedFlashExtern = flashExternDirectory != "";
-		this.outputtedFlash = flashDirectory != "";
-		this.outputtedCreateJs = createJsDirectory != "";
-		this.outputtedOpenfl = openflDirectory != "";
+		outputtedFlashExtern = flashExternDirectory != "";
+		outputtedFlash = flashDirectory != "";
+		outputtedCreateJs = createJsDirectory != "";
+		outputtedOpenfl = openflDirectory != "";
+		outputtedGAF = gafDirectory != "";
 
-		if(!outputtedFlashExtern && !outputtedFlash && !outputtedCreateJs && !outputtedOpenfl){
+		if(!outputtedFlashExtern && !outputtedFlash && !outputtedCreateJs && !outputtedOpenfl && !outputtedGAF){
 			Lib.fl.trace("Set output directory");
 			return;
 		}
@@ -67,6 +71,7 @@ class FlashToHaxeConverter {
 		this.flashDirectory = getOutputDirectory(flashDirectory);
 		this.createJsDirectory = getOutputDirectory(createJsDirectory);
 		this.openflDirectory = getOutputDirectory(openflDirectory);
+		this.gafDirectory = getOutputDirectory(gafDirectory);
 
 		parseLibrary();
 	}
@@ -96,8 +101,9 @@ class FlashToHaxeConverter {
 		createOutputDirectoryCommon(outputtedFlash, flashDirectory);
 		createOutputDirectoryCommon(outputtedCreateJs, createJsDirectory);
 		createOutputDirectoryCommon(outputtedOpenfl, openflDirectory);
+		createOutputDirectoryCommon(outputtedGAF, gafDirectory);
 
-		mainFunction = (outputtedOpenfl) ? setSwfName: createFolder;
+		mainFunction = (outputtedOpenfl || outputtedGAF) ? setSwfName: createFolder;
 	}
 	private function createOutputDirectoryCommon(outputted:Bool, outputDirectory:String){
 
@@ -133,8 +139,9 @@ class FlashToHaxeConverter {
 		catch(error:String){
 
 			Lib.fl.trace(error);
-			Lib.fl.trace("This document is not supported the OpenFL-Haxe output.");
+			Lib.fl.trace("This document is not supported the OpenFL or GAF output.");
 			outputtedOpenfl = false;
+			outputtedGAF = false;
 		}
 		mainFunction = createFolder;
 	}
@@ -147,6 +154,7 @@ class FlashToHaxeConverter {
 			createFolderCommon(outputtedFlash, flashDirectory + key);
 			createFolderCommon(outputtedCreateJs, createJsDirectory + key);
 			createFolderCommon(outputtedOpenfl, openflDirectory + key);
+			createFolderCommon(outputtedGAF, gafDirectory + key);
 
 			libraryParser.packageDirectoryMap.remove(key);
 			return;
@@ -188,6 +196,10 @@ class FlashToHaxeConverter {
 			if(outputtedOpenfl){
 				var outputLines = getOutputLinesForOpenfl(outputData);
 				output(openflDirectory, outputData.outputPath, outputLines);
+			}
+			if(outputtedGAF){
+				var outputLines = getOutputLinesForGAF(outputData);
+				output(gafDirectory, outputData.outputPath, outputLines);
 			}
 			if(++outputCount >= OUTPUT_LOOP_ONCE) return;
 		}
@@ -234,6 +246,20 @@ class FlashToHaxeConverter {
 				outputLines = tmpl.openfl.Sound.create(outputData.packageStr, outputData.className);
 			case ItemType.BITMAP:
 				outputLines = tmpl.openfl.Bitmap.create(outputData.packageStr, outputData.className, swfName);
+		}
+		return outputLines;
+	}
+	private function getOutputLinesForGAF(outputData:OutputData):String{
+
+		var outputLines = "";
+		switch(outputData.itemType){
+			case ItemType.MOVIE_CLIP:
+				var templateMovieClip = new tmpl.gaf.MovieClip();
+				outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, outputData.packageStr, swfName);
+			case ItemType.SOUND:
+				"";
+			case ItemType.BITMAP:
+				"";
 		}
 		return outputLines;
 	}

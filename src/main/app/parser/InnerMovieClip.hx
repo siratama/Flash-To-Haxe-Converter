@@ -5,9 +5,9 @@ class InnerMovieClip {
 	public var propertyName(default, null):String;
 	public var className(default, null):String;
 	public var textFieldNameSet(default, null):Array<String>;
-	public var linkageClassName:String;
+	public var linkageClassName(default, null):String;
 	public var innerMovieClipSet(default, null):Array<InnerMovieClip>;
-	private var framesLength:Int;
+	public var framesLength(default, null):Int;
 
 	public function new(propertyName:String, className:String, linkageClassName:String){
 
