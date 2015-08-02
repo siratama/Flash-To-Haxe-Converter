@@ -199,7 +199,8 @@ class FlashToHaxeConverter {
 			}
 			if(outputtedGAF){
 				var outputLines = getOutputLinesForGAF(outputData);
-				output(gafDirectory, outputData.outputPath, outputLines);
+				if(outputLines != null)
+					output(gafDirectory, outputData.outputPath, outputLines);
 			}
 			if(++outputCount >= OUTPUT_LOOP_ONCE) return;
 		}
@@ -256,10 +257,8 @@ class FlashToHaxeConverter {
 			case ItemType.MOVIE_CLIP:
 				var templateMovieClip = new tmpl.gaf.MovieClip();
 				outputLines = templateMovieClip.create(outputData.baseInnerMovieClip, outputData.packageStr, swfName);
-			case ItemType.SOUND:
-				"";
-			case ItemType.BITMAP:
-				"";
+			case ItemType.SOUND: return null;
+			case ItemType.BITMAP: return null;
 		}
 		return outputLines;
 	}

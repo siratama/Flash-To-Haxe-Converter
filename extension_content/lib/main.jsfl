@@ -179,7 +179,7 @@ FlashToHaxeConverter.prototype = {
 			}
 			if(this.outputtedGAF) {
 				var outputLines4 = this.getOutputLinesForGAF(outputData);
-				this.output(this.gafDirectory,outputData.outputPath,outputLines4);
+				if(outputLines4 != null) this.output(this.gafDirectory,outputData.outputPath,outputLines4);
 			}
 			if(++outputCount >= FlashToHaxeConverter.OUTPUT_LOOP_ONCE) return;
 		}
@@ -242,11 +242,9 @@ FlashToHaxeConverter.prototype = {
 			outputLines = templateMovieClip.create(outputData.baseInnerMovieClip,outputData.packageStr,this.swfName);
 			break;
 		case jsfl.ItemType.SOUND:
-			"";
-			break;
+			return null;
 		case jsfl.ItemType.BITMAP:
-			"";
-			break;
+			return null;
 		}
 		return outputLines;
 	}
