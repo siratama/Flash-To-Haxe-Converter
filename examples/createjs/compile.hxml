@@ -1,0 +1,9 @@
+-js deploy/main.js
+-main shooting.Main
+-cp src/app
+-cp src/extension/createjs
+-cp src/toolkit_for_createjs
+-cp src/createjs
+-lib createjs
+-debug
+

@@ -1,0 +1,7 @@
+-swf deploy/main.swf
+-main shooting.Main
+-swf-version 11
+-swf-header 480:320:24:000000
+-cp src/app
+-cp src/extern/flash
+
