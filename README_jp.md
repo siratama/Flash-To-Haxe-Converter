@@ -62,7 +62,7 @@ fla ファイルと異なるディレクトリに出力したい場合、相対�
 ---
 ## Features
 
-### html6 canvas 用 独自出力
+### html5 canvas 用 独自出力
 
 CreateJS用に出力された各 Haxe ファイルには、
 html5 canvas ドキュメントから出力された javascript ファイルにアクセスしやすくなるような以下のプロパティを追加しています。
