@@ -130,6 +130,7 @@ FlashToHaxeConverter から出力されるサウンド用 test.JumpSound.hx フ�
 ## サンプル
 
 * [Flash](examples/flash/)
+* [CreateJS](examples/createjs/)
 * [OpenFL](https://github.com/siratama/FlashAndCppOutputUsingSwfFromOpenFL)
 * [GAF](https://github.com/siratama/HaxeSampleUsingGAF)
 

@@ -123,6 +123,7 @@ The next cord is written in OpenFL-Haxe Sound Class. Create in new JumpSound().
 ## examples
 
 * [Flash](examples/flash/)
+* [CreateJS](examples/createjs/)
 * [OpenFL](https://github.com/siratama/FlashAndCppOutputUsingSwfFromOpenFL)
 * [GAF](https://github.com/siratama/HaxeSampleUsingGAF)
 
