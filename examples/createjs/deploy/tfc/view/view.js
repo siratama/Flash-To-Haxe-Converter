@@ -1,4 +1,4 @@
-(function (lib, img, cjs) {
+(function (lib, img, cjs, ss) {
 
 var p; // shortcut to reference prototypes
 
@@ -116,8 +116,13 @@ p.nominalBounds = new cjs.Rectangle(0,0,36,34);
 (lib.view = function() {
 	this.initialize();
 
-}).prototype = p = new cjs.Container();
-p.nominalBounds = null;
+	// guide
+	this.instance = new lib.shootingplayerPlayerMovieClip();
+	this.instance.setTransform(66,123,1,1,0,0,0,18,17);
 
-})(lib = lib||{}, images = images||{}, createjs = createjs||{});
-var lib, images, createjs;
+	this.addChild(this.instance);
+}).prototype = p = new cjs.Container();
+p.nominalBounds = new cjs.Rectangle(323,306,36,34);
+
+})(lib = lib||{}, images = images||{}, createjs = createjs||{}, ss = ss||{});
+var lib, images, createjs, ss;

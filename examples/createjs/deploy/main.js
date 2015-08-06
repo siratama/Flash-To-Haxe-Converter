@@ -221,7 +221,9 @@ shooting.Main = function() {
 };
 shooting.Main.__name__ = true;
 shooting.Main.main = function() {
-	new shooting.Main();
+	window.addEventListener("load",function(event) {
+		new shooting.Main();
+	});
 };
 shooting.Main.prototype = {
 	run: function(event) {

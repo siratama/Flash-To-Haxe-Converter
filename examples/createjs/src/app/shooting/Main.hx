@@ -16,7 +16,9 @@ class Main
 
 	public static function main()
 	{
-		new Main();
+		js.Browser.window.addEventListener("load", function(event){
+			new Main();
+		});
 	}
 	public function new()
 	{

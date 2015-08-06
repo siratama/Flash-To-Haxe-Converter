@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <title>view</title>
 
-<script src="http://code.createjs.com/easeljs-0.7.1.min.js"></script>
-<script src="http://code.createjs.com/tweenjs-0.5.1.min.js"></script>
-<script src="http://code.createjs.com/movieclip-0.7.1.min.js"></script>
-<script src="http://code.createjs.com/preloadjs-0.4.1.min.js"></script>
+<script src="http://code.createjs.com/easeljs-0.8.1.min.js"></script>
+<script src="http://code.createjs.com/tweenjs-0.6.1.min.js"></script>
+<script src="http://code.createjs.com/movieclip-0.8.1.min.js"></script>
+<script src="http://code.createjs.com/preloadjs-0.6.1.min.js"></script>
 <script src="view.js"></script>
 
 <script>
@@ -27,7 +27,7 @@ function handleFileLoad(evt) {
 	if (evt.item.type == "image") { images[evt.item.id] = evt.result; }
 }
 
-function handleComplete() {
+function handleComplete(evt) {
 	exportRoot = new lib.view();
 
 	stage = new createjs.Stage(canvas);
