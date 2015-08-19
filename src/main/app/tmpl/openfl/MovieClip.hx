@@ -10,10 +10,10 @@ import flash.display.MovieClip;
 import flash.text.TextField;
 import openfl.Assets;
 abstract ::className::(MovieClip){
-    public function new()
-        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');
-    @:to public function getInstance():MovieClip
-        return this;
+	public function new()
+		this = Assets.getMovieClip('::swfName:::::packageStr::::partition::::className::');
+	@:to public function getInstance():MovieClip
+		return this;
 ::field::
 }");
 	}
@@ -21,10 +21,10 @@ abstract ::className::(MovieClip){
 	override private function getClassTemplateStr():String{
 		return (
 "abstract ::className::(MovieClip){
-    public function new(mc:MovieClip)
-        this = mc;
-    @:to public function getInstance():MovieClip
-        return this;
+	public function new(mc:MovieClip)
+		this = mc;
+	@:to public function getInstance():MovieClip
+		return this;
 ::field::
 }");
 	}
@@ -70,6 +70,7 @@ abstract ::className::(MovieClip){
 		var lines = baseClassTemplate.execute({
 			packageStr: packageStr,
 			className: baseInnerMovieClip.className,
+			partition: (packageStr == "") ? "" : ".",
 			swfName: swfName,
 			field: [textFieldPropertyLines, linkageClassPropertyLines, movieClipPropertyLines].join("\n")
 		});

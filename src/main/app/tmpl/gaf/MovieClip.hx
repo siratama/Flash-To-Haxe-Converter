@@ -1,4 +1,4 @@
-package tmpl.gaf;
+﻿package tmpl.gaf;
 import haxe.Template;
 import parser.InnerMovieClip;
 class MovieClip extends tmpl.MovieClip
@@ -9,10 +9,10 @@ class MovieClip extends tmpl.MovieClip
 import com.catalystapps.gaf.display.GAFMovieClip;
 import com.catalystapps.gaf.core.GAFTimelinesManager;
 abstract ::className::(GAFMovieClip){
-    public function new()
-        this = GAFTimelinesManager.getGAFMovieClip('::swfName::', '::packageStr::.::className::');
-    @:to public function getInstance():GAFMovieClip
-        return this;
+	public function new()
+		this = GAFTimelinesManager.getGAFMovieClip('::swfName::', '::packageStr::::partition::::className::');
+	@:to public function getInstance():GAFMovieClip
+		return this;
 ::field::
 }");
 	}
@@ -20,10 +20,10 @@ abstract ::className::(GAFMovieClip){
 	override private function getClassTemplateStr():String{
 		return (
 "abstract ::className::(GAFMovieClip){
-    public function new(mc:GAFMovieClip)
-        this = mc;
-    @:to public function getInstance():GAFMovieClip
-        return this;
+	public function new(mc:GAFMovieClip)
+		this = mc;
+	@:to public function getInstance():GAFMovieClip
+		return this;
 ::field::
 }");
 	}
@@ -72,6 +72,7 @@ abstract ::className::(GAFMovieClip){
 		var lines = baseClassTemplate.execute({
 			packageStr: packageStr,
 			className: baseInnerMovieClip.className,
+			partition: (packageStr == "") ? "" : ".",
 			swfName: swfName,
 			field: [textFieldPropertyLines, linkageClassPropertyLines, movieClipPropertyLines].join("\n")
 		});

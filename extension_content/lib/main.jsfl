@@ -2207,7 +2207,7 @@ tmpl.gaf.MovieClip.__name__ = ["tmpl","gaf","MovieClip"];
 tmpl.gaf.MovieClip.__super__ = tmpl.MovieClip;
 tmpl.gaf.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	getBaseClassTemplateStr: function() {
-		return "package ::packageStr::;\r\nimport com.catalystapps.gaf.display.GAFMovieClip;\r\nimport com.catalystapps.gaf.core.GAFTimelinesManager;\r\nabstract ::className::(GAFMovieClip){\r\n    public function new()\r\n        this = GAFTimelinesManager.getGAFMovieClip('::swfName::', '::packageStr::.::className::');\r\n    @:to public function getInstance():GAFMovieClip\r\n        return this;\r\n::field::\r\n}";
+		return "package ::packageStr::;\r\nimport com.catalystapps.gaf.display.GAFMovieClip;\r\nimport com.catalystapps.gaf.core.GAFTimelinesManager;\r\nabstract ::className::(GAFMovieClip){\r\n    public function new()\r\n        this = GAFTimelinesManager.getGAFMovieClip('::swfName::', '::packageStr::::partition::::className::');\r\n    @:to public function getInstance():GAFMovieClip\r\n        return this;\r\n::field::\r\n}";
 	}
 	,getClassTemplateStr: function() {
 		return "abstract ::className::(GAFMovieClip){\r\n    public function new(mc:GAFMovieClip)\r\n        this = mc;\r\n    @:to public function getInstance():GAFMovieClip\r\n        return this;\r\n::field::\r\n}";
@@ -2232,7 +2232,7 @@ tmpl.gaf.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
 		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
-		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, swfName : swfName, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, partition : packageStr == ""?"":".", swfName : swfName, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
 		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip,true);
 	}
 	,getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
@@ -2271,7 +2271,7 @@ tmpl.openfl.MovieClip.__name__ = ["tmpl","openfl","MovieClip"];
 tmpl.openfl.MovieClip.__super__ = tmpl.MovieClip;
 tmpl.openfl.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 	getBaseClassTemplateStr: function() {
-		return "package ::packageStr::;\nimport flash.display.MovieClip;\nimport flash.text.TextField;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::.::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
+		return "package ::packageStr::;\nimport flash.display.MovieClip;\nimport flash.text.TextField;\nimport openfl.Assets;\nabstract ::className::(MovieClip){\n    public function new()\n        this = Assets.getMovieClip('::swfName:::::packageStr::::partition::::className::');\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
 	}
 	,getClassTemplateStr: function() {
 		return "abstract ::className::(MovieClip){\n    public function new(mc:MovieClip)\n        this = mc;\n    @:to public function getInstance():MovieClip\n        return this;\n::field::\n}";
@@ -2293,7 +2293,7 @@ tmpl.openfl.MovieClip.prototype = $extend(tmpl.MovieClip.prototype,{
 		var textFieldPropertyLines = this.getTextFieldPropertyLines(baseInnerMovieClip);
 		var linkageClassPropertyLines = this.getLinkageClassPropertyLines(baseInnerMovieClip);
 		var baseClassTemplate = new haxe.Template(this.getBaseClassTemplateStr());
-		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, swfName : swfName, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
+		var lines = baseClassTemplate.execute({ packageStr : packageStr, className : baseInnerMovieClip.className, partition : packageStr == ""?"":".", swfName : swfName, field : [textFieldPropertyLines,linkageClassPropertyLines,movieClipPropertyLines].join("\n")});
 		return lines + "\n" + this.getInnerMovieClipLines(baseInnerMovieClip,true);
 	}
 	,getMovieClipPropertyLines: function(baseInnerMovieClip,inner) {
