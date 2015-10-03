@@ -1,4 +1,5 @@
 package ;
+import tmpl.flash.MovieClipType;
 import DocumentState;
 import jsfl.EventType;
 import jsfl.FLfile;
@@ -188,6 +189,7 @@ class FlashToHaxeConverter {
 			if(outputtedFlash){
 				var outputLines = getOutputLinesForFlash(outputData, false);
 				output(flashDirectory, outputData.outputPath, outputLines);
+				output(flashDirectory, MovieClipType.name, MovieClipType.lines);
 			}
 			if(outputtedCreateJs){
 				var outputLines = getOutputLinesForCreateJs(outputData);

@@ -14,7 +14,7 @@ class MovieClip extends tmpl.MovieClip {
 	override private function getClassTemplateStr():String{
 		return (
 "typedef ::className:: =
-{ > flash.display.MovieClip,
+{ > MovieClipType,
 ::field::
 }");
 	}
