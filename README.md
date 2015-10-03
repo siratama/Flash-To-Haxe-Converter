@@ -130,8 +130,7 @@ The next cord is written in OpenFL-Haxe Sound Class. Create in new JumpSound().
 ---
 ## External library
 
-* [CreateJS extern](https://github.com/)
-
+* [CreateJS extern](https://github.com/nickalie/CreateJS-Haxe)
 ---
 ## Library for extension development
 

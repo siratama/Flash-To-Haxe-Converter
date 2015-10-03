@@ -137,7 +137,7 @@ FlashToHaxeConverter から出力されるサウンド用 test.JumpSound.hx フ�
 ---
 ## 外部ライブラリ
 
-* [CreateJS extern](https://github.com/)
+* [CreateJS extern](https://github.com/nickalie/CreateJS-Haxe)
 
 ---
 ## 開発用ライブラリ
